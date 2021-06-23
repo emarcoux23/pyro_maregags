@@ -399,6 +399,11 @@ class RRT:
     def plot_open_loop_solution(self, params = 'xu' ):
 
         self.sys.get_plotter().plot( self.trajectory, params)
+        
+    ############################
+    def animate_solution(self, speed_factor = 1.0 ):
+
+        self.sys.get_animator().animate_simulation( self.trajectory, speed_factor, self.sys.is_3d )
 
 
     ##################################################################

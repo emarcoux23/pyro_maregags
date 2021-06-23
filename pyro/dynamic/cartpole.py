@@ -29,14 +29,7 @@ class RotatingCartPole( mechanical.MechanicalSystem ):
         # Name
         self.name = 'Rotating Cart Pole'
         
-        # params
-        self.setparams()
-                
-            
-    #############################
-    def setparams(self):
-        """ Set model parameters here """
-        
+        # dynamic/kinematic params
         self.l1  = 1 
         self.l2  = 1
         
@@ -49,6 +42,9 @@ class RotatingCartPole( mechanical.MechanicalSystem ):
         
         self.d1 = 0.1
         self.d2 = 0.1
+        
+        #plotting params
+        self.is_3d = True
         
         
     ##############################
@@ -280,8 +276,22 @@ class UnderActuatedRotatingCartPole( RotatingCartPole ):
         # Name
         self.name = 'Underactuated Rotating Cart Pole'
         
-        # params
-        self.setparams()
+        # dynamic/kinematic params
+        self.l1  = 1 
+        self.l2  = 1
+        
+        self.m2  = 1
+        
+        self.I1 = 1.0
+        self.I2 = 0.1
+        
+        self.gravity = 9.81
+        
+        self.d1 = 0.1
+        self.d2 = 0.1
+        
+        #plotting params
+        self.is_3d = True
     
     
     ###########################################################################
