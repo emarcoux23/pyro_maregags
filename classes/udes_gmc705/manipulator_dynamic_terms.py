@@ -33,10 +33,7 @@ torque_controlled_robot.ubar    = [0,0]
 
 # Simulations
 
-#x0 = np.array([0,0,-1,1])
-x0 = np.array([0,0.1,0,0])
-tf = 10
+torque_controlled_robot.x0 = np.array([0,0.1,0,0])
 
-torque_controlled_robot.plot_animation( x0 , tf )
-#torque_controlled_robot.animate_simulation(0.1)
-torque_controlled_robot.sim.plot('xu')
+torque_controlled_robot.animate_simulation()
+torque_controlled_robot.plot_trajectory('xu')

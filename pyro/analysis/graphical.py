@@ -43,6 +43,7 @@ class TrajectoryPlotter:
         plot = 'u'
         plot = 'y'
         plot = 'j'
+        plot = 'z'
         """
 
         if 'j' in plot and (traj.J is None or traj.dJ is None):
@@ -75,10 +76,8 @@ class TrajectoryPlotter:
             l = sys.p
         elif plot == 'j':
             l = 2
-        elif plot == 'z5':
-            l = 5
-        elif plot == 'z8':
-            l = 8
+        elif plot == 'z':
+            l = sys.controller.l
         else:
             raise ValueError('not a valid ploting argument')
 
@@ -91,7 +90,7 @@ class TrajectoryPlotter:
             plots = [plots]
         #######################################################################
 
-        simfig.canvas.set_window_title('Trajectory for ' + self.sys.name)
+        simfig.canvas.manager.set_window_title('Trajectory for ' + self.sys.name)
 
         j = 0 # plot index
 
@@ -138,22 +137,13 @@ class TrajectoryPlotter:
             plots[j].tick_params( labelsize = self.fontsize )
             j = j + 1
             
-        if plot == 'z5':
+        if plot == 'z':
             # Internal states
+            n = sys.n - sys.controller.l
             for i in range( l ):
-                plots[j].plot( traj.t , traj.x[:,i+sys.p] , 'b')
-                plots[j].set_ylabel(sys.state_label[i+sys.p] +'\n'+
-                sys.state_units[i+sys.p] , fontsize=self.fontsize )
-                plots[j].grid(True)
-                plots[j].tick_params( labelsize = self.fontsize )
-                j = j + 1
-
-        if plot == 'z8':
-            # Internal states
-            for i in range( l ):
-                plots[j].plot( traj.t , traj.x[:,i+sys.p] , 'b')
-                plots[j].set_ylabel(sys.state_label[i+sys.p] +'\n'+
-                sys.state_units[i+sys.p] , fontsize=self.fontsize )
+                plots[j].plot( traj.t , traj.x[:,i+n] , 'b')
+                plots[j].set_ylabel(sys.state_label[i+n] +'\n'+
+                sys.state_units[i+n] , fontsize=self.fontsize )
                 plots[j].grid(True)
                 plots[j].tick_params( labelsize = self.fontsize )
                 j = j + 1
@@ -297,8 +287,11 @@ class Animator:
         # Params
         self.figsize   = (4, 3)
         self.dpi       = 300
-        self.linestyle = 'o-'
+        self.linestyle = sys.linestyle 
         self.fontsize  = 5
+        
+        # Label
+        self.top_right_label = None
         
 
     ###########################################################################
@@ -316,7 +309,7 @@ class Animator:
         
         # Plot
         self.showfig = plt.figure(figsize=self.figsize, dpi=self.dpi)
-        self.showfig.canvas.set_window_title('2D Configuration of ' + 
+        self.showfig.canvas.manager.set_window_title('2D Configuration of ' + 
                                             self.sys.name )
         self.showax = self.showfig.add_subplot(111, autoscale_on=False )
         self.showax.grid()
@@ -345,7 +338,7 @@ class Animator:
         
         # Plot
         self.show3fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
-        self.show3fig.canvas.set_window_title('3D Configuration of ' + 
+        self.show3fig.canvas.manager.set_window_title('3D Configuration of ' + 
                                             self.sys.name )
         self.show3ax = self.show3fig.gca(projection='3d')
                 
@@ -407,21 +400,22 @@ class Animator:
         
         
         if is_3d:
-            self.ani_ax = p3.Axes3D( self.ani_fig )
+            self.ani_ax = p3.Axes3D(self.ani_fig)
+            #self.ani_fig.add_axes(self.ani_ax)
             self.ani_ax.set_xlim3d(self.ani_domains[0][0])
             self.ani_ax.set_xlabel('X')
             self.ani_ax.set_ylim3d(self.ani_domains[0][1])
             self.ani_ax.set_ylabel('Y')
             self.ani_ax.set_zlim3d(self.ani_domains[0][2])
             self.ani_ax.set_zlabel('Z')
-            self.ani_fig.canvas.set_window_title('3D Animation of ' + 
+            self.ani_fig.canvas.manager.set_window_title('3D Animation of ' + 
                                             self.sys.name )
         else:
             self.ani_ax = self.ani_fig.add_subplot(111, autoscale_on=True)
             self.ani_ax.axis('equal')
             self.ani_ax.set_xlim(  self.ani_domains[0][self.x_axis] )
             self.ani_ax.set_ylim(  self.ani_domains[0][self.y_axis] )
-            self.ani_fig.canvas.set_window_title('2D Animation of ' + 
+            self.ani_fig.canvas.manager.set_window_title('2D Animation of ' + 
                                             self.sys.name )
             
         self.ani_ax.tick_params(axis='both', which='both', labelsize=
@@ -441,6 +435,7 @@ class Animator:
                 self.time_text = self.ani_ax.text(0, 0, 0, 'time =', 
                                                   transform=
                                                   self.ani_ax.transAxes)
+                self.label_text = self.ani_ax.text(0.9, 0.9, 0.9, self.top_right_label)
             else:
                 thisx = line_pts[:,self.x_axis]
                 thisy = line_pts[:,self.y_axis]
@@ -448,10 +443,14 @@ class Animator:
                 self.time_text = self.ani_ax.text(0.05, 0.9, 'time =', 
                                                   transform=self.
                                                   ani_ax.transAxes)
+                self.label_text = self.ani_ax.text(0.75, 0.8, self.top_right_label, 
+                                                   transform=self.
+                                                   ani_ax.transAxes)
                 self.ani_fig.tight_layout()
             self.lines.append( line )
         
         self.time_template = 'time = %.1fs'
+        
         
         # Animation
         inter      =  40.             # ms --> 25 frame per second
@@ -567,6 +566,7 @@ if __name__ == "__main__":
     sys.x0   = np.array([0,0,0])
     
     b = Animator(sys)
+    b.top_right_label = 'this is a label'
     sys.compute_trajectory( 100 )
     sys.plot_trajectory()
     b.animate_simulation( sys.traj, 10, is_3d)

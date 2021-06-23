@@ -15,7 +15,7 @@ from pyro.control  import controller
 class OpenLoopController( controller.StaticController ) :
     """  Open-loop controller based on trajectory solution  """
     ############################
-    def __init__(self, trajectory   ):
+    def __init__(self, trajectory ):
         """ """
         
         # Sys
@@ -31,7 +31,7 @@ class OpenLoopController( controller.StaticController ) :
         else:
             self.p = trajectory.x.shape[1]
 
-        controller.StaticController.__init__(self, self.k, self.m, self.p)
+        super().__init__(self.k, self.m, self.p)
         
         # Label
         self.name = 'Open Loop Controller'

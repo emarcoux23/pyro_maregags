@@ -32,7 +32,7 @@ planner.u_options = [
         np.array([-speed,-steering])
         ]
 
-planner.goal_radius       = 0.3
+planner.goal_radius       = 0.5
 planner.dt                = 0.1
 planner.steps             = 3
 planner.max_solution_time = 8.0

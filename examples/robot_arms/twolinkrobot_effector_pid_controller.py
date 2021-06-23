@@ -38,5 +38,5 @@ tf = 20
 robot_with_effector_pid.x0 = np.array([0,0,0,0,0,0])
 robot_with_effector_pid.compute_trajectory( tf )
 robot_with_effector_pid.plot_trajectory('xu')
-robot_with_effector_pid.plot_trajectory_with_internal_states()
+robot_with_effector_pid.plot_internal_controller_states()
 robot_with_effector_pid.animate_simulation()

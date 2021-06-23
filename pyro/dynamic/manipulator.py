@@ -7,6 +7,7 @@ Created on Wed May  8 08:47:05 2019
 
 ###############################################################################
 import numpy as np
+import matplotlib.pyplot as plt
 ###############################################################################
 from pyro.dynamic import system
 from pyro.dynamic import mechanical
@@ -68,10 +69,17 @@ class Manipulator( mechanical.MechanicalSystem ):
         self.e = e
                
         # initialize standard params
-        mechanical.MechanicalSystem.__init__(self, dof )
+        super().__init__( dof )
         
         # Name
         self.name = str(dof) + 'Joint Manipulator Robot'
+        
+        # Default Label and units
+        self.effector_label = []
+        self.effector_units = []
+        for i in range(e):
+            self.effector_label.append('Axis '+str(i))
+            self.effector_units.append('[m]')
         
     ###########################################################################
     # The following functions needs to be overloaded by child classes
@@ -206,6 +214,68 @@ class Manipulator( mechanical.MechanicalSystem ):
                                               - g 
                                               - d ) )
         return ddq
+    
+    
+    ##############################
+    def plot_end_effector_trajectory(self, traj = None ):
+        """ 
+        Plot the end effector trajectory with respect to time
+        --------------------------------------------------------------
+        
+        """  
+        
+        # If no argument is passed, use object traj
+        if traj == None:
+            traj = self.traj
+        
+        # Plot param
+        fontsize = 5
+        figsize  = (4, 3)
+        dpi      = 300
+        
+        #Number of plot
+        l = self.e * 1
+        
+        simfig , plots = plt.subplots( l, sharex=True, figsize=figsize,
+                                      dpi=dpi, frameon=True)
+            
+        simfig.canvas.manager.set_window_title('End-Effector trajectory for ' + 
+                                       self.name)
+        
+        
+        # Computing end-effector trajectory
+        n  = traj.time_steps
+        
+        r_traj  = np.zeros((n,self.e))
+        dr_traj = np.zeros((n,self.e))
+        
+        for i in range(traj.time_steps):
+            
+            x = traj.x[i, :]
+            
+            q, dq = self.x2q(x)
+            
+            r  = self.forward_kinematic_effector( q )
+            dr = self.forward_differential_kinematic_effector(q, dq)
+            
+            r_traj[i,:]  =  r
+            dr_traj[i,:] = dr
+        
+        #j = 0 # plot index
+        for i in range( l ):
+                plots[i].plot( traj.t , r_traj[:,i] , 'b')
+                plots[i].set_ylabel(self.effector_label[i] +'\n'+
+                self.effector_units[i] , fontsize = fontsize )
+                plots[i].grid(True)
+                plots[i].tick_params( labelsize = fontsize )
+        
+        plots[l-1].set_xlabel('Time [sec]', fontsize=fontsize )
+        
+        simfig.tight_layout()
+        simfig.canvas.draw()
+        plt.show()
+                
+        return 
         
 
 
@@ -272,7 +342,7 @@ class SpeedControlledManipulator( system.ContinuousDynamicSystem ):
         n = dof
         
         # initialize standard params
-        system.ContinuousDynamicSystem.__init__(self, dof, dof, dof)
+        super().__init__(dof, dof, dof)
         
         # Name
         self.name = str(n) + ' Joint Speed Controlled Manipulator'
@@ -389,28 +459,21 @@ class OneLinkManipulator( Manipulator ):
         e   = 2
                
         # initialize standard params
-        Manipulator.__init__(self, dof , m , e)
+        super().__init__(dof , m , e)
         
         # Name
         self.name = 'One Link Manipulator'
         
-        # params
-        self.setparams()
+        # Plot param
+        self.linestyle = '-'
                 
-            
-    #############################
-    def setparams(self):
-        """ Set model parameters here """
-        
-        self.l1  = 0.5
-        self.lc1 = 0.2
-        
-        self.m1 = 1
-        self.I1 = 0
-        
-        self.gravity = 9.81
-        
-        self.d1 = 0.1
+        # Model parameters
+        self.l1      = 2.5  # Link length
+        self.lc1     = 1.2  # Center of mass distance from pivot
+        self.m1      = 1    # Mass
+        self.I1      = 0    # Inertia
+        self.gravity = 9.81 # Gravity field constant
+        self.d1      = 0.1  # Linear damping coef
         
         
     ##############################
@@ -550,7 +613,7 @@ class OneLinkManipulator( Manipulator ):
     def forward_kinematic_domain(self, q ):
         """ 
         """
-        l = 1
+        l = self.l1 * 1.2
         
         domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
                 
@@ -585,13 +648,55 @@ class OneLinkManipulator( Manipulator ):
         # pendulum kinematic
         ###########################
         
-        pts      = np.zeros(( 2 , 3 ))
-        pts[0,:] = np.array([0,0,0])
+        pts      = np.zeros(( 6 , 3 ))
         
         [c1,s1] = self.trig( q )
         
-        pts[1,0] = self.l1 * s1
-        pts[1,1] = self.l1 * c1
+        l = self.l1 * 0.9
+        h = self.l1 * 0.1
+        
+        pts[1,0] = 0 * s1 + h * c1
+        pts[1,1] = 0 * c1 - h * s1
+        
+        pts[2,0] = l * s1 + h * c1
+        pts[2,1] = l * c1 - h * s1
+        
+        pts[3,0] = l * s1 - h * c1
+        pts[3,1] = l * c1 + h * s1
+        
+        pts[4,0] = 0 * s1 - h * c1
+        pts[4,1] = 0 * c1 + h * s1
+        
+        lines_pts.append( pts )
+        
+        
+        ###########################
+        # end effector
+        ###########################
+        
+        pts      = np.zeros(( 7 , 3 ))
+        
+        pts[0,0] = l * s1 + 0 * c1
+        pts[0,1] = l * c1 - 0 * s1
+        
+        pts[1,0] = (l+h) * s1 + 0 * c1
+        pts[1,1] = (l+h) * c1 - 0 * s1
+        
+        pts[2,0] = (l+h) * s1 - h * c1
+        pts[2,1] = (l+h) * c1 + h * s1
+        
+        pts[3,0] = (l+h+h) * s1 - h * c1
+        pts[3,1] = (l+h+h) * c1 + h * s1
+        
+        pts[4,0] = (l+h) * s1 - h * c1
+        pts[4,1] = (l+h) * c1 + h * s1
+        
+        pts[5,0] = (l+h) * s1 + h * c1
+        pts[5,1] = (l+h) * c1 - h * s1
+        
+        pts[6,0] = (l+h+h) * s1 + h * c1
+        pts[6,1] = (l+h+h) * c1 - h * s1
+        
         
         lines_pts.append( pts )
                 
@@ -618,7 +723,7 @@ class TwoLinkManipulator( Manipulator ):
         e   = 2
                
         # initialize standard params
-        Manipulator.__init__(self, dof , m , e)
+        super().__init__(dof , m , e)
         
         # Name
         self.name = 'Two Link Manipulator'
@@ -889,7 +994,7 @@ class ThreeLinkManipulator3D( Manipulator ):
         e   = 3
                
         # initialize standard params
-        Manipulator.__init__(self, dof , m , e)
+        super().__init__(dof , m , e)
         
         # Name
         self.name = 'Three Link Manipulator'
@@ -1293,7 +1398,7 @@ class FiveLinkPlanarManipulator( Manipulator ):
         e   = 2
                
         # initialize standard params
-        Manipulator.__init__(self, dof , m , e)
+        super().__init__(dof , m , e)
         
         # Name
         self.name = 'Five Link Manipulator'
@@ -1466,7 +1571,7 @@ class TwoLinkManipulatorwithObstacles( TwoLinkManipulator ):
     def __init__(self):
         """ """
         # initialize standard params
-        TwoLinkManipulator.__init__(self)
+        super().__init__()
         
         self.l1 = 1.1
         self.l2 = 0.9
@@ -1576,7 +1681,7 @@ class FiveLinkPlanarManipulatorwithObstacles( FiveLinkPlanarManipulator ):
     def __init__(self):
         """ """
         # initialize standard params
-        FiveLinkPlanarManipulator.__init__(self)
+        super().__init__()
         
         # Labels
         self.name = 'Five Link Planar Manipulator with Obstacles'
@@ -1674,11 +1779,13 @@ if __name__ == "__main__":
     #sys = TwoLinkManipulator()
     
     sys.x0[0] = 0.1
-    #sys.animate_simulation()
-    #sys.plot_trajectory()
+    sys.animate_simulation()
+    sys.plot_trajectory()
+    sys.plot_end_effector_trajectory()
     
-    sys = ThreeLinkManipulator3D()
-    sys.x0[0] = 0.1
+    
+    #sys = ThreeLinkManipulator3D()
+    #sys.x0[0] = 0.1
     #sys.animate_simulation( is_3d = True )
     #sys.plot_trajectory()
     
@@ -1686,7 +1793,7 @@ if __name__ == "__main__":
     #sys.ubar = np.array([1,1,1,1,1])
     #sys.animate_simulation()
     
-    aaa = TwoLinkManipulatorwithObstacles()
-    bbb = SpeedControlledManipulator.from_manipulator( aaa )
-    bbb.ubar = np.array([1,1])
-    bbb.animate_simulation()
+    #aaa = TwoLinkManipulatorwithObstacles()
+    #bbb = SpeedControlledManipulator.from_manipulator( aaa )
+    #bbb.ubar = np.array([1,1])
+    #bbb.animate_simulation()

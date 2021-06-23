@@ -56,7 +56,7 @@ class PhasePlot:
         self.streamplot = False
         self.arrowstyle = '->'
         self.headlength = 4.5
-        self.fontsize   = 6
+        self.fontsize   = 5
         
         
     ###########################################################################
@@ -96,7 +96,7 @@ class PhasePlot:
         
         self.phasefig = plt.figure( figsize = self.figsize , dpi = self.dpi,
                                    frameon=True)
-        self.phasefig.canvas.set_window_title('Phase plane of ' + 
+        self.phasefig.canvas.manager.set_window_title('Phase plane of ' + 
                                                 self.cds.name )
         
         
@@ -133,6 +133,7 @@ class PhasePlot:
         
         self.ax.set_xlim([ self.x_axis_min , self.x_axis_max ])
         self.ax.set_ylim([ self.y_axis_min , self.y_axis_max ])
+        self.ax.tick_params( labelsize = self.fontsize )
         self.ax.grid(True)
         self.phasefig.tight_layout()
         
@@ -166,7 +167,7 @@ class PhasePlot3( PhasePlot ):
     ###########################################################################
     def __init__(self, ContinuousDynamicSystem, x_axis=0,  y_axis=1, z_axis=2):
         
-        PhasePlot.__init__(self, ContinuousDynamicSystem, x_axis, y_axis)
+        super().__init__(ContinuousDynamicSystem, x_axis, y_axis)
         
         # Smaller resolution
         self.x_axis_n   = 5

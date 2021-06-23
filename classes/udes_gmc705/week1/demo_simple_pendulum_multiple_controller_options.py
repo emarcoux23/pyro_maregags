@@ -20,7 +20,7 @@ sys  = pendulum.SinglePendulum()
 
 # Planning
 
-traj   = plan.load_trajectory('rrt.npy')
+traj   = plan.Trajectory.load('rrt.npy')
 q_goal = np.array([-3.14])
 
 ###############################################################################
@@ -95,11 +95,10 @@ cl_sys = ctl + sys
 # Simultation
 q0 = 0
 tf = 10
-cl_sys.sim = simulation.CLosedLoopSimulation( cl_sys , tf , tf * 1000 + 1 , 'euler' )
-cl_sys.sim.x0 = np.array([q0,0])
-cl_sys.sim.compute()
-cl_sys.sim.plot('xu')
+cl_sys.x0[0] = q0
+cl_sys.compute_trajectory(tf,10001,'euler')
+cl_sys.plot_trajectory('xu')
 cl_sys.animate_simulation()
-cl_sys.sim.phase_plane_trajectory(0,1)
 
 sys.plot_phase_plane()
+cl_sys.plot_phase_plane_trajectory_closed_loop()

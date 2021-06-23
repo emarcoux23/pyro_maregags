@@ -71,6 +71,8 @@ class MechanicalSystem( system.ContinuousDynamicSystem ):
             self.u_lb[i] = - 5
             self.input_label[i] = 'Torque ' + str(i)
             self.input_units[i] ='[Nm]'
+        self.output_label = self.state_label
+        self.output_units = self.state_units
             
     ###########################################################################
     # The following functions needs to be overloaded by child classes

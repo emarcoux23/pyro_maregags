@@ -399,6 +399,11 @@ class RRT:
     def plot_open_loop_solution(self, params = 'xu' ):
 
         self.sys.get_plotter().plot( self.trajectory, params)
+        
+    ############################
+    def animate_solution(self, speed_factor = 1.0 ):
+
+        self.sys.get_animator().animate_simulation( self.trajectory, speed_factor, self.sys.is_3d )
 
 
     ##################################################################
@@ -413,7 +418,7 @@ class RRT:
         self.fig_tree = plt.figure(figsize=(3, 2), dpi=300, frameon=True)
         
         # Set window title
-        self.fig_tree.canvas.set_window_title('RRT tree search for ' + 
+        self.fig_tree.canvas.manager.set_window_title('RRT tree search for ' + 
                                             self.sys.name )
         
         # Create axe
@@ -468,7 +473,7 @@ class RRT:
         self.fig_tree_3d = plt.figure( figsize = self.figsize, dpi = self.dpi )
         
         # Set window title
-        self.fig_tree_3d.canvas.set_window_title('RRT tree search for ' + 
+        self.fig_tree_3d.canvas.manager.set_window_title('RRT tree search for ' + 
                                             self.sys.name )
         
         # Create Axe
@@ -530,7 +535,7 @@ class RRT:
         self.fig_tree_dyna = plt.figure(figsize=(3, 2),dpi=300, frameon=True)
         
         # Set window title
-        self.fig_tree_dyna.canvas.set_window_title('RRT tree search for ' + 
+        self.fig_tree_dyna.canvas.manager.set_window_title('RRT tree search for ' + 
                                             self.sys.name )
         
         # Create axe

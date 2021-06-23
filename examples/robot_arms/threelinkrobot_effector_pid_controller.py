@@ -37,5 +37,6 @@ robot_with_effector_pid.x0  = np.array([0,0,0,0,0,0,0,0,0])
 
 robot_with_effector_pid.compute_trajectory( 10 )
 robot_with_effector_pid.plot_trajectory('x')
-robot_with_effector_pid.plot_trajectory_with_internal_states()
+robot_with_effector_pid.plot_internal_controller_states()
+robot_with_effector_pid.plot_end_effector_trajectory()
 robot_with_effector_pid.animate_simulation(time_factor_video=1, is_3d=True)
