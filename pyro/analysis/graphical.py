@@ -90,7 +90,7 @@ class TrajectoryPlotter:
             plots = [plots]
         #######################################################################
 
-        simfig.canvas.set_window_title('Trajectory for ' + self.sys.name)
+        simfig.canvas.manager.set_window_title('Trajectory for ' + self.sys.name)
 
         j = 0 # plot index
 
@@ -309,7 +309,7 @@ class Animator:
         
         # Plot
         self.showfig = plt.figure(figsize=self.figsize, dpi=self.dpi)
-        self.showfig.canvas.set_window_title('2D Configuration of ' + 
+        self.showfig.canvas.manager.set_window_title('2D Configuration of ' + 
                                             self.sys.name )
         self.showax = self.showfig.add_subplot(111, autoscale_on=False )
         self.showax.grid()
@@ -338,7 +338,7 @@ class Animator:
         
         # Plot
         self.show3fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
-        self.show3fig.canvas.set_window_title('3D Configuration of ' + 
+        self.show3fig.canvas.manager.set_window_title('3D Configuration of ' + 
                                             self.sys.name )
         self.show3ax = self.show3fig.gca(projection='3d')
                 
@@ -400,21 +400,22 @@ class Animator:
         
         
         if is_3d:
-            self.ani_ax = p3.Axes3D( self.ani_fig )
+            self.ani_ax = p3.Axes3D(self.ani_fig)
+            self.ani_fig.add_axes(self.ani_ax)
             self.ani_ax.set_xlim3d(self.ani_domains[0][0])
             self.ani_ax.set_xlabel('X')
             self.ani_ax.set_ylim3d(self.ani_domains[0][1])
             self.ani_ax.set_ylabel('Y')
             self.ani_ax.set_zlim3d(self.ani_domains[0][2])
             self.ani_ax.set_zlabel('Z')
-            self.ani_fig.canvas.set_window_title('3D Animation of ' + 
+            self.ani_fig.canvas.manager.set_window_title('3D Animation of ' + 
                                             self.sys.name )
         else:
             self.ani_ax = self.ani_fig.add_subplot(111, autoscale_on=True)
             self.ani_ax.axis('equal')
             self.ani_ax.set_xlim(  self.ani_domains[0][self.x_axis] )
             self.ani_ax.set_ylim(  self.ani_domains[0][self.y_axis] )
-            self.ani_fig.canvas.set_window_title('2D Animation of ' + 
+            self.ani_fig.canvas.manager.set_window_title('2D Animation of ' + 
                                             self.sys.name )
             
         self.ani_ax.tick_params(axis='both', which='both', labelsize=
