@@ -401,7 +401,7 @@ class Animator:
         
         if is_3d:
             self.ani_ax = p3.Axes3D(self.ani_fig)
-            self.ani_fig.add_axes(self.ani_ax)
+            #self.ani_fig.add_axes(self.ani_ax)
             self.ani_ax.set_xlim3d(self.ani_domains[0][0])
             self.ani_ax.set_xlabel('X')
             self.ani_ax.set_ylim3d(self.ani_domains[0][1])
@@ -435,6 +435,7 @@ class Animator:
                 self.time_text = self.ani_ax.text(0, 0, 0, 'time =', 
                                                   transform=
                                                   self.ani_ax.transAxes)
+                self.label_text = self.ani_ax.text(0.9, 0.9, 0.9, self.top_right_label)
             else:
                 thisx = line_pts[:,self.x_axis]
                 thisy = line_pts[:,self.y_axis]

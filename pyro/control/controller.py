@@ -201,6 +201,9 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
         self.u_ub = self.controller.r_ub
         self.u_lb = self.controller.r_lb
         
+        # Plot params
+        self.linestyle = self.plant.linestyle
+        
         # Default State and inputs        
         self.xbar = self.plant.xbar
         self.ubar = self.controller.rbar
