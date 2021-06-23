@@ -89,6 +89,7 @@ class ContinuousDynamicSystem:
         # Plot params
         self.domain     = [ (-10,10) , (-10,10) , (-10,10) ]
         self.linestyle  = 'o-'
+        self.is_3d      =  False  # Use 2d plot by default
         
         ################################
         # Variables
@@ -472,7 +473,7 @@ class ContinuousDynamicSystem:
         
         linearized_sys = linearize( self )
         
-        linearized_sys.animate_eigen_mode( i )
+        linearized_sys.animate_eigen_mode( i , self.is_3d )
         
         return linearized_sys
     
@@ -488,7 +489,7 @@ class ContinuousDynamicSystem:
         linearized_sys = linearize( self )
         
         for i in range(self.n):
-            linearized_sys.animate_eigen_mode( i )
+            linearized_sys.animate_eigen_mode( i , self.is_3d )
         
         return linearized_sys
 

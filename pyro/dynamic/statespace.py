@@ -103,7 +103,7 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         return traj
     
     ############################################
-    def animate_eigen_mode(self, i = 0 ):
+    def animate_eigen_mode(self, i = 0 , is_3d = False):
         """ 
         Simulation of time evolution of the system on mode i
         ------------------------------------------------
@@ -123,7 +123,7 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         label    = template % (i, self.poles[i].real, self.poles[i].imag)
         
         animator.top_right_label = label
-        animator.animate_simulation( traj, 3.0)
+        animator.animate_simulation( traj, 3.0, is_3d)
 
     
     
