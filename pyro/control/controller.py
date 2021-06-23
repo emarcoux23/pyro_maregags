@@ -201,6 +201,9 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
         self.u_ub = self.controller.r_ub
         self.u_lb = self.controller.r_lb
         
+        # Plot params
+        self.linestyle = self.plant.linestyle
+        
         # Default State and inputs        
         self.xbar = self.plant.xbar
         self.ubar = self.controller.rbar
@@ -387,6 +390,14 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
         
         plotter = self.get_plotter()
         plotter.phase_plane_trajectory_closed_loop( self.traj, x_axis, y_axis)
+        
+        
+    ###########################################################################
+    def plot_end_effector_trajectory(self, traj = None ):
+        
+        self.plant.plot_end_effector_trajectory( self.traj )
+        
+        
 
 
 
@@ -559,7 +570,7 @@ class DynamicClosedLoopSystem( ClosedLoopSystem ):
         
         plant.cost_function = None
         
-        ClosedLoopSystem.__init__( self, plant, controller)
+        super().__init__(plant, controller)
 
         # Add extra states that represent system memory
         self.n = self.plant.n + self.controller.l
@@ -748,7 +759,7 @@ class DynamicClosedLoopSystem( ClosedLoopSystem ):
         plotter.plot( self.traj, plot, **kwargs)
         
     #############################
-    def plot_internal_states_5(self, plot='z5', **kwargs):
+    def plot_internal_controller_states(self, plot='z', **kwargs):
         """
         Plot time evolution of a simulation of this system
         ------------------------------------------------
@@ -762,22 +773,8 @@ class DynamicClosedLoopSystem( ClosedLoopSystem ):
                
         plotter = graphical.TrajectoryPlotter( self )
         plotter.plot( self.traj, plot, **kwargs)
-        
-    #############################
-    def plot_internal_states_8(self, plot='z8', **kwargs):
-        """
-        Plot time evolution of a simulation of this system
-        ------------------------------------------------
-        note: will call compute_trajectory if no simulation data is present
 
-        """
-        
-        # Check if trajectory is already computed
-        if self.traj == None:
-            self.compute_trajectory()
-               
-        plotter = graphical.TrajectoryPlotter( self )
-        plotter.plot( self.traj, plot, **kwargs)  
+
     
     ###########################################################################
     def plot_phase_plane_closed_loop( self , x_axis = 0 , y_axis = 1 ):

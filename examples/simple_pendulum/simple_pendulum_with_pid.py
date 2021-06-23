@@ -15,19 +15,15 @@ from pyro.control  import linear
 class SinglePendulum_with_position_output( pendulum.SinglePendulum ):
     
     def __init__(self):
-        pendulum.SinglePendulum.__init__( self )
+        super().__init__()
         
         self.p    = 1             # output size
         #self.rbar = np.array([0]) # ref size
-        
-        self.cost_function = None
-        #TODO: Fix bug when of using standard cost function with system with
-        # internal controller states.
+
 
     def h(self, x, u, t):
         
         # New output function
-        
         y = pendulum.SinglePendulum.h(self, x, u, t)
         
         y_position    = np.zeros(1)
@@ -53,9 +49,8 @@ cl_sys = ctl + sys
 
 # Simultation
 cl_sys.x0[0] = 1.0
-
 cl_sys.compute_trajectory(tf=10, n=20001, solver='euler')
 cl_sys.plot_phase_plane_trajectory()
 cl_sys.plot_trajectory('xu')
-cl_sys.plot_trajectory_with_internal_states()
+cl_sys.plot_internal_controller_states()
 cl_sys.animate_simulation()

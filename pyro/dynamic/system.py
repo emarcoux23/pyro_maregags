@@ -86,6 +86,11 @@ class ContinuousDynamicSystem:
         self.xbar = np.zeros(self.n)
         self.ubar = np.zeros(self.m)
         
+        # Plot params
+        self.domain     = [ (-10,10) , (-10,10) , (-10,10) ]
+        self.linestyle  = 'o-'
+        self.is_3d      =  False  # Use 2d plot by default
+        
         ################################
         # Variables
         ################################
@@ -215,11 +220,7 @@ class ContinuousDynamicSystem:
     def forward_kinematic_domain(self, q ):
         """ Set the domain range for ploting, can be static or dynamic """
         
-        l = 10
-        
-        domain  = [ (-l,l) , (-l,l) , (-l,l) ]  
-                
-        return domain
+        return self.domain
     
     
     ###########################################################################
@@ -431,6 +432,67 @@ class ContinuousDynamicSystem:
             self.compute_trajectory()
 
         self.get_animator().animate_simulation( self.traj, **kwargs)
+        
+        
+    #############################
+    def plot_linearized_bode(self, u_index=0, y_index=0):
+        """
+        Bode plot of linearized siso
+
+        """
+        
+        from pyro.dynamic.statespace import linearize
+        from pyro.dynamic.tranferfunction import ss2tf
+        
+        linearized_sys = linearize( self )
+        siso_sys       = ss2tf( linearized_sys, u_index, y_index)
+        siso_sys.bode_plot()
+        
+    
+    #############################
+    def plot_linearized_pz_map(self, u_index=0, y_index=0):
+        """
+
+        """
+        
+        from pyro.dynamic.statespace import linearize
+        from pyro.dynamic.tranferfunction import ss2tf
+        
+        linearized_sys = linearize( self )
+        siso_sys       = ss2tf( linearized_sys, u_index, y_index)
+        siso_sys.pz_map()
+        
+        
+    #############################
+    def animate_linearized_mode(self, i=0 ):
+        """
+
+        """
+        
+        from pyro.dynamic.statespace import linearize
+        
+        linearized_sys = linearize( self )
+        
+        linearized_sys.animate_eigen_mode( i , self.is_3d )
+        
+        return linearized_sys
+    
+    #############################
+    def animate_linearized_modes(self ):
+        """
+        Linearize and show eigen modes
+
+        """
+        
+        from pyro.dynamic.statespace import linearize
+        
+        linearized_sys = linearize( self )
+        
+        for i in range(self.n):
+            linearized_sys.animate_eigen_mode( i , self.is_3d )
+        
+        return linearized_sys
+
 
 
 '''

@@ -15,16 +15,13 @@ from pyro.dynamic  import manipulator
 torque_controlled_robot      = manipulator.TwoLinkManipulator()
 torque_controlled_robot.ubar = np.array([2,0.8]) # constant inputs
 
-x0        = np.array([0,1,0,0])
+torque_controlled_robot.x0 = np.array([0,1,0,0])
+torque_controlled_robot.animate_simulation()
+torque_controlled_robot.plot_trajectory('xu')
 
-torque_controlled_robot.plot_animation( x0 )
-torque_controlled_robot.sim.plot('xu')
-
-speed_controlled_robot      = manipulator.SpeedControlledManipulator( 
-                                             torque_controlled_robot )
+speed_controlled_robot      = manipulator.SpeedControlledManipulator.from_manipulator(torque_controlled_robot)
 speed_controlled_robot.ubar = np.array([2,0.8]) # constant inputs
     
-x0        = np.array([0,1])
-    
-speed_controlled_robot.plot_animation( x0 )
-speed_controlled_robot.sim.plot('xu')
+speed_controlled_robot.x0 = np.array([0,1])
+speed_controlled_robot.animate_simulation()
+speed_controlled_robot.plot_trajectory('xu')

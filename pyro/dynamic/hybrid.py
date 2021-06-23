@@ -16,13 +16,13 @@ from pyro.analysis import simulation
 ###############################################################################
 class SwitchedSystem(ContinuousDynamicSystem):
     """
-    
+    Class in construction !!!!!!
     
     """
     ############################################
     def __init__(self, n, m, p, k):
         
-        ContinuousDynamicSystem.__init__(self, n, m, p)
+        super().__init__(n, m, p)
         
         
         self.k = k  # Number of discrte modes
@@ -54,7 +54,7 @@ class SwitchedSystem(ContinuousDynamicSystem):
     
     #############################
     def compute_trajectory(
-        self, tf=10, n=10001, solver='euler'):
+        self, tf=10, n=100001):
         """ 
         Simulation of time evolution of the system
         ------------------------------------------------
@@ -62,7 +62,7 @@ class SwitchedSystem(ContinuousDynamicSystem):
         n  : time steps
         """
 
-        sim = simulation.Simulator(self, tf, n, solver)
+        sim = simulation.Simulator(self, tf, n, 'euler')
 
         self.traj = sim.compute() # save the result in the instance
 
