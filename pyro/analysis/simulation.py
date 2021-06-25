@@ -127,6 +127,32 @@ class Trajectory():
         # Find associated state
         return self.x[i,:]
     
+    ############################
+    def copy(self):
+        """ copy object """
+        
+        x  = self.x.copy()
+        u  = self.u.copy()
+        t  = self.t.copy()
+        dx = self.dx.copy()
+        y  = self.y.copy()
+        
+        if self.r is not None:
+            r  = self.r.copy()
+        else:
+            r = None
+        
+        if self.J is not None:
+            J  = self.J.copy()
+            dJ = self.dJ.copy()
+        else:
+            J  = None
+            dJ = None
+
+        new_traj = Trajectory(x, u, t, dx, y, r, J, dJ)
+        
+        return new_traj
+    
 
 
 ##########################################################################

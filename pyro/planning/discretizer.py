@@ -22,7 +22,6 @@ class GridDynamicSystem:
         
         # Discretization Parameters
         
-        # Simple 1-DoF
         self.dt    = dt        # time discretization
         
         # Grid size
