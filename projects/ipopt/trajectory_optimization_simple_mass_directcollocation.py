@@ -105,7 +105,7 @@ res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons) #
 
 print(res)
 
-res2 = minimize_ipopt( cost, dec, bounds=bnds, constraints=cons)
+#res2 = minimize_ipopt( cost, dec, constraints=cons)
 
 from pyro.dynamic  import integrator
 

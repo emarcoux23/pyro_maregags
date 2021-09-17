@@ -8,12 +8,19 @@ Created on Fri Sep 10 11:12:11 2021
 
 import numpy as np
 from scipy.optimize import minimize
-from cyipopt import minimize_ipopt
+from pyro.dynamic  import pendulum
+
+from pyro.analysis import simulation
+
+
+
+
+sys = pendulum.SinglePendulum()
 
 n = 2
 m = 1
-grid = 100
-dt   = 0.01
+grid = 45
+dt   = 0.1
 
 mass = 1
 target = 1
@@ -59,9 +66,8 @@ def constraints(dec):
     
     for i in range(grid-1):
         
-        vec[i]      = (x[0,i+1] - x[0,i]) - 0.5 * dt * (  x[1,i+1] + x[1,i] )
-        vec[i+grid-1] = (x[1,i+1] - x[1,i]) - 0.5 * dt * (  u[0,i+1]/mass + u[0,i]/mass )
-        
+        vec[i]      = (x[0,i+1] - x[0,i]) - 0.5 * dt * ( sys.f(x[:,i],u[:,i])[0] + sys.f(x[:,i+1],u[:,i+1])[0] )
+        vec[i+grid-1] = (x[1,i+1] - x[1,i]) - 0.5 * dt * (  sys.f(x[:,i],u[:,i])[1] + sys.f(x[:,i+1],u[:,i+1])[1] )
     return vec
 
 
@@ -72,46 +78,41 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (0,10) )
+        bounds.append( (-4,1) )
         
-    bounds.append( (0.99,1) )
+    bounds.append( (-3.14,-3.13) )
         
     bounds.append( (0,0.01) )
     
     for i in range(1,grid-1):
         
-        bounds.append( (-100,100) )
+        bounds.append( (-6,4) )
         
     bounds.append( (0,0.01) )
         
     for i in range(grid):
         
-        bounds.append( (-100,100) )
+        bounds.append( (-10,10) )
         
     return bounds
 
 
 
 # Guess
+traj = simulation.Trajectory.load('pendulum_rrt.npy')
+sys.traj = traj
+sys.plot_trajectory('xu')
+
 dec = np.zeros(grid*(n+m))
-dec[0:grid] = np.linspace(0,1,grid)
-dec[grid:2*grid] = 1
-dec[2*grid:3*grid] = 1
+dec[0:grid] = traj.x[:,0]
+dec[grid:2*grid] = traj.x[:,1]
+dec[2*grid:3*grid] = traj.u[:,0]
 
 bnds = compute_bounds()
 
 cons = {'type': 'eq', 'fun': constraints }
-res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons) #
+res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons, options={'disp':True,'maxiter':1000}) #
 
-print(res)
-
-res2 = minimize_ipopt( cost, dec, bounds=bnds, constraints=cons)
-
-from pyro.dynamic  import integrator
-
-sys = integrator.DoubleIntegrator()
-
-sys.compute_trajectory(1,100)
 
 
 dec = res.x
@@ -119,5 +120,6 @@ dec = res.x
 sys.traj.x[:,0] = dec[0:grid]
 sys.traj.x[:,1] = dec[grid:2*grid]
 sys.traj.u[:,0] = dec[2*grid:3*grid]
+
 
 sys.plot_trajectory('xu')
