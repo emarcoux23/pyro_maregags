@@ -8,7 +8,6 @@ Created on Fri Sep 10 11:12:11 2021
 
 import numpy as np
 from scipy.optimize import minimize
-from cyipopt import minimize_ipopt
 
 n = 2
 m = 1
@@ -104,8 +103,6 @@ cons = {'type': 'eq', 'fun': constraints }
 res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons) #
 
 print(res)
-
-#res2 = minimize_ipopt( cost, dec, constraints=cons)
 
 from pyro.dynamic  import integrator
 
