@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 ###############################################################################
 from pyro.planning import plan
 from pyro.analysis import simulation
+from pyro.planning import filters
 
 
 ###############################################################################
@@ -383,6 +384,22 @@ class RRT:
         
         #
         self.solution_is_found = True
+        
+    
+    ############################
+    def low_pass_solution(self, fc = 1 ):
+        """ Fc = cutoff freq in Hz """
+        
+        #Memorize original raw trajectory plan
+        self.raw_trajectory_solution = self.trajectory 
+        
+        tf = filters.TrajectoryFilter( fc , self.dt )
+        
+        # Low pass filter
+        filtered_traj = tf.low_pass_filter_traj( self.trajectory )
+        
+        self.trajectory = filtered_traj
+        
 
 
     ############################
@@ -616,8 +633,9 @@ class RRT:
                     
             #plt.ioff()
             self.fig_tree_dyna.show()
-    
-        
+            
+            
+
 
 
 '''
@@ -650,13 +668,16 @@ if __name__ == "__main__":
             np.array([ 5])
             ]
     
+    planner.goal_radius = 0.8
     planner.alpha = 0.99
     planner.find_path_to_goal( x_goal )
     
     planner.plot_tree()
     planner.plot_open_loop_solution()
-    sys.traj = planner.trajectory
-    sys.animate_simulation()
+    planner.low_pass_solution( 3 )
+    planner.plot_open_loop_solution()
     
     planner.z_axis = 0
     planner.plot_tree_3d()
+    
+    planner.animate_solution()
