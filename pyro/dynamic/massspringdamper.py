@@ -81,7 +81,7 @@ class SingleMass( statespace.StateSpaceSystem ):
         """
         l = self.l1 * 2
         
-        domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
+        domain  = [ (-l+self.l1,l+self.l1) , (-l,l) , (-l,l) ]#  
                 
         return domain
     
@@ -156,7 +156,7 @@ class SingleMass( statespace.StateSpaceSystem ):
         return lines_pts
     
 
-
+###############################################################################
 
 class TwoMass( statespace.StateSpaceSystem ):
     """Two Mass with linear spring and damper
@@ -167,7 +167,7 @@ class TwoMass( statespace.StateSpaceSystem ):
     """
 
     ############################
-    def __init__(self, m=1, k=2, b=0.2):
+    def __init__(self, m=1, k=2, b=0.2, output_mass = 2):
         """ """
 
         # params
@@ -180,6 +180,9 @@ class TwoMass( statespace.StateSpaceSystem ):
         
         self.l1 = 2
         self.l2 = 1
+        
+        # sensor output
+        self.output_mass = output_mass
         
         # Matrix ABCD
         self.compute_ABCD()
@@ -211,7 +214,17 @@ class TwoMass( statespace.StateSpaceSystem ):
                             [ 0 ],
                             [ 0 ],
                             [ 1/self.m2 ]])
-        self.C = np.array([ [ 0 , 1 , 0 , 0 ]])
+        
+        if self.output_mass == 2:
+            self.C = np.array([ [ 0 , 1 , 0 , 0 ]])
+            self.output_label = ['x2']
+        elif self.output_mass ==1:
+            self.C = np.array([ [ 1 , 0 , 0 , 0 ]])
+            self.output_label = ['x1']
+        else:
+            self.C = np.array([ [ 0 , 1 , 0 , 0 ]])
+            self.output_label = ['x2']
+            
         self.D = np.array([ [ 0 ]])
                 
         
@@ -233,7 +246,7 @@ class TwoMass( statespace.StateSpaceSystem ):
         """
         l = self.l1 * 3
         
-        domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
+        domain  = [ (-l+self.l1,l+self.l1) , (-l,l) , (-l,l) ]#  
                 
         return domain
     
@@ -345,7 +358,9 @@ class TwoMass( statespace.StateSpaceSystem ):
         lines_pts.append( pts )
                 
         return lines_pts
+  
     
+  ###############################################################################
     
     
 class ThreeMass( statespace.StateSpaceSystem ):
@@ -357,7 +372,7 @@ class ThreeMass( statespace.StateSpaceSystem ):
     """
 
     ############################
-    def __init__(self, m=1, k=2, b=0.2):
+    def __init__(self, m=1, k=2, b=0.2, output_mass = 2):
         """ """
 
         # params
@@ -373,6 +388,9 @@ class ThreeMass( statespace.StateSpaceSystem ):
         
         self.l1 = 2
         self.l2 = 1
+        
+        # sensor output
+        self.output_mass = output_mass
         
         # Matrix ABCD
         self.compute_ABCD()
@@ -418,7 +436,20 @@ class ThreeMass( statespace.StateSpaceSystem ):
                             [ 0 ],
                             [ 0 ],
                             [ 1/m2 ]])
-        self.C = np.array([ [ 0 , 0 , 1 , 0 , 0 , 0 ]])
+        
+        if self.output_mass == 3:
+            self.C = np.array([ [ 0 , 0 , 1 , 0 , 0 , 0 ]])
+            self.output_label = ['x3']
+        elif self.output_mass == 2:
+            self.C = np.array([ [ 0 , 1 , 0 , 0 , 0 , 0 ]])
+            self.output_label = ['x2']
+        elif self.output_mass == 1:
+            self.C = np.array([ [ 1 , 0 , 0 , 0 , 0 , 0 ]])
+            self.output_label = ['x1']
+        else:
+            self.C = np.array([ [ 0 , 0 , 1 , 0 , 0 , 0 ]])
+            self.output_label = ['x3']
+            
         self.D = np.array([ [ 0 ]])
                 
         
@@ -440,7 +471,7 @@ class ThreeMass( statespace.StateSpaceSystem ):
         """
         l = self.l1 * 3
         
-        domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
+        domain  = [ (-l+self.l1,l+self.l1) , (-l,l) , (-l,l) ]#  
                 
         return domain
     
