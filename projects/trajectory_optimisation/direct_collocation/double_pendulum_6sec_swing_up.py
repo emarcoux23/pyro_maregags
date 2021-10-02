@@ -17,8 +17,8 @@ sys = pendulum.DoublePendulum()
 
 n = 4
 m = 2
-grid = 100
-dt   = 0.1
+grid = 30
+dt   = 0.2
 
 
 #dec = np.linspace(0,grid*3,grid*3)
@@ -56,7 +56,9 @@ def cost(dec):
         
         #J = J + 0.5 * dt * ( (x[0,i]-target)**2 + (x[0,i+1]-target)**2 + x[1,i]**2 + x[1,i+1]**2 + u[0,i]**2 + u[0,i+1]**2 )
         
-        J = J + 0.5 * dt * ( u[0,i]**2 + u[0,i+1]**2 + u[1,i]**2 + u[1,i+1]**2 ) 
+        J = J + 0.5 * dt * ( x[0,i]**2 + x[0,i+1]**2 + x[1,i]**2 + x[1,i+1]**2 ) 
+        J = J + 0.5 * dt * ( x[2,i]**2 + x[2,i+1]**2 + x[3,i]**2 + x[3,i+1]**2 ) 
+        J = J + 0.5 * dt * ( u[0,i]**2 + u[0,i+1]**2 + u[1,i]**2 + u[1,i+1]**2 ) * 5
         
     return J
 
@@ -85,7 +87,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-4,1) )
+        bounds.append( (-5,2) )
         
     bounds.append( (0.0,0.01) )
     
@@ -94,7 +96,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-1,3) )
+        bounds.append( (-3,3) )
         
     bounds.append( (0,0.01) )
     
@@ -104,7 +106,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-2,6) )
+        bounds.append( (-3,6) )
         
     bounds.append( (0,0.01) )
     
@@ -114,7 +116,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-6,6) )
+        bounds.append( (-10,10) )
         
     bounds.append( (0,0.01) )
     
@@ -167,6 +169,6 @@ sys.traj.x[:,3] = dec[3*grid:4*grid]
 sys.traj.u[:,0] = dec[4*grid:5*grid]
 sys.traj.u[:,1] = dec[5*grid:6*grid]
 
-
+#sys.traj.save('doublependulumswingup6sec')
 sys.plot_trajectory('xu')
 sys.animate_simulation()

@@ -17,7 +17,7 @@ sys = pendulum.DoublePendulum()
 
 n = 4
 m = 2
-grid = 10
+grid = 20
 dt   = 0.2
 
 
@@ -87,7 +87,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-6,2) )
+        bounds.append( (-5,2) )
         
     bounds.append( (0.0,0.01) )
     
@@ -96,7 +96,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-2,4) )
+        bounds.append( (-3,3) )
         
     bounds.append( (0,0.01) )
     
@@ -106,7 +106,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-2,6) )
+        bounds.append( (-3,6) )
         
     bounds.append( (0,0.01) )
     
@@ -116,7 +116,7 @@ def compute_bounds():
     
     for i in range(1,grid-1):
         
-        bounds.append( (-6,6) )
+        bounds.append( (-10,10) )
         
     bounds.append( (0,0.01) )
     
