@@ -19,6 +19,8 @@ target = 1
 
 #dec = np.linspace(0,grid*3,grid*3)
 
+count = 0
+
 
 def dec2xu(dec):
     
@@ -89,6 +91,12 @@ def compute_bounds():
         
     return bounds
 
+def display_callback(a):
+    
+    
+    print('One iteration completed')
+    
+    return True
 
 
 # Guess
@@ -100,7 +108,7 @@ dec[2*grid:3*grid] = 1
 bnds = compute_bounds()
 
 cons = {'type': 'eq', 'fun': constraints }
-res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons) #
+res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons, callback=display_callback ) #
 
 print(res)
 
