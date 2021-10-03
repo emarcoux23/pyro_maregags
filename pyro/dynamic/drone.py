@@ -145,9 +145,9 @@ class Drone2D( mechanical.MechanicalSystem ):
         
         d = np.zeros(3)
         
-        d[0] = dq[0]*abs(dq[0]) * self.cda
-        d[1] = dq[1]*abs(dq[1]) * self.cda
-        d[2] = dq[2]*abs(dq[2]) * 0
+        d[0] = dq[0]*abs(dq[0]) * self.cda + dq[0] * 0.01
+        d[1] = dq[1]*abs(dq[1]) * self.cda + dq[1] * 0.01
+        d[2] = dq[2]*abs(dq[2]) * 0        + dq[2] * 0.01
         
         return d
     
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     
     sys.x0[5] = 0
     
-    sys.ubar[0] = 9.81 * 0.5
+    sys.ubar[0] = 9.81 * 0.6
     sys.ubar[1] = 9.81 * 0.7
     
     sys.plot_trajectory()
