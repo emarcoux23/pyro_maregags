@@ -14,13 +14,16 @@ from pyro.analysis import simulation
 
 sys  = pendulum.DoublePendulum()
 
-traj = simulation.Trajectory.load('double_pendulum_rrt.npy')
+#traj = simulation.Trajectory.load('double_pendulum_rrt.npy')
+traj = simulation.Trajectory.load('double_pendulum_directcollocation.npy')
 
 # Controller
 ctl  = nonlinear.ComputedTorqueController( sys , traj )
 
 # goal
 ctl.rbar = np.array([0,0])
+ctl.w0   = 5
+ctl.zeta = 1
 
 # New cl-dynamic
 cl_sys = ctl + sys

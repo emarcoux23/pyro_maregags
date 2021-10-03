@@ -13,5 +13,5 @@ sys = pendulum.DoublePendulum()
 #sys.traj = Trajectory.load('doublependulumswingup2sec.npy')
 sys.traj = Trajectory.load('doublependulumswingup4sec.npy')
 
-sys.plot_trajectory()
+sys.plot_trajectory('xu')
 sys.animate_simulation()

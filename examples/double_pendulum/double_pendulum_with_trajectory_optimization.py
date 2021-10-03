@@ -17,7 +17,7 @@ sys = pendulum.DoublePendulum()
 
 n = 4
 m = 2
-grid = 30
+grid = 20
 dt   = 0.2
 
 
@@ -169,6 +169,6 @@ sys.traj.x[:,3] = dec[3*grid:4*grid]
 sys.traj.u[:,0] = dec[4*grid:5*grid]
 sys.traj.u[:,1] = dec[5*grid:6*grid]
 
-#sys.traj.save('doublependulumswingup6sec')
+
 sys.plot_trajectory('xu')
 sys.animate_simulation()
