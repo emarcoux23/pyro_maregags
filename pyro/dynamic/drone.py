@@ -114,12 +114,12 @@ class Drone2D( mechanical.MechanicalSystem ):
         B = np.zeros((3,2))
         
         # TODO PLACE HOLDER
-        B[0,0] = np.sin( q[2] )
-        B[0,1] = np.sin( q[2] )
+        B[0,0] = -np.sin( q[2] )
+        B[0,1] = -np.sin( q[2] )
         B[1,0] = np.cos( q[2] )
         B[1,1] = np.cos( q[2] )
-        B[2,0] = self.truster_offset
-        B[2,1] = -self.truster_offset
+        B[2,0] = -self.truster_offset
+        B[2,1] = self.truster_offset
         
         return B
     
