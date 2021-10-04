@@ -61,7 +61,7 @@ class DirectCollocationTrajectoryOptimisation:
     
     ############################
     def cost(self, dec):
-        """ Compute cost for given decision variable """
+        """ Compute cost for given decision variable using trapez integration approx """
         
         x,u = self.decisionvariables2xu( dec )
         
@@ -89,6 +89,43 @@ class DirectCollocationTrajectoryOptimisation:
             J = J + dJ * self.dt
             
         return J
+    
+    
+    ########################
+    def dynamic_constraints(self, dec):
+        """ Compute residues of dynamic constraints """
+    
+        x,u = self.decisionvariables2xu( dec )
+        
+        residues_vec = np.zeros( (self.grid-1) * self.sys.n )
+        
+        for i in range(self.grid-1):
+            
+            #i
+            x_i = x[:,i]
+            u_i = u[:,i]
+            t_i = i*self.dt
+            dx_i = self.sys.f(x_i,u_i,t_i) # analytical state derivatives
+            
+            #i+1
+            x_i1 = x[:,i+1]
+            u_i1 = u[:,i+1]
+            t_i1 = (i+1)*self.dt
+            dx_i1 = self.sys.f(x_i1,u_i1,t_i1) # analytical state derivatives
+            
+            #trapez
+            delta_x_eqs = 0.5 * self.dt * (dx_i + dx_i1)
+            
+            #num diff
+            delta_x_num = x[:,i+1] - x[:,i] # numerical delta in trajectory data
+            
+            diff = delta_x_num - delta_x_eqs
+            
+            for j in range(self.sys.n):
+                #TODO numpy manip for replacing slow for loop
+                residues_vec[i + (self.grid-1) * j ] = diff[j]
+            
+        return residues_vec
 
 
 
