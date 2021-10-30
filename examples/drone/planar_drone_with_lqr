@@ -18,7 +18,7 @@ from pyro.control.lqr           import synthesize_lqr_controller
 sys = Drone2D()
 
 sys.xbar =  np.array([0,0,0.0,0,0,0])
-sys.ubar =  np.array([0.5,0.5])* sys.mass * sys.gravity
+sys.ubar =  np.array([0.5,0.5]) * sys.mass * sys.gravity
     
 # Linear model
 ss  = linearize( sys , 0.01 )
