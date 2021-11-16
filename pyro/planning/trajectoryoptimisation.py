@@ -86,6 +86,48 @@ class DirectCollocationTrajectoryOptimisation:
         
         return x,u
     
+    
+    ############################
+    def traj2decisionvariables(self, traj):
+        """ 
+        Compute decision variables based onna trajectory object
+        --------------------------
+        
+        dec = [ x[0](t=0), .... x[0](t), .... x[0](t=tf), 
+               ...
+               x[i](t=0), .... x[i](t), .... x[i](t=tf), 
+               ...
+               x[n](t=0), .... x[n](t), .... x[n](t=tf), 
+               
+               u[0](t=0), .... u[0](t), .... u[0](t=tf), 
+               ...
+               u[j](t=0), .... u[j](t), .... u[j](t=tf), 
+               ...
+               u[m](t=0), .... u[m](t), .... u[m](t=tf) ]
+        
+        """
+        
+        #n = grid*(self.sys.n+self.sys.m)
+        
+        dec = np.array([]).reshape(0,1) # initialize dec_vars array
+        
+        for i in range(self.sys.n): # append states x
+            arr_to_add = traj.x[:,i].reshape(self.grid,1)
+            dec = np.append(dec,arr_to_add,axis=0)
+    
+        for i in range(self.sys.m): # append inputs u
+            arr_to_add = traj.u[:,i].reshape(self.grid,1)
+            dec = np.append(dec,arr_to_add,axis=0)
+        
+        return dec
+    
+    ############################
+    def set_initial_trajectory_guest(self, traj):
+        
+        new_traj      = traj.re_sample( self.grid )
+        self.dec_init = self.traj2decisionvariables( new_traj )
+    
+    
     ############################
     def decisionvariables2traj(self, dec):
         """ 
@@ -254,7 +296,7 @@ class DirectCollocationTrajectoryOptimisation:
         
         self.iter_count = self.iter_count + 1
         
-        print('Iteration ', self.iter_count)
+        print('Optimizing trajectory: Iteration', self.iter_count)
         
         
     ##############################
@@ -273,6 +315,8 @@ class DirectCollocationTrajectoryOptimisation:
                        options={'disp':True,'maxiter':self.maxiter})
         
         self.res = res
+        
+        self.traj = self.decisionvariables2traj( self.res.x )
         
     
     ##############################
