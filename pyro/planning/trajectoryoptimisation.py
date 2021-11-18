@@ -314,18 +314,21 @@ class DirectCollocationTrajectoryOptimisation:
                        callback=self.display_callback, 
                        options={'disp':True,'maxiter':self.maxiter})
         
-        self.res = res
-        
+        self.res  = res
         self.traj = self.decisionvariables2traj( self.res.x )
         
     
     ##############################
     def show_solution(self):
         
-        self.sys.traj = self.decisionvariables2traj( self.res.x )
-        
+        self.sys.traj = self.traj
         self.sys.plot_trajectory('xu')
         self.sys.animate_simulation()
+        
+    ##############################
+    def save_solution(self, name = 'optimized_trajectory.npy' ):
+        
+        self.sys.traj.save( name )
     
 
 

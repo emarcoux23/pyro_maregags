@@ -14,12 +14,20 @@ from pyro.analysis import simulation
 
 sys  = pendulum.DoublePendulum()
 
+
+# ref traj
+#traj = simulation.Trajectory.load( 'double_pendulum_rrt.npy' )
+#traj = simulation.Trajectory.load( 'double_pendulum_directcollocation.npy' )
+traj = simulation.Trajectory.load('double_pendulum_directcollocation_hires.npy')
+
 # Controller
-traj = simulation.Trajectory.load( 'double_pendulum_rrt.npy' )
 ctl  = nonlinear.SlidingModeController( sys , traj )
+#ctl  = nonlinear.SlidingModeController( sys )
 
 # goal
 ctl.rbar = np.array([0,0])
+ctl.lam  = 1
+ctl.gain = 2
 
 # New cl-dynamic
 cl_sys = ctl + sys

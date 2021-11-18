@@ -31,7 +31,7 @@ dt = tf/n
 
 planner = trajectoryoptimisation.DirectCollocationTrajectoryOptimisation( sys , dt , n )
 
-planner.x_start = np.array([3.14,0,0,0])
+planner.x_start = np.array([-3.14,0,0,0])
 planner.x_goal  = np.array([0,0,0,0])
 
 planner.maxiter = 500
@@ -43,13 +43,15 @@ n = 100
 dt = tf/n
 planner2 = trajectoryoptimisation.DirectCollocationTrajectoryOptimisation( sys , dt , n )
 
-planner2.x_start = np.array([3.14,0,0,0])
+planner2.x_start = np.array([-3.14,0,0,0])
 planner2.x_goal  = np.array([0,0,0,0])
 
 planner2.set_initial_trajectory_guest( planner.traj )
 planner2.maxiter = 500
 planner2.compute_optimal_trajectory()
 planner2.show_solution()
+
+planner2.save_solution( 'double_pendulum_directcollocation_hires.npy' )
 
 # Controller
 ctl  = nonlinear.ComputedTorqueController( sys , planner2.traj )
@@ -62,6 +64,6 @@ ctl.zeta = 1
 cl_sys = ctl + sys
 
 # Simultation
-cl_sys.x0 = np.array([3.14,0,0,0])
+cl_sys.x0 = np.array([-3.14,0,0,0])
 cl_sys.plot_trajectory('xu')
 cl_sys.animate_simulation()
