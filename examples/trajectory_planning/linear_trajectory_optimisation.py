@@ -14,10 +14,13 @@ from pyro.planning.trajectoryoptimisation import DirectCollocationTrajectoryOpti
 
 sys = TwoMass()
 
-planner = DirectCollocationTrajectoryOptimisation( sys )
+sys.u_ub[0] = +2
+sys.u_lb[0] = 0
 
-planner.x_start = np.array([-5,0,0,0])
-planner.x_goal  = np.array([0,0,0,0])
+planner = DirectCollocationTrajectoryOptimisation( sys , 0.2, 20 )
+
+planner.x_start = np.array([0,0,0,0])
+planner.x_goal  = np.array([0,0.5,0,0])
 
 planner.compute_optimal_trajectory()
 planner.show_solution()
