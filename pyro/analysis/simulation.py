@@ -364,7 +364,7 @@ class CLosedLoopSimulator(Simulator):
         r = traj.u.copy() # reference is input of combined sys
         u = np.zeros((self.n,self.cds.plant.m))
 
-        # Compute internal input signal_proc
+        # Compute internal input
         for i in range(self.n):
 
             ri = r[i,:]

@@ -22,7 +22,7 @@ class NonLinearMPC( controller.StaticController ) :
 
     """
     ############################
-    def __init__(self, sys, dt = 0.2 , n = 20 ):
+    def __init__(self, sys, dt = 0.1 , n = 10 ):
         """ """
         
         # Dimensions
@@ -64,6 +64,10 @@ class NonLinearMPC( controller.StaticController ) :
         
         x,u = self.planner.decisionvariables2xu( self.planner.res.x )
         
+        #DEBUG
+        self.planner.show_solution()
+        print(self.planner.x_start)
+        
         u_next = u[:,0]
         
         return u_next
@@ -103,14 +107,15 @@ if __name__ == "__main__":
     sys.u_ub[0] = +2
     sys.u_lb[0] = 0
     
-    ctl = NonLinearMPC( sys )
+    ctl = NonLinearMPC( sys , 0.1 , 30)
     
-    ctl.planner.goal = np.array([0,0,0,0])
+    ctl.planner.goal    = np.array([0,0,0,0])
+    ctl.planner.maxiter = 10
     
     # New cl-dynamic
     cl_sys = ctl + sys
     
-    cl_sys.x0 = np.array([-0.5,-1,0,0])
-    cl_sys.compute_trajectory(10,100,'euler')
+    cl_sys.x0 = np.array([0.5,0.5,0,0])
+    cl_sys.compute_trajectory(0.3,4,'euler')
     cl_sys.plot_trajectory('xu')
     cl_sys.animate_simulation()

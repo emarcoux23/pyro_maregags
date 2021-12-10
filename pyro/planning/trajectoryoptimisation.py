@@ -323,6 +323,11 @@ class DirectCollocationTrajectoryOptimisation:
         
         self.sys.traj = self.traj
         self.sys.plot_trajectory('xu')
+        
+    ##############################
+    def animate_solution(self):
+        
+        self.sys.traj = self.traj
         self.sys.animate_simulation()
         
     ##############################

@@ -21,5 +21,5 @@ planner.x_goal  = np.array([0,0,0,0,0,0])
 
 planner.compute_optimal_trajectory()
 planner.show_solution()
-
+planner.animate_solution()
 
