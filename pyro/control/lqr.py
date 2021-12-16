@@ -18,7 +18,7 @@ from pyro.analysis import costfunction
 
 
 #################################################################
-def synthesize_lqr_controller( ss , cf ):
+def synthesize_lqr_controller( ss , cf , xbar = None, ubar = None):
     """
 
     Compute the optimal linear controller minimizing the quadratic cost:
@@ -53,8 +53,17 @@ def synthesize_lqr_controller( ss , cf ):
     R_inv = np.linalg.inv( cf.R )
     K     = np.dot( R_inv  , BTS )
     
+    # Define linear controller
     ctl = linear.ProportionalController( K )
     ctl.name = 'LQR controller'
+    
+    # Offsets on input and ouputs
+    if xbar is not None:
+        ctl.ybar = xbar  # Offset on the sensor signal
+        
+    if ubar is not None:
+        ctl.ubar = ubar  # Offset on the control input
+    
     
     return ctl
     
