@@ -12,8 +12,7 @@ from pyro.planning import discretizer
 from pyro.analysis import costfunction
 from pyro.planning import valueiteration
 
-from pyro.dynamic.statespace    import linearize
-from pyro.control.lqr           import synthesize_lqr_controller
+from pyro.control.lqr           import linearize_and_synthesize_lqr_controller
 ##############################################################################
 
 sys  = pendulum.SinglePendulum()
@@ -35,13 +34,12 @@ vi = valueiteration.ValueIteration_2D( grid_sys , qcf )
 
 vi.initialize()
 vi.load_data('simple_pendulum_vi')
+#vi.compute_steps(110,True)
 vi.assign_interpol_controller()
 vi.plot_policy(0)
 
 #LQR
-ss  = linearize( sys , 0.01 )
-
-lqr_ctl = synthesize_lqr_controller( ss , qcf , sys.xbar )
+lqr_ctl = linearize_and_synthesize_lqr_controller(sys, qcf)
 
 lqr_ctl.plot_control_law(0,1,0,0,100,sys)
 

@@ -37,6 +37,8 @@ def synthesize_lqr_controller( ss , cf , xbar = None, ubar = None):
     ----------
     sys : `StateSpaceSystem` instance
     cf  : "quadratic cost function" instance
+    xbar: offset on state feedback
+    ubar: offset on control input
         
     Returns
     -------
@@ -66,6 +68,40 @@ def synthesize_lqr_controller( ss , cf , xbar = None, ubar = None):
     
     
     return ctl
+
+
+#################################################################
+def linearize_and_synthesize_lqr_controller( sys , cf ):
+    """
+
+    Compute the optimal linear controller minimizing the quadratic cost:
+        
+    J = int ( xQx + uRu ) dt = xSx
+    
+    with control law:
+        
+    u = K x
+    
+    Note:
+    ---------
+    Controller assume y = x  (output is directly the state vector)
+
+    Parameters
+    ----------
+    sys : `ContinuousSystem` instance
+    cf  : "quadratic cost function" instance
+        
+    Returns
+    -------
+    instance of `Proportionnal Controller`
+
+    """
+    
+    ss  = statespace.linearize( sys , 0.01 )
+    
+    ctl = synthesize_lqr_controller( ss , cf , sys.xbar , sys.ubar )
+    
+    return ctl
     
 
 
@@ -81,11 +117,10 @@ if __name__ == "__main__":
     
     from pyro.dynamic.pendulum      import DoublePendulum
     from pyro.analysis.costfunction import QuadraticCostFunction
-    from pyro.dynamic.statespace    import linearize
     
     sys = DoublePendulum()
     
-    ss  = linearize( sys , 0.01 )
+    ss  = statespace.linearize( sys , 0.01 )
     
     cf  = QuadraticCostFunction.from_sys( sys )
     
