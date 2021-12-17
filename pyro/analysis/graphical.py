@@ -497,6 +497,8 @@ class Animator:
         if show:
             plt.ioff()
             plt.show()
+        else:
+            plt.close(self.ani_fig)
         
 
     #####################################    
