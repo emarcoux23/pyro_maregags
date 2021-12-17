@@ -363,7 +363,8 @@ class Animator:
 
     ###########################################################################
     def animate_simulation(self, traj, time_factor_video =  1.0 , is_3d = False, 
-                                 save = False , file_name = 'Animation' ):
+                                 save = False , file_name = 'Animation' , 
+                                 show = True ):
         """ 
         Show Animation of the simulation 
         ----------------------------------
@@ -493,8 +494,9 @@ class Animator:
             self.ani.save( file_name + '.gif', writer='imagemagick', fps=30)
 
         # self.ani_fig.show()
-        plt.ioff()
-        plt.show()
+        if show:
+            plt.ioff()
+            plt.show()
         
 
     #####################################    
