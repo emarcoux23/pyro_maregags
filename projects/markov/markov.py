@@ -67,21 +67,27 @@ class MarkovSystem:
         self.xbar = 0
         self.ubar = 0
         
-        # Plot params
-        self.domain     = [ (-10,10) , (-10,10) , (-10,10) ]
-        self.linestyle  = 'o-'
-        self.is_3d      =  False  # Use 2d plot by default
-        
-        
         ################################
         # Transition Probabilities
         ################################
         
-        self.T_ija = np.zeros((n,n,m))
+        self.T_jia = np.zeros((n,n,m))
         
         for a in range(m):
             
-            self.T_ija[:,:,a] = np.diag(np.ones((n)))
+            self.T_jia[:,:,a] = np.diag(np.ones((n)))
+            
+        ################################
+        # Transition cost
+        ################################
+            
+        self.a_jia = np.zeros((n,n,m))
+        
+        ################################
+        # Final cost
+        ################################
+            
+        self.gN_i = np.zeros((n))
         
         
         ################################
@@ -106,9 +112,9 @@ class MarkovSystem:
         
         """
         
-        T_ij = self.T_ija[:,:,u] # transition matrix of given action
+        T_ji = self.T_jia[:,:,u] # transition matrix of given action
         
-        x_k1 = np.dot( T_ij , x )
+        x_k1 = np.dot( T_ji , x )
         
         return x_k1
     
@@ -120,9 +126,9 @@ class MarkovSystem:
         
         """
         
-        print( self.T_ija.sum( axis = 0 ) )
+        print( self.T_jia.sum( axis = 0 ) )
         
-        return self.T_ija.sum( axis = 0 ) # should be all ones
+        return self.T_jia.sum( axis = 0 ) # should be all ones
     
     
     ###########################################################################
@@ -172,10 +178,91 @@ class MarkovSystem:
                 print(x_k1)
             
         
-        return x_k1
+        return x_k1 # return probability distribution at k = N
     
+    
+    #############################
+    def get_valueiteration_algo(self):
+        
+        vi = ValueIterationForMarkovProcess(self.T_jia, self.a_jia, self.gN_i)
+        
+        return vi
+    
+    
+    
+###############################################################################
+class ValueIterationForMarkovProcess:
+    """ 
+    
+    
+    
+    """
+    
+    ############################
+    def __init__(self, T_jia , a_jia, gN_i ):
+        
+        
+        self.alpha = 1.0 # discount factor
+        
+        
+        self.T = T_jia
+        self.a = a_jia
+        self.g = gN_i
+        
+        self.n = T_jia.shape[0] # Number of states
+        self.m = T_jia.shape[2] # Number of actions
+        
+        
+        # Initialise cost-to-go with final cost
+        self.J = self.g.copy()
+        
+        # Initialise policy map
+        self.c = np.zeros((self.n))
+        
+        # Initialise Q-values
+        self.Q = np.zeros((self.n,self.m))
+        
+        
+        self.print = True
+        
+        
+    ###############################
+    def compute_backward_step(self):
+        
+        # For all states
+        for i in range(self.n):
+            
+            # For all actions
+            for a in range(self.m):
+                
+                Q_j    = self.a[:,i,a] + self.alpha * self.J  # array of possible cost 
+                
+                self.Q[i,a] = np.dot( self.T[:,i,a] , Q_j )  # expected value
+                
+        
+        self.J = self.Q.min(1)     # Minimum over all possible actions
+        self.c = self.Q.argmin(1)  # Action that minimise Q for all i
+        
+        
+    ###############################
+    def compute_n_backward_steps(self, n):
+        
+        for k in range(n):
+            
+            self.compute_backward_step()
+        
+            if self.print:
+                print('Backward step N-',k)
+                print('J = ',self.J)
+                print('c = ',self.c)
+        
+        
+            
+        
+        
 
     
+
     
     
 
@@ -190,10 +277,15 @@ class MarkovSystem:
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    m = MarkovSystem(3,2)
+    # 
+    m = MarkovSystem(5,3)
     
-    m.T_ija[0,0,0] = 0.5
-    m.T_ija[1,0,0] = 0.5
     
     m.check_probability_matrix()
+    
+    vi = m.get_valueiteration_algo()
+    
+    vi.alpha = 0.9
+    
+    vi.compute_n_backward_steps(100)
     
