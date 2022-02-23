@@ -75,7 +75,7 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         
         # Graphic output parameters 
         self.dynamic_domain  = False
-        self.dynamic_range   = 10
+        self.dynamic_range   = self.lenght * 2
         
         # Animation output graphical parameters
         self.linestyle = '-'
@@ -335,6 +335,227 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         
         pts = pts.copy()
         pts[:,0] = pts[:,0] + l
+        
+        lines_pts.append( pts )
+                
+        return lines_pts
+    
+    
+
+##############################################################################
+# 2 DoF Car Model
+##############################################################################
+        
+class LongitudinalFrontWheelDriveCarWithTorqueInput( LongitudinalFrontWheelDriveCarWithWheelSlipInput ):
+    """ 
+    Equations of Motion
+    -------------------------
+    TBD
+    """
+    
+    ############################
+    def __init__(self):
+        """ """
+        
+        # initialize standard params
+        super().__init__()
+        
+        # Dimensions
+        self.n = 4   
+        self.m = 1   
+        self.p = 1
+        
+        # initialize standard vectors with new dimensions
+        system.ContinuousDynamicSystem.__init__(self,self.n,self.m,self.p)
+
+        # Labels
+        self.name = 'Front Wheel Drive Car'
+        self.state_label = ['x','dx', 'w','theta']
+        self.input_label = ['torque']
+        self.output_label = ['slip']
+        
+        # Units
+        self.state_units = ['[m]','[m/sec]','[rad/sec]','[rad]']
+        self.input_units = ['[Nm]']
+        self.output_units = ['']
+        
+        # State working range
+        self.x_ub = np.array([+50,+30,1000, 10000])
+        self.x_lb = np.array([ 0,-10,-100,-10000])
+        
+        # Input working range
+        self.u_ub = np.array([  200])
+        self.u_lb = np.array([ -200])
+        
+        # Additionnal Model param
+        self.wheel_radius  = 0.3 # [m]
+        self.wheel_inertia = 1.5 # [kg m2]
+        
+        self.x0 = np.array([0,0.01,0,0])
+        
+        self.linestyle = '-'
+        self.dynamic_domain = True
+        
+        
+    #############################
+    def f(self, x , u , t = 0 ):
+        """ 
+        Continuous time foward dynamics evaluation
+        
+        dx = f(x,u,t)
+        
+        INPUTS
+        x  : state vector             n x 1
+        u  : control inputs vector    m x 1
+        t  : time                     1 x 1
+        
+        OUPUTS
+        dx : state derivative vectror n x 1
+        
+        """
+        
+        dx = np.zeros(self.n) # State derivative vector
+        
+        ###################
+        
+        torque = u
+        v      = x[1]
+        w      = x[2]
+        
+        # constant params local vairables
+        ry, rr, rf = self.compute_ratios() 
+        m    = self.mass 
+        g    = self.gravity
+        rcda = self.rho * self.cdA
+        r    = self.wheel_radius
+        j    = self.wheel_inertia
+        
+        #slip computation
+        slip = np.clip( ( r * w - v ) / (np.abs(v) + 0.0 ) , -0.5 , 0.5 )
+        
+        # compute ratio of horizontal/vertical force
+        mu = self.slip2force( slip ) 
+        
+        # Drag froce
+        fd = 0.5 * rcda * v * np.abs( v ) # drag froce with the right sign
+        
+        # Acceleration (equation considering weight transfer)
+        a  = (mu * m * g * rr - fd )/( m * (1 + mu * ry ))
+        
+        # Wheel acceleration
+        dw = (torque - r * (m * a + fd)) / j
+        
+        ###################
+        
+        dx[0]  = v   # velocity
+        dx[1]  = a   # acc
+        dx[2]  = dw  # angular acc. of the wheels
+        dx[3]  = w   #
+        
+        ###################
+        # Normal force check
+        fn_front = m * g * rr - m * a * ry
+        fn_rear  = m * g * rf + m * a * ry
+        if (fn_front<0) :
+            print('Normal force on front wheel is negative: fn = ', fn_front)
+        if (fn_rear<0) : 
+            print('Normal force on rear wheel is negative: fn = ', fn_rear)
+        ###################
+        
+        return dx
+    
+    
+    #############################
+    def h(self, x , u , t = 0 ):
+        """ 
+        Continuous time foward dynamics evaluation
+        
+        dx = f(x,u,t)
+        
+        INPUTS
+        x  : state vector             n x 1
+        u  : control inputs vector    m x 1
+        t  : time                     1 x 1
+        
+        OUPUTS
+        dx : state derivative vectror n x 1
+        
+        """
+        
+        y = np.zeros(self.p) # State derivative vector
+        
+        ###################
+        v      = x[1]
+        w      = x[2]
+        
+        # constant params local vairables
+        r    = self.wheel_radius
+        
+        #slip computation
+        slip = np.clip( ( r * w - v ) / (np.abs(v) + 0.0 ) , -0.5 , 0.5 )
+        
+        y[0] = slip
+        
+        return y
+    
+    
+    ###########################################################################
+    # For graphical output
+    ###########################################################################
+    
+    
+    #############################
+    def xut2q( self, x , u , t ):
+        """ compute config q """
+        
+        q   =  x
+        
+        return q
+    
+    ###########################################################################
+    def forward_kinematic_lines(self, q ):
+        """ 
+        Compute points p = [x;y;z] positions given config q 
+        ----------------------------------------------------
+        - points of interest for ploting
+        
+        Outpus:
+        lines_pts = [] : a list of array (n_pts x 3) for each lines
+        
+        """
+        
+        # Variables
+        
+        travel   = q[0]
+        ang      = q[3]
+        
+        # constant
+        
+        r = self.wheel_radius
+        l = self.lenght
+        
+        #base plot form mother class
+        lines_pts = LongitudinalFrontWheelDriveCarWithWheelSlipInput.forward_kinematic_lines(self, q)
+        
+        
+        ###########################
+        # Wheels
+        ###########################
+        
+        
+        angles = np.arange(0,6.4,0.8)
+        n      = angles.size
+        
+        pts = np.zeros((n*2,3))
+        
+        for i in range(n):
+            a = angles[i] - ang
+            pts[i*2,:]  = [ r * np.cos(a) , r * np.sin(a) , 0 ]
+            pts[i*2+1,:] = [ 0 , 0 , 0 ]
+
+        pts[:,0] = pts[:,0] + travel + l
+        pts[:,1] = pts[:,1] + r
+        
         
         lines_pts.append( pts )
                 
