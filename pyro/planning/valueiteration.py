@@ -836,6 +836,8 @@ class ValueIteration_ND:
               self.sys.x_ub[0],
               self.sys.x_lb[1],
               self.sys.x_ub[1]])
+        
+        plt.show()
 
 
         
