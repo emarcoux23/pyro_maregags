@@ -53,7 +53,11 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         
         # State working range
         self.x_ub = np.array([+50,+30,])
-        self.x_lb = np.array([-10,-10])
+        self.x_lb = np.array([ 0,-10])
+        
+        # Input working range
+        self.u_ub = np.array([  0.3])
+        self.u_lb = np.array([ -0.3])
         
         # Model param
         self.lenght  = 2          # distance between front wheel and back wheel [m]
@@ -75,7 +79,7 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         
         # Animation output graphical parameters
         self.linestyle = '-'
-        self.obs_dist = 50
+        self.obs_dist =  self.x_ub[0] + self.lenght * 2 # using the upper bound on x range
         self.obs_size = 2
         
         
@@ -352,7 +356,7 @@ if __name__ == "__main__":
     sys.plot_slip2force()
     
     sys.x0[1]   = 20
-    sys.ubar[0] = -0.2
+    sys.ubar[0] = -0.1
     
     sys.compute_trajectory( 10, 10001, 'euler')
     
