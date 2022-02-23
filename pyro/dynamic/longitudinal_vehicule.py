@@ -74,7 +74,7 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         
         
         # Graphic output parameters 
-        self.dynamic_domain  = True
+        self.dynamic_domain  = False
         self.dynamic_range   = 10
         
         # Animation output graphical parameters
@@ -215,9 +215,9 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
                         ( -l + z , l + z ) ]#  
         else:
             
-            domain  = [ ( -l , l ) ,
-                        ( -l , l ) ,
-                        ( -l , l ) ]#
+            domain  = [ ( 0 , self.obs_dist + self.obs_size * 2 ) ,
+                        ( 0 , 1 ) ,
+                        ( 0 , self.obs_dist + self.obs_size * 2 ) ]#
             
                 
         return domain
@@ -238,7 +238,7 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         # Variables
         
         travel   = q[0]
-        slipping = (np.abs( q[2] ) > 0.1 ) # bool
+        slipping = (np.abs( q[2] ) > 0.03 ) # bool
         
         
         
