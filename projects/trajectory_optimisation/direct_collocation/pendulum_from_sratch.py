@@ -17,8 +17,8 @@ sys = pendulum.SinglePendulum()
 
 n = 2
 m = 1
-grid = 100
-dt   = 0.1
+grid = 30
+dt   = 0.2
 
 
 #dec = np.linspace(0,grid*3,grid*3)
@@ -48,9 +48,10 @@ def cost(dec):
     
     for i in range(grid-1):
         
-        #J = J + 0.5 * dt * ( (x[0,i]-target)**2 + (x[0,i+1]-target)**2 + x[1,i]**2 + x[1,i+1]**2 + u[0,i]**2 + u[0,i+1]**2 )
+        target = -3.14
+        J = J + 0.5 * dt * ( (x[0,i]-target)**2 + (x[0,i+1]-target)**2 + x[1,i]**2 + x[1,i+1]**2 + u[0,i]**2 + u[0,i+1]**2 )
         
-        J = J + 0.5 * dt * ( u[0,i]**2 + u[0,i+1]**2 ) 
+        #J = J + 0.5 * dt * ( u[0,i]**2 + u[0,i+1]**2 ) 
         
     return J
 
@@ -93,6 +94,14 @@ def compute_bounds():
     return bounds
 
 
+def display_callback(a):
+    
+    
+    print('Iteration completed')
+    
+    return True
+
+
 
 # Guess
 dec = np.zeros(grid*(n+m))
@@ -103,7 +112,7 @@ dec = np.zeros(grid*(n+m))
 bnds = compute_bounds()
 
 cons = {'type': 'eq', 'fun': constraints }
-res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons, options={'disp':True,'maxiter':1000}) #
+res = minimize( cost, dec, method='SLSQP',  bounds=bnds, constraints=cons, callback=display_callback, options={'disp':True,'maxiter':1000}) #
 
 
 sys.compute_trajectory(grid*dt,grid)
