@@ -300,6 +300,34 @@ class ContinuousDynamicSystem:
     ###########################################################################
     # Quick Analysis Shorcuts
     ###########################################################################
+    """
+    #############################
+    def set_single_output_to(self, o=0 ):
+        
+        #TODO
+       
+        self.p    = 1             # output size
+        
+        self.full_h = self.h
+    
+        # new output fonction
+        def new_h(x, u, t):
+            
+            # New output function
+            y_old = self.full_h( x, u, t)
+            
+            y_new    = np.zeros(1)
+            y_new[0] = y_old[o]
+            
+            return y_new
+            
+        self.h = new_h
+        
+        
+        pass
+    """
+        
+        
     
     #############################
     def get_plotter(self):
