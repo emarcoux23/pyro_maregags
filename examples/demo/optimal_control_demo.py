@@ -18,6 +18,8 @@ from pyro.dynamic  import pendulum
 # Define the dynamical system to control
 sys  = pendulum.SinglePendulum()
 
+sys.plot_phase_plane()
+
 #Max/Min torque
 sys.u_ub[0] = +5
 sys.u_lb[0] = -5
