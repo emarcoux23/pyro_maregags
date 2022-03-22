@@ -200,18 +200,23 @@ class StaticController():
                 
         
         # Ploting
-        fig = plt.figure(figsize=(4, 3),dpi=300, frameon=True)
+        fig = plt.figure(figsize=(3, 2),dpi=300, frameon=True)
+        
         fig.canvas.manager.set_window_title('Control law for u[%i]'%i)
         ax  = fig.add_subplot(1,1,1)
         
+        ax.tick_params('both',labelsize = 5 )
         plt.ylabel(yname, fontsize = 5 )
         plt.xlabel(xname, fontsize = 5 )
         
-        im1 = plt.pcolormesh( X , Y , U, shading='gouraud')
+        im1 = plt.pcolormesh( X , Y , U, shading='gouraud' )
+        
+        cbar = plt.colorbar(im1)
+        cbar.ax.tick_params(labelsize=5)
+        
         
         plt.axis([xmin,xmax,ymin,ymax])
-    
-        plt.colorbar()
+
         plt.grid(True)
         plt.tight_layout() 
         plt.show()
