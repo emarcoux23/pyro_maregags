@@ -200,12 +200,12 @@ class StaticController():
                 
         
         # Ploting
-        fig = plt.figure(figsize=(4, 4),dpi=300, frameon=True)
+        fig = plt.figure(figsize=(4, 3),dpi=300, frameon=True)
         fig.canvas.manager.set_window_title('Control law for u[%i]'%i)
         ax  = fig.add_subplot(1,1,1)
         
-        plt.ylabel(yname, fontsize = 10 )
-        plt.xlabel(xname, fontsize = 10 )
+        plt.ylabel(yname, fontsize = 5 )
+        plt.xlabel(xname, fontsize = 5 )
         
         im1 = plt.pcolormesh( X , Y , U, shading='gouraud')
         
@@ -890,7 +890,6 @@ class DynamicClosedLoopSystem( ClosedLoopSystem ):
 
 if __name__ == "__main__":     
     """ MAIN TEST """
-    
     pass
 
     
