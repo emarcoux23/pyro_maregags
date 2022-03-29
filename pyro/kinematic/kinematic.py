@@ -59,7 +59,7 @@ class Vector:
     ##################################################
     def __call__(self):
         
-        print '3D Vector : [',self.x,';',self.y,';',self.z,']'
+        print('3D Vector : [',self.x,';',self.y,';',self.z,']')
         
         
     #################################
@@ -174,7 +174,7 @@ class RotationMatrix:
     #######################
     def __call__(self):
         
-        print 'Rotation Matrix : \n', self.C
+        print('Rotation Matrix : \n', self.C)
         
         
     #################################
@@ -259,7 +259,7 @@ class AngleAxis:
     def __call__(self):
         """ Print Angle Axis """
         
-        print 'AngleAxis: \n deg : ',self.deg,' axis : [',self.axis.x,';',self.axis.y,';',self.axis.z,']' 
+        print('AngleAxis: \n deg : ',self.deg,' axis : [',self.axis.x,';',self.axis.y,';',self.axis.z,']')
         
     
     #################################
@@ -306,7 +306,7 @@ class RotationVector(Vector):
     def __call__(self):
         """ Print Rotation Vector """
         
-        print '3D Rotation Vector : [',self.x,';',self.y,';',self.z,']'
+        print('3D Rotation Vector : [',self.x,';',self.y,';',self.z,']')
         
         
     ####################
@@ -355,7 +355,7 @@ class Quaternion:
     def __call__(self):
         """ Print Quaternion """
         
-        print 'Quaternion: \n e : [',self.e.x,';',self.e.y,';',self.e.z,']  n : ',self.n 
+        print('Quaternion: \n e : [',self.e.x,';',self.e.y,';',self.e.z,']  n : ',self.n)
         
         
     #################################
@@ -541,7 +541,7 @@ def RotationMatrix2AngleAxis(RM):
     ##############
     else:
         
-        print '\n RotationMatrix2AngleAxis : bad matrix : to do!!!'
+        print('\n RotationMatrix2AngleAxis : bad matrix : to do!!!')
     
     axis = Vector(ax,ay,az)
     
@@ -620,7 +620,7 @@ def RotationMatrix2Quaternion(RM):
     trace = C.trace()[0,0]
     
     if trace < epsilon :
-        print ' Warning : trace of the matrix is near zero '
+        print(' Warning : trace of the matrix is near zero ')
     
     n = 0.5 * np.sqrt( trace + 1 )
     
