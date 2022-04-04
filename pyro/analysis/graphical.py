@@ -374,27 +374,33 @@ class Animator:
         self.is_3d = is_3d
         
         # Init list
-        self.ani_lines_pts = []
-        self.ani_domains   = []
+        self.ani_lines_pts      = []
+        self.ani_lines_plus_pts = []
+        self.ani_domains        = []
 
         nsteps = traj.t.size
         self.sim_dt = (traj.t[-1] - traj.t[0]) / (traj.t.size - 1)
 
         # For all simulation data points
         for i in range( nsteps ):
-            # Get configuration q from simulation
-            q               = self.sys.xut2q(traj.x[i,:] ,
-                                             traj.u[i,:] , 
-                                             traj.t[i] )
             
-            #TODO fix dependency on sys.sim
+            # Get states , actions , time
+            x = traj.x[i,:]
+            u = traj.u[i,:]
+            t = traj.t[i]
+            
+            # Get configuration q from simulation
+            q               = self.sys.xut2q( x , u , t )
             
             # Compute graphical forward kinematic
             lines_pts       = self.sys.forward_kinematic_lines( q )
+            lines_plus_pts  = self.sys.forward_kinematic_lines_plus( x , u , t )
             domain          = self.sys.forward_kinematic_domain( q )
+            
             # Save data in lists
-            self.ani_lines_pts.append(lines_pts)
-            self.ani_domains.append(domain)
+            self.ani_lines_pts.append( lines_pts )
+            self.ani_lines_plus_pts.append( lines_plus_pts )
+            self.ani_domains.append( domain )
             
         # Init figure
         self.ani_fig = plt.figure(figsize=self.figsize, dpi=self.dpi )

@@ -87,9 +87,13 @@ class ContinuousDynamicSystem:
         self.ubar = np.zeros(self.m)
         
         # Plot params
-        self.domain     = [ (-10,10) , (-10,10) , (-10,10) ]
-        self.linestyle  = 'o-'
-        self.is_3d      =  False  # Use 2d plot by default
+        self.domain           = [ (-10,10) , (-10,10) , (-10,10) ]
+        self.linestyle        = 'o-'
+        self.linestyle_plus   = '--'
+        self.linescolor       = 'o-'
+        self.linescolor_plus  = '--'
+        self.lines_plus       = True    # Bool to active second graphic outpout
+        self.is_3d            =  False  # Use 2d plot by default
         
         ################################
         # Variables
@@ -251,6 +255,36 @@ class ContinuousDynamicSystem:
     
     
     ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        Additionnal optionnal graphic output used in animations
+        
+        Compute points p = [x;y;z] positions given state x , u , t
+        -------------------------------------------------------------
+        - additionnal points of interest for ploting
+        - for instances forces arrows illustrating control inputs
+        
+        Outpus:
+        lines_pts = [] : a list of array (n_pts x 3) for each lines
+        
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        
+        ###########################
+        # Your graphical code here
+        ###########################
+            
+        # simple place holder
+        for u_i in u:
+            pts      = np.zeros(( 1 , 3 ))     # array of 1 pts for the line
+            pts[0,0] = u_i                     # x cord of point 0 = u
+            lines_pts.append( pts )            # list of all arrays of pts
+                
+        return lines_pts
+    
+    
+    ###########################################################################
     # No need to overwrite the following functions for custom dynamic systems
     ###########################################################################
     
@@ -388,7 +422,8 @@ class ContinuousDynamicSystem:
         if self.traj == None:
             self.compute_trajectory()
         
-        self.get_plotter().plot( self.traj, plot, **kwargs)
+        plotter = graphical.TrajectoryPlotter(self)
+        plotter.plot( self.traj, plot, **kwargs)
 
 
     #############################
@@ -403,8 +438,9 @@ class ContinuousDynamicSystem:
         # Check is trajectory is already computed
         if self.traj == None:
             self.compute_trajectory()
-            
-        self.get_plotter().phase_plane_trajectory( self.traj, x_axis , y_axis)
+        
+        plotter = graphical.TrajectoryPlotter(self)
+        plotter.phase_plane_trajectory( self.traj, x_axis , y_axis)
 
 
     #############################
@@ -419,8 +455,9 @@ class ContinuousDynamicSystem:
         # Check is trajectory is already computed
         if self.traj == None:
             self.compute_trajectory()
-            
-        self.get_plotter().phase_plane_trajectory_3d( 
+        
+        plotter = graphical.TrajectoryPlotter(self)
+        plotter.phase_plane_trajectory_3d( 
                 self.traj, x_axis , y_axis, z_axis)
 
 
@@ -458,8 +495,9 @@ class ContinuousDynamicSystem:
         # Check is trajectory is already computed
         if self.traj == None:
             self.compute_trajectory()
-
-        self.get_animator().animate_simulation( self.traj, **kwargs)
+            
+        ani = graphical.Animator(self)
+        ani.animate_simulation( self.traj, **kwargs)
         
     
     ##############################
@@ -477,7 +515,7 @@ class ContinuousDynamicSystem:
         if self.traj == None:
             self.compute_trajectory()
             
-        animator = self.get_animator()
+        animator = graphical.Animator(self)
         animator.animate_simulation( self.traj, show = False )
         html_video = animator.ani.to_html5_video()
         
@@ -499,7 +537,7 @@ class ContinuousDynamicSystem:
         
     
     #############################
-    def plot_linearized_pz_map(self, u_index=0, y_index=0):
+    def plot_linearized_pz_map(self, u_index = 0 , y_index = 0 ):
         """
 
         """
@@ -513,9 +551,9 @@ class ContinuousDynamicSystem:
         
         
     #############################
-    def animate_linearized_mode(self, i=0 ):
+    def animate_linearized_mode(self, i = 0 ):
         """
-
+        Linearize and show eigen mode i
         """
         
         from pyro.dynamic.statespace import linearize
@@ -525,6 +563,7 @@ class ContinuousDynamicSystem:
         linearized_sys.animate_eigen_mode( i , self.is_3d )
         
         return linearized_sys
+    
     
     #############################
     def animate_linearized_modes(self ):
