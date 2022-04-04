@@ -149,15 +149,32 @@ class SingleMass( statespace.StateSpaceSystem ):
         lines_pts.append( pts )
         lines_style.append( '-')
         lines_color.append( 'k')
+                
+        return lines_pts , lines_style , lines_color
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        plots the force vector
+        
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
         
         # force arrow
         pts      = np.zeros(( 5 , 3 ))
         
-        pts[0,:] =  np.array([q[0] + self.l2/2,0,0])
-        pts[1,:] =  np.array([q[0] + self.l2/2 + q[1],0,0])
-        pts[2,:] =  np.array([q[0] + self.l2/2 + q[1] - self.l2/4*q[1],+self.l2/4*q[1],0])
-        pts[3,:] =  np.array([q[0] + self.l2/2 + q[1],0,0])
-        pts[4,:] =  np.array([q[0] + self.l2/2 + q[1] - self.l2/4*q[1],-self.l2/4*q[1],0])
+        xf = x[0] # base of force x coordinate
+        f  = u[0] # force amplitude
+        
+        pts[0,:] =  np.array([xf + self.l2/2,0,0])
+        pts[1,:] =  np.array([xf + self.l2/2 + f,0,0])
+        pts[2,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,+self.l2/4*f,0])
+        pts[3,:] =  np.array([xf + self.l2/2 + f,0,0])
+        pts[4,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,-self.l2/4*f,0])
         
         lines_pts.append( pts )
         lines_style.append( '-')
@@ -165,6 +182,7 @@ class SingleMass( statespace.StateSpaceSystem ):
                 
         return lines_pts , lines_style , lines_color
     
+
 
 ###############################################################################
 
@@ -367,15 +385,32 @@ class TwoMass( statespace.StateSpaceSystem ):
         lines_pts.append( pts )
         lines_style.append( '-')
         lines_color.append( 'k')
+                
+        return lines_pts , lines_style , lines_color
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        plots the force vector
+        
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
         
         # force arrow
         pts      = np.zeros(( 5 , 3 ))
         
-        pts[0,:] =  np.array([q[1] + self.l2/2,0,0])
-        pts[1,:] =  np.array([q[1] + self.l2/2 + q[2],0,0])
-        pts[2,:] =  np.array([q[1] + self.l2/2 + q[2] - self.l2/4*q[2],+self.l2/4*q[2],0])
-        pts[3,:] =  np.array([q[1] + self.l2/2 + q[2],0,0])
-        pts[4,:] =  np.array([q[1] + self.l2/2 + q[2] - self.l2/4*q[2],-self.l2/4*q[2],0])
+        xf = x[1] # base of force x coordinate
+        f  = u[0] # force amplitude
+        
+        pts[0,:] =  np.array([xf + self.l2/2,0,0])
+        pts[1,:] =  np.array([xf + self.l2/2 + f,0,0])
+        pts[2,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,+self.l2/4*f,0])
+        pts[3,:] =  np.array([xf + self.l2/2 + f,0,0])
+        pts[4,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,-self.l2/4*f,0])
         
         lines_pts.append( pts )
         lines_style.append( '-')
@@ -645,15 +680,32 @@ class ThreeMass( statespace.StateSpaceSystem ):
         lines_pts.append( pts )
         lines_style.append( '-')
         lines_color.append( 'k')
+                
+        return lines_pts , lines_style , lines_color
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        plots the force vector
+        
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
         
         # force arrow
         pts      = np.zeros(( 5 , 3 ))
         
-        pts[0,:] =  np.array([x3 + self.l2/2,0,0])
-        pts[1,:] =  np.array([x3 + self.l2/2 + q[3],0,0])
-        pts[2,:] =  np.array([x3 + self.l2/2 + q[3] - self.l2/4*q[3],+self.l2/4*q[3],0])
-        pts[3,:] =  np.array([x3 + self.l2/2 + q[3],0,0])
-        pts[4,:] =  np.array([x3 + self.l2/2 + q[3] - self.l2/4*q[3],-self.l2/4*q[3],0])
+        xf = x[2] + self.l1
+        f = u[0]
+        
+        pts[0,:] =  np.array([xf + self.l2/2,0,0])
+        pts[1,:] =  np.array([xf + self.l2/2 + f,0,0])
+        pts[2,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,+self.l2/4*f,0])
+        pts[3,:] =  np.array([xf + self.l2/2 + f,0,0])
+        pts[4,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,-self.l2/4*f,0])
         
         lines_pts.append( pts )
         lines_style.append( '-')
@@ -709,19 +761,6 @@ class FloatingSingleMass( SingleMass ):
         lines_pts.append( pts )
         lines_style.append( '-')
         lines_color.append( 'k')
-        
-        # force arrow
-        pts      = np.zeros(( 5 , 3 ))
-        
-        pts[0,:] =  np.array([q[0] + self.l2/2,0,0])
-        pts[1,:] =  np.array([q[0] + self.l2/2 + q[1],0,0])
-        pts[2,:] =  np.array([q[0] + self.l2/2 + q[1] - self.l2/4*q[1],+self.l2/4*q[1],0])
-        pts[3,:] =  np.array([q[0] + self.l2/2 + q[1],0,0])
-        pts[4,:] =  np.array([q[0] + self.l2/2 + q[1] - self.l2/4*q[1],-self.l2/4*q[1],0])
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r')
                 
         return lines_pts , lines_style , lines_color
 
@@ -817,19 +856,6 @@ class FloatingTwoMass( TwoMass ):
         lines_style.append( '-')
         lines_color.append( 'k')
         
-        # force arrow
-        pts      = np.zeros(( 5 , 3 ))
-        
-        pts[0,:] =  np.array([q[1] + self.l2/2,0,0])
-        pts[1,:] =  np.array([q[1] + self.l2/2 + q[2],0,0])
-        pts[2,:] =  np.array([q[1] + self.l2/2 + q[2] - self.l2/4*q[2],+self.l2/4*q[2],0])
-        pts[3,:] =  np.array([q[1] + self.l2/2 + q[2],0,0])
-        pts[4,:] =  np.array([q[1] + self.l2/2 + q[2] - self.l2/4*q[2],-self.l2/4*q[2],0])
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r')
-                
         return lines_pts , lines_style , lines_color
     
     
@@ -961,54 +987,9 @@ class FloatingThreeMass( ThreeMass ):
         lines_pts.append( pts )
         lines_style.append( '-')
         lines_color.append( 'k')
-        
-        """
-        # force arrow
-        pts      = np.zeros(( 5 , 3 ))
-        
-        pts[0,:] =  np.array([x3 + self.l2/2,0,0])
-        pts[1,:] =  np.array([x3 + self.l2/2 + q[3],0,0])
-        pts[2,:] =  np.array([x3 + self.l2/2 + q[3] - self.l2/4*q[3],+self.l2/4*q[3],0])
-        pts[3,:] =  np.array([x3 + self.l2/2 + q[3],0,0])
-        pts[4,:] =  np.array([x3 + self.l2/2 + q[3] - self.l2/4*q[3],-self.l2/4*q[3],0])
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r')
-        """
                 
         return lines_pts , lines_style , lines_color
-    
-    
-    ###########################################################################
-    def forward_kinematic_lines_plus(self, x , u , t ):
-        """ 
-        plots the force vector
-        
-        """
-        
-        lines_pts = [] # list of array (n_pts x 3) for each lines
-        lines_style = []
-        lines_color = []
-        
-        # force arrow
-        pts      = np.zeros(( 5 , 3 ))
-        
-        xf = x[2] + self.l1
-        f = u[0]
-        
-        pts[0,:] =  np.array([xf + self.l2/2,0,0])
-        pts[1,:] =  np.array([xf + self.l2/2 + f,0,0])
-        pts[2,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,+self.l2/4*f,0])
-        pts[3,:] =  np.array([xf + self.l2/2 + f,0,0])
-        pts[4,:] =  np.array([xf + self.l2/2 + f - self.l2/4*f,-self.l2/4*f,0])
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r')
-                
-        return lines_pts , lines_style , lines_color
-        
+ 
         
 '''
 #################################################################
@@ -1020,12 +1001,12 @@ class FloatingThreeMass( ThreeMass ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    sys = SingleMass()
-    sys = TwoMass()
+    #sys = SingleMass()
+    #sys = TwoMass()
     sys = ThreeMass()
-    sys = FloatingSingleMass()
-    sys = FloatingTwoMass()
-    sys = FloatingThreeMass()
+    #sys = FloatingSingleMass()
+    #sys = FloatingTwoMass()
+    #sys = FloatingThreeMass()
     
     def t2u(t):
         return np.array([t])
@@ -1038,4 +1019,7 @@ if __name__ == "__main__":
     #sys.plot_linearized_bode()
     #sys.plot_linearized_pz_map()
     #sys.plot_trajectory('xu')
+    
+    sys.lines_plus = True
+    #sys.lines_plus = False
     sys.animate_simulation()
