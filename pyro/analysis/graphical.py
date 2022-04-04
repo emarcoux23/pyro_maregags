@@ -318,8 +318,11 @@ class Animator:
             lines_color = lines[2]
         else:
             lines_pts   = lines
-            lines_style = self.sys.linestyle   # default value 
-            lines_color = self.sys.linescolor  # default value 
+            lines_style = []
+            lines_color = []
+            for j, line in enumerate(lines):
+                lines_style.append( self.sys.linestyle  )  # default value 
+                lines_color.append( self.sys.linescolor )  # default value 
         
         # Plot
         self.showfig = plt.figure(figsize=self.figsize, dpi=self.dpi)
@@ -334,10 +337,13 @@ class Animator:
         
         self.showlines = []
         
-        for pts in lines_pts:
-            x_pts = pts[:, x_axis ]
-            y_pts = pts[:, y_axis ]
-            line  = self.showax.plot( x_pts, y_pts, lines_color + lines_style )
+        for j , pts in enumerate(lines_pts):
+            
+            x_pts     = pts[:, x_axis ]
+            y_pts     = pts[:, y_axis ]
+            linestyle = lines_style[j] + lines_color[j]
+            line      = self.showax.plot( x_pts, y_pts, linestyle )
+            
             self.showlines.append( line )
 
         plt.show()
@@ -348,8 +354,21 @@ class Animator:
         """ Plot figure of configuration q """
         
         # Get data
-        lines_pts      = self.sys.forward_kinematic_lines( q )
+        lines          = self.sys.forward_kinematic_lines( q )
         domain         = self.sys.forward_kinematic_domain( q )
+        
+        if type(lines) is tuple:
+            # If the foward_kinematic_lines function specify style and color
+            lines_pts   = lines[0]
+            lines_style = lines[1]
+            lines_color = lines[2]
+        else:
+            lines_pts   = lines
+            lines_style = []
+            lines_color = []
+            for j, line in enumerate(lines):
+                lines_style.append( self.sys.linestyle  )  # default value 
+                lines_color.append( self.sys.linescolor )  # default value 
         
         # Plot
         self.show3fig = plt.figure(figsize=self.figsize, dpi=self.dpi)
@@ -359,11 +378,13 @@ class Animator:
                 
         self.show3lines = []
         
-        for pts in lines_pts:
-            x_pts = pts[:, 0 ]
-            y_pts = pts[:, 1 ]
-            z_pts = pts[:, 2 ]
-            line  = self.show3ax.plot( x_pts, y_pts, z_pts, self.linestyle)
+        for j , pts in enumerate(lines_pts):
+            x_pts     = pts[:, 0 ]
+            y_pts     = pts[:, 1 ]
+            z_pts     = pts[:, 2 ]
+            linestyle = lines_style[j] + lines_color[j]
+            line      = self.show3ax.plot( x_pts, y_pts, z_pts, linestyle)
+            
             self.show3lines.append( line )
             
         self.show3ax.set_xlim3d( domain[0] )

@@ -174,7 +174,9 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         
         """
         
-        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_pts   = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
         
         # ground line
         pts      = np.zeros(( 2 , 3 ))
@@ -182,6 +184,8 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         pts[1,:] = np.array([+10,0,0])
         
         lines_pts.append( pts )
+        lines_style.append( '--')
+        lines_color.append( 'k' )
         
         # pendulum
         pts      = np.zeros(( 2 , 3 ))
@@ -193,8 +197,68 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         pts[1,1] = - c1 * self.l1
         
         lines_pts.append( pts )
+        lines_style.append( 'o-')
+        lines_color.append( 'b' )
                 
-        return lines_pts
+        return lines_pts , lines_style , lines_color
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        show torque as a rotating arrow around the joint
+        
+        """
+        
+        lines_pts   = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+        
+        # Torque
+        f         = u[0] # torque amplitude
+        f_pos     = ( f > 0 )
+        q         = x[0] - np.pi / 2  # rigid link angle
+        max_angle = f * ( np.pi * 2 /3 / ( self.u_ub[0] ) )
+        r         = self.l1 / 5.0  # radius of arc
+        r1        = r/2            # length of arrows
+        da        = 0.2            # angle discretization
+        
+        
+        
+        if f_pos:
+            angles = np.arange( 0, max_angle , da  ) + q 
+        else:
+            angles = np.arange( 0, max_angle * -1 , da  ) * -1 + q 
+        n      = angles.size
+        
+        # Draw arc
+        pts = np.zeros((n,3))
+        for i , a in enumerate( angles ):
+            pts[i,:] = [ r * np.cos(a) , r * np.sin(a) , 0 ]
+        
+        lines_pts.append( pts )
+        lines_style.append( '-')
+        lines_color.append( 'r' )
+        
+        # Draw Arrow
+        
+        c = np.cos( max_angle + q + da)
+        s = np.sin( max_angle + q + da)
+        
+        pts = np.zeros((3,3))
+        pts[1,:] = [ r * c , r * s , 0 ]
+        if f_pos:
+            pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
+            pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
+        else:
+            pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
+            pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
+        
+        lines_pts.append( pts )
+        lines_style.append( '-')
+        lines_color.append( 'r' )
+        
+                
+        return lines_pts , lines_style , lines_color
         
         
         
@@ -608,12 +672,18 @@ class TwoIndependentSinglePendulum( mechanical.MechanicalSystem ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    sys = DoublePendulum()
+    #sys = DoublePendulum()
+    
+    sys = SinglePendulum()
     
     #sys = TwoIndependentSinglePendulum()
     
-    sys.x0 = np.array([0.1,0.9,0,0])
-    tf = 20
-    sys.compute_trajectory( tf )
-    sys.plot_trajectory()
+    def t2u(t):
+        return np.array([t+sys.u_lb[0]])
+    
+    sys.t2u   = t2u
+    
+    sys.x0[0] = 0.1
+    sys.compute_trajectory( 10 )
+    sys.plot_trajectory('xu')
     sys.animate_simulation()
