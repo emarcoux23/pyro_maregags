@@ -90,10 +90,10 @@ class ContinuousDynamicSystem:
         self.domain           = [ (-10,10) , (-10,10) , (-10,10) ]
         self.linestyle        = 'o-'
         self.linestyle_plus   = '--'
-        self.linescolor       = 'o-'
-        self.linescolor_plus  = '--'
+        self.linescolor       = 'b'
+        self.linescolor_plus  = 'r'
         self.lines_plus       = True    # Bool to active second graphic outpout
-        self.is_3d            =  False  # Use 2d plot by default
+        self.is_3d            = False  # Use 2d plot by default
         
         ################################
         # Variables
@@ -422,7 +422,7 @@ class ContinuousDynamicSystem:
         if self.traj == None:
             self.compute_trajectory()
         
-        plotter = graphical.TrajectoryPlotter(self)
+        plotter = self.get_plotter()
         plotter.plot( self.traj, plot, **kwargs)
 
 
@@ -439,7 +439,7 @@ class ContinuousDynamicSystem:
         if self.traj == None:
             self.compute_trajectory()
         
-        plotter = graphical.TrajectoryPlotter(self)
+        plotter = self.get_plotter()
         plotter.phase_plane_trajectory( self.traj, x_axis , y_axis)
 
 
@@ -456,7 +456,7 @@ class ContinuousDynamicSystem:
         if self.traj == None:
             self.compute_trajectory()
         
-        plotter = graphical.TrajectoryPlotter(self)
+        plotter = self.get_plotter()
         plotter.phase_plane_trajectory_3d( 
                 self.traj, x_axis , y_axis, z_axis)
 
@@ -465,7 +465,7 @@ class ContinuousDynamicSystem:
     def show(self, q , x_axis = 0 , y_axis = 1 ):
         """ Plot figure of configuration q """
         
-        ani = graphical.Animator( self )
+        ani = self.get_animator()
         ani.x_axis  = x_axis
         ani.y_axis  = y_axis
         
@@ -476,7 +476,7 @@ class ContinuousDynamicSystem:
     def show3(self, q ):
         """ Plot figure of configuration q """
         
-        ani = graphical.Animator( self )
+        ani = self.get_animator()
         
         ani.show3( q )
         
@@ -496,7 +496,7 @@ class ContinuousDynamicSystem:
         if self.traj == None:
             self.compute_trajectory()
             
-        ani = graphical.Animator(self)
+        ani = self.get_animator()
         ani.animate_simulation( self.traj, **kwargs)
         
     
@@ -515,7 +515,7 @@ class ContinuousDynamicSystem:
         if self.traj == None:
             self.compute_trajectory()
             
-        animator = graphical.Animator(self)
+        animator = self.get_animator()
         animator.animate_simulation( self.traj, show = False )
         html_video = animator.ani.to_html5_video()
         
