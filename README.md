@@ -31,11 +31,11 @@ At the core of pyro is a mother-class representing generic non-linear dynamic sy
 <img width="929" alt="Screen Shot 2021-05-02 at 15 57 47" src="https://user-images.githubusercontent.com/16725496/116826021-fd9b7a80-ab5f-11eb-8e50-d7361094cbee.png">
 
 Other more specific mother-class are 
--Linear System
--Mechanical System
--Manipulator Robot
+1. Linear System
+2. Mechanical System
+3. Manipulator Robot
 
-<img width="763" alt="Screen Shot 2021-05-02 at 16 13 51" src="https://user-images.githubusercontent.com/16725496/116826418-dc3b8e00-ab61-11eb-9372-09ae08f0b15a.png">
+![pyro_system_class](https://user-images.githubusercontent.com/16725496/161467982-e0f815f0-e18f-4f3f-b6dc-34ff35e22120.jpg)
 
 
 ### Controller objects ###
