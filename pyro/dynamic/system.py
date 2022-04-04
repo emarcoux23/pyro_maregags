@@ -21,17 +21,26 @@ from pyro.analysis import costfunction
 class ContinuousDynamicSystem:
     """ 
     Mother class for continuous dynamical systems
-    ----------------------------------------------
-    n : number of states
-    m : number of control inputs
-    p : number of outputs
-    ---------------------------------------
-    dx = f( x , u , t )
-    y  = h( x , u , t )
+    
+    Main functions
+    ---------------------------------------------
+    dx = f( x , u , t )    : dynamic equation
     
     optionnal: 
-    u = t2u( t ) : time-dependent input signal
+    y = h( x , u , t )     : output equation (by default y = x )
+    u = t2u( t )           : time-dependent input signal (by default u = ubar)
+    q = xut2q( x , u , t ) : get configuration vector (by default q = x )
     
+    graphic output:
+    lines = forward_kinematic_lines( q ) : draw the system based on q
+    
+    Signal and Dimentions
+    ----------------------------------------------
+    x  : state vector             n x 1
+    u  : control inputs vector    m x 1
+    t  : time                     1 x 1
+    y  : output vector            p x 1
+    q  : configuration vector     ? x 1   (dimension is not imposed)
     
     """
     ###########################################################################
@@ -92,7 +101,7 @@ class ContinuousDynamicSystem:
         self.linestyle_plus   = '--'
         self.linescolor       = 'b'
         self.linescolor_plus  = 'r'
-        self.lines_plus       = True    # Bool to active second graphic outpout
+        self.lines_plus       = True   # Bool to active second graphic outpout
         self.is_3d            = False  # Use 2d plot by default
         
         ################################

@@ -304,8 +304,22 @@ class Animator:
         self.y_axis = y_axis
         
         # Get data
-        lines_pts      = self.sys.forward_kinematic_lines( q )
-        domain         = self.sys.forward_kinematic_domain( q )
+        lines      = self.sys.forward_kinematic_lines( q )
+        domain     = self.sys.forward_kinematic_domain( q )
+        
+        # Two type of output are supported for foward_kinematic_lines
+        # check if return is a tuple of ( pts , style , color )
+        # or only the pts (then use default values)
+        
+        if type(lines) is tuple:
+            # If the foward_kinematic_lines function specify style and color
+            lines_pts   = lines[0]
+            lines_style = lines[1]
+            lines_color = lines[2]
+        else:
+            lines_pts   = lines
+            lines_style = self.sys.linestyle   # default value 
+            lines_color = self.sys.linescolor  # default value 
         
         # Plot
         self.showfig = plt.figure(figsize=self.figsize, dpi=self.dpi)
@@ -316,13 +330,14 @@ class Animator:
         self.showax.axis('equal')
         self.showax.set_xlim(  domain[x_axis] )
         self.showax.set_ylim(  domain[y_axis] )
+        self.showax.tick_params(axis='both', which='both', labelsize=self.fontsize)
         
         self.showlines = []
         
         for pts in lines_pts:
             x_pts = pts[:, x_axis ]
             y_pts = pts[:, y_axis ]
-            line  = self.showax.plot( x_pts, y_pts, self.linestyle)
+            line  = self.showax.plot( x_pts, y_pts, lines_color + lines_style )
             self.showlines.append( line )
 
         plt.show()
@@ -357,8 +372,61 @@ class Animator:
         self.show3ax.set_ylabel('Y')
         self.show3ax.set_zlim3d( domain[2] )
         self.show3ax.set_zlabel('Z')
+        self.show3ax.tick_params(axis='both', which='both', labelsize=self.fontsize)
         
         plt.show()
+        
+        
+    ###########################################################################
+    def get_lines(self, x , u , t ):
+        """ 
+        shorcut to get all graphic output data
+        """
+        
+        # Get configuration q from simulation
+        q               = self.sys.xut2q( x , u , t )
+        
+        # Compute graphical forward kinematic
+        lines       = self.sys.forward_kinematic_lines( q )
+        lines_plus  = self.sys.forward_kinematic_lines_plus( x , u , t )
+        domain      = self.sys.forward_kinematic_domain( q )
+        
+        
+        # Two type of output are supported for foward_kinematic_lines
+        # check if return is a tuple of ( pts , style , color )
+        # or only the pts (then use default values)
+        
+        if type(lines) is tuple:
+            # If the foward_kinematic_lines function specify style and color
+            lines_pts   = lines[0]
+            lines_style = lines[1]
+            lines_color = lines[2]
+        else:
+            lines_pts   = lines
+            lines_style = []
+            lines_color = []
+            for j, line in enumerate(lines):
+                lines_style.append( self.sys.linestyle  )  # default value 
+                lines_color.append( self.sys.linescolor )  # default value 
+        
+        if type(lines_plus) is tuple:
+            # If the foward_kinematic_lines function specify style and color
+            lines_plus_pts   = lines_plus[0]
+            lines_plus_style = lines_plus[1]
+            lines_plus_color = lines_plus[2]
+        else:
+            lines_plus_pts   = lines_plus
+            lines_plus_style = []
+            lines_plus_color = []
+            for j, line_plus in enumerate(lines_plus):
+                lines_plus_style.append( self.sys.linestyle_plus  )  # default value 
+                lines_plus_color.append( self.sys.linescolor_plus )  # default value 
+            
+        lines_data = ( lines_pts ,lines_style , lines_color , lines_plus_pts ,
+                       lines_plus_style , lines_plus_color , domain )
+            
+        return lines_data
+
         
 
     ###########################################################################
@@ -373,10 +441,16 @@ class Animator:
         """  
         self.is_3d = is_3d
         
-        # Init list
-        self.ani_lines_pts      = []
-        self.ani_lines_plus_pts = []
-        self.ani_domains        = []
+        # Init lists
+        self.ani_lines_pts        = []
+        self.ani_lines_style      = []
+        self.ani_lines_color      = []
+        
+        self.ani_lines_plus_pts   = []
+        self.ani_lines_plus_style = []
+        self.ani_lines_plus_color = []
+        
+        self.ani_domains          = []
 
         nsteps = traj.t.size
         self.sim_dt = (traj.t[-1] - traj.t[0]) / (traj.t.size - 1)
@@ -389,18 +463,16 @@ class Animator:
             u = traj.u[i,:]
             t = traj.t[i]
             
-            # Get configuration q from simulation
-            q               = self.sys.xut2q( x , u , t )
+            lines_data = self.get_lines(x, u, t)
             
-            # Compute graphical forward kinematic
-            lines_pts       = self.sys.forward_kinematic_lines( q )
-            lines_plus_pts  = self.sys.forward_kinematic_lines_plus( x , u , t )
-            domain          = self.sys.forward_kinematic_domain( q )
-            
-            # Save data in lists
-            self.ani_lines_pts.append( lines_pts )
-            self.ani_lines_plus_pts.append( lines_plus_pts )
-            self.ani_domains.append( domain )
+            # Save data in lists for the whole trajectory
+            self.ani_lines_pts.append(        lines_data[0]  )
+            self.ani_lines_style.append(      lines_data[1]  )
+            self.ani_lines_color.append(      lines_data[2]  )
+            self.ani_lines_plus_pts.append(   lines_data[3]  )
+            self.ani_lines_plus_style.append( lines_data[4]  )
+            self.ani_lines_plus_color.append( lines_data[5]  )
+            self.ani_domains.append(          lines_data[6]  )
             
         # Init figure
         self.ani_fig = plt.figure(figsize=self.figsize, dpi=self.dpi )
@@ -433,20 +505,25 @@ class Animator:
         self.lines = []
         
         # for each lines of the t=0 data point
-        for line_pts in self.ani_lines_pts[0]:
+        for j, line_pts in enumerate( self.ani_lines_pts[0] ):
+            
+            linestyle = self.ani_lines_style[0][j] + self.ani_lines_color[0][j]
+            
             if is_3d:
-                thisx = line_pts[:,0]
-                thisy = line_pts[:,1]
-                thisz = line_pts[:,2]
-                line, = self.ani_ax.plot(thisx, thisy, thisz, self.linestyle)
+                thisx     = line_pts[:,0]
+                thisy     = line_pts[:,1]
+                thisz     = line_pts[:,2]
+                
+                line, = self.ani_ax.plot(thisx, thisy, thisz, linestyle)
                 self.time_text = self.ani_ax.text(0, 0, 0, 'time =', 
                                                   transform=
                                                   self.ani_ax.transAxes)
                 self.label_text = self.ani_ax.text(0.9, 0.9, 0.9, self.top_right_label)
+                
             else:
                 thisx = line_pts[:,self.x_axis]
                 thisy = line_pts[:,self.y_axis]
-                line, = self.ani_ax.plot(thisx, thisy, self.linestyle)
+                line, = self.ani_ax.plot(thisx, thisy, linestyle)
                 self.time_text = self.ani_ax.text(0.05, 0.9, 'time =', 
                                                   transform=self.
                                                   ani_ax.transAxes)
@@ -454,6 +531,7 @@ class Animator:
                                                    transform=self.
                                                    ani_ax.transAxes)
                 self.ani_fig.tight_layout()
+                
             self.lines.append( line )
         
         self.time_template = 'time = %.1fs'
