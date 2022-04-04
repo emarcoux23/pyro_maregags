@@ -29,8 +29,8 @@ sys.u_lb[0] = -20
 
 planner = trajectoryoptimisation.DirectCollocationTrajectoryOptimisation( sys , 0.1 , 30 )
 
+# Load an initial guess found with RRT
 init_traj = simulation.Trajectory.load('underactuatedcartpole_rrt.npy')
-
 planner.set_initial_trajectory_guest( init_traj )
 
 planner.x_start = np.array([0,-3.14,0,0])
