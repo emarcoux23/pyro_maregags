@@ -249,7 +249,6 @@ class Drone2D( mechanical.MechanicalSystem ):
         """ 
         show trust vectors
         
-        TODO: upgrade to nice arrows
         
         """
         
@@ -269,17 +268,23 @@ class Drone2D( mechanical.MechanicalSystem ):
         h = self.height 
         h2 = self.height * u[0]
         
-        pts      = np.zeros(( 2 , 3 ))
-        pts[0,:] = np.array([xcg+l*c-h2*s,ycg+l*s+h2*c,0])
-        pts[1,:] = np.array([xcg+l*c-h*s,ycg+l*s+h*c,0])
+        pts      = np.zeros(( 5 , 3 ))
+        pts[0,:] = np.array([xcg+l*c-h*s,ycg+l*s+h*c,0])
+        pts[1,:] = np.array([xcg+l*c-h2*s,ycg+l*s+h2*c,0])
+        pts[2,:] = pts[1,:] + np.array([-h*c+h*s,-h*s-h*c,0])
+        pts[3,:] = pts[1,:] 
+        pts[4,:] = pts[1,:] + np.array([h*c+h*s,h*s-h*c,0])
         
         lines_pts.append( pts )
         lines_style.append( '-')
         lines_color.append( 'r' )
         
-        pts      = np.zeros(( 2 , 3 ))
+        pts      = np.zeros(( 5 , 3 ))
         pts[0,:] = np.array([xcg-l*c-h*s,ycg-l*s+h*c,0])
         pts[1,:] = np.array([xcg-l*c-h2*s,ycg-l*s+h2*c,0])
+        pts[2,:] = pts[1,:] + np.array([-h*c+h*s,-h*s-h*c,0])
+        pts[3,:] = pts[1,:] 
+        pts[4,:] = pts[1,:] + np.array([h*c+h*s,h*s-h*c,0])
         
         lines_pts.append( pts )
         lines_style.append( '-')
