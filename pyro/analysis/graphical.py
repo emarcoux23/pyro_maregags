@@ -502,7 +502,8 @@ class Animator:
         self.ani_ax.grid()
                 
         # Plot lines at t=0
-        self.lines = []
+        self.lines      = []
+        self.lines_plus = []
         
         # for each lines of the t=0 data point
         for j, line_pts in enumerate( self.ani_lines_pts[0] ):
@@ -533,6 +534,26 @@ class Animator:
                 self.ani_fig.tight_layout()
                 
             self.lines.append( line )
+            
+        # Lines plus optionnal 
+        if self.sys.lines_plus:
+            
+            for j, line_pts in enumerate( self.ani_lines_plus_pts[0] ):
+                
+                linestyle = self.ani_lines_plus_style[0][j] + self.ani_lines_plus_color[0][j]
+                
+                if is_3d:
+                    thisx     = line_pts[:,0]
+                    thisy     = line_pts[:,1]
+                    thisz     = line_pts[:,2]
+                    line,     = self.ani_ax.plot(thisx, thisy, thisz, linestyle)
+                    
+                else:
+                    thisx = line_pts[:,self.x_axis]
+                    thisy = line_pts[:,self.y_axis]
+                    line, = self.ani_ax.plot(thisx, thisy, linestyle)
+                    
+                self.lines_plus.append( line )
         
         self.time_template = 'time = %.1fs'
         
@@ -587,13 +608,21 @@ class Animator:
 
     #####################################    
     def __ani_init__(self):
+        
         for line in self.lines:
             line.set_data([], [])
+            
+        for line in self.lines_plus:
+            line.set_data([], [])
+            
         self.time_text.set_text('')
-        return self.lines, self.time_text, self.ani_ax
+        
+        return self.lines, self.lines_plus, self.time_text, self.ani_ax
+    
     
     ######################################
     def __animate__(self,i):
+        
         # Update lines
         for j, line in enumerate(self.lines):
             if self.is_3d:
@@ -606,6 +635,20 @@ class Animator:
                 thisx = self.ani_lines_pts[i*self.skip_steps][j][:,self.x_axis]
                 thisy = self.ani_lines_pts[i*self.skip_steps][j][:,self.y_axis]
                 line.set_data(thisx, thisy)
+        
+        if self.sys.lines_plus:
+            # Update lines plus
+            for j, line in enumerate(self.lines_plus):
+                if self.is_3d:
+                    thisx = self.ani_lines_plus_pts[i * self.skip_steps][j][:,0]
+                    thisy = self.ani_lines_plus_pts[i * self.skip_steps][j][:,1]
+                    thisz = self.ani_line_pluss_pts[i * self.skip_steps][j][:,2]
+                    line.set_data(thisx, thisy)
+                    line.set_3d_properties(thisz)
+                else:
+                    thisx = self.ani_lines_plus_pts[i*self.skip_steps][j][:,self.x_axis]
+                    thisy = self.ani_lines_plus_pts[i*self.skip_steps][j][:,self.y_axis]
+                    line.set_data(thisx, thisy)
             
         # Update time
         self.time_text.set_text(self.time_template % 
@@ -623,7 +666,7 @@ class Animator:
             self.ani_ax.set_xlim( self.ani_domains[i * self.skip_steps][i_x] )
             self.ani_ax.set_ylim( self.ani_domains[i * self.skip_steps][i_y] )
         
-        return self.lines, self.time_text, self.ani_ax
+        return self.lines, self.lines_plus, self.time_text, self.ani_ax
     
 
 '''
