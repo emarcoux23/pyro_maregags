@@ -279,7 +279,13 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
         self.u_lb = self.controller.r_lb
         
         # Plot params
-        self.linestyle = self.plant.linestyle
+        self.domain           = self.plant.domain
+        self.linestyle        = self.plant.linestyle
+        self.linestyle_plus   = self.plant.linestyle_plus
+        self.linescolor       = self.plant.linescolor
+        self.linescolor_plus  = self.plant.linescolor_plus
+        self.lines_plus       = self.plant.lines_plus
+        self.is_3d            = self.plant.is_3d
         
         # Default State and inputs        
         self.xbar = self.plant.xbar
@@ -430,10 +436,14 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
     #############################################
     # Make graph function use the internal sys
     #############################################
-
+    
+    
+    ###########################################################################
     def get_plotter(self):
         return self.plant.get_plotter()
-
+    
+    
+    ###########################################################################
     def get_animator(self):
         return self.plant.get_animator()
     

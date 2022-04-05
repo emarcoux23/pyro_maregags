@@ -193,6 +193,8 @@ class Drone2D( mechanical.MechanicalSystem ):
         """
         
         lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
         
         ###############################
         # ground line
@@ -203,6 +205,8 @@ class Drone2D( mechanical.MechanicalSystem ):
         pts[1,:] = np.array([+10,0,0])
         
         lines_pts.append( pts )
+        lines_style.append( '--')
+        lines_color.append( 'k' )
         
         ###########################
         # drone body
@@ -223,6 +227,8 @@ class Drone2D( mechanical.MechanicalSystem ):
         
         
         lines_pts.append( pts )
+        lines_style.append( 'o-')
+        lines_color.append( 'b' )
         
         ###########################
         # drone cg
@@ -232,8 +238,59 @@ class Drone2D( mechanical.MechanicalSystem ):
         pts[0,:] = np.array([x,y,0])
         
         lines_pts.append( pts )
+        lines_style.append( 'o')
+        lines_color.append( 'b' )
                 
-        return lines_pts
+        return lines_pts , lines_style , lines_color
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        show trust vectors
+        
+        
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+        
+        ###########################
+        # drone trust force vectors
+        ###########################
+        
+        xcg = x[0]
+        ycg = x[1]
+        s = np.sin(x[2])
+        c = np.cos(x[2])
+        l = self.width
+        h = self.height 
+        h2 = self.height * u[0]
+        
+        pts      = np.zeros(( 5 , 3 ))
+        pts[0,:] = np.array([xcg+l*c-h*s,ycg+l*s+h*c,0])
+        pts[1,:] = np.array([xcg+l*c-h2*s,ycg+l*s+h2*c,0])
+        pts[2,:] = pts[1,:] + np.array([-h*c+h*s,-h*s-h*c,0])
+        pts[3,:] = pts[1,:] 
+        pts[4,:] = pts[1,:] + np.array([h*c+h*s,h*s-h*c,0])
+        
+        lines_pts.append( pts )
+        lines_style.append( '-')
+        lines_color.append( 'r' )
+        
+        pts      = np.zeros(( 5 , 3 ))
+        pts[0,:] = np.array([xcg-l*c-h*s,ycg-l*s+h*c,0])
+        pts[1,:] = np.array([xcg-l*c-h2*s,ycg-l*s+h2*c,0])
+        pts[2,:] = pts[1,:] + np.array([-h*c+h*s,-h*s-h*c,0])
+        pts[3,:] = pts[1,:] 
+        pts[4,:] = pts[1,:] + np.array([h*c+h*s,h*s-h*c,0])
+        
+        lines_pts.append( pts )
+        lines_style.append( '-')
+        lines_color.append( 'r' )
+                
+        return lines_pts , lines_style , lines_color
     
     
     
