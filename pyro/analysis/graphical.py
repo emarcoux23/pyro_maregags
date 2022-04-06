@@ -663,7 +663,7 @@ class Animator:
                 if self.is_3d:
                     thisx = self.ani_lines_plus_pts[i * self.skip_steps][j][:,0]
                     thisy = self.ani_lines_plus_pts[i * self.skip_steps][j][:,1]
-                    thisz = self.ani_line_pluss_pts[i * self.skip_steps][j][:,2]
+                    thisz = self.ani_lines_plus_pts[i * self.skip_steps][j][:,2]
                     line.set_data(thisx, thisy)
                     line.set_3d_properties(thisz)
                 else:

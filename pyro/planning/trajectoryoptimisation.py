@@ -325,10 +325,11 @@ class DirectCollocationTrajectoryOptimisation:
         self.sys.plot_trajectory('xu')
         
     ##############################
-    def animate_solution(self):
+    def animate_solution(self , time_factor_video = 1):
         
         self.sys.traj = self.traj
-        self.sys.animate_simulation()
+        self.sys.animate_simulation( time_factor_video = time_factor_video ,
+                                    is_3d = self.sys.is_3d )
         
     ##############################
     def save_solution(self, name = 'optimized_trajectory.npy' ):
