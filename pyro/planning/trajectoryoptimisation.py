@@ -337,6 +337,7 @@ class DirectCollocationTrajectoryOptimisation:
         animator.animate_simulation( self.traj, show = False , **kwargs)
         
         return animator.ani.to_html5_video()
+    
         
     ##############################
     def save_solution(self, name = 'optimized_trajectory.npy' ):
