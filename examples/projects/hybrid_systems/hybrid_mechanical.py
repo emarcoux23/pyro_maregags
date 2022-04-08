@@ -10,11 +10,12 @@ import numpy as np
 ###############################################################################
 from pyro.dynamic import system
 from pyro.dynamic import mechanical
+from hybrid import SwitchedSystem
 ###############################################################################
 
 ###############################################################################
         
-class HybridMechanicalSystem( mechanical.MechanicalSystem ):
+class HybridMechanicalSystem( mechanical.MechanicalSystem , SwitchedSystem ):
     """ 
     Mechanical system with Equation of Motion in the form of
     -------------------------------------------------------
@@ -36,11 +37,12 @@ class HybridMechanicalSystem( mechanical.MechanicalSystem ):
     """
     
     ############################
-    def __init__(self, dof = 1 , actuators = None):
+    def __init__(self, dof = 1 , actuators = None, k = 2):
         """ """
         
         # Degree of Freedom
         self.dof = dof
+        self.k   = k
         
         # Nb of actuators
         if actuators == None:   # If not specifyied the sys is fully actuated
@@ -55,7 +57,7 @@ class HybridMechanicalSystem( mechanical.MechanicalSystem ):
         system.ContinuousDynamicSystem.__init__(self, n, m, p)
         
         # Name
-        self.name = str(dof) + 'DoF Mechanical System'
+        self.name = str(dof) + 'DoF Hybrid Mechanical System'
         
         # Labels, bounds and units
         for i in range(dof):
@@ -77,7 +79,7 @@ class HybridMechanicalSystem( mechanical.MechanicalSystem ):
         self.output_label = self.state_label
         self.output_units = self.state_units
         
-        self.u_ub[0] = 1
+        self.u_ub[0] = k - 1
         self.u_lb[0] = 0
         self.input_label[0] = 'Mode'
         self.input_units[0] =''
@@ -223,7 +225,7 @@ class HybridMechanicalSystem( mechanical.MechanicalSystem ):
     
 
 ##############################################################################
-# ybridMechanicalSystem
+# Hybrid Mechanica lSystem
 ##############################################################################
 
 class MultipleSpeedMechanicalSystem( HybridMechanicalSystem ):
@@ -291,12 +293,10 @@ class MultipleSpeedMechanicalSystem( HybridMechanicalSystem ):
     
         
     ###########################################################################
-    def H(self, q , u ):
+    def H(self, q , k ):
         """   """  
         
-        k = self.u2k()
-        
-        R = self.R_options(k)
+        R = self.R_options[k]
         
         H = self.H_mech(q) + R.T @ self.I_actuators @ R
         
@@ -309,9 +309,7 @@ class MultipleSpeedMechanicalSystem( HybridMechanicalSystem ):
         Actuator Matrix  : dof x m
         """
         
-        k = self.u2k()
-        
-        R = self.R_options(k)
+        R = self.R_options[k]
         
         return R.T
     
@@ -321,7 +319,7 @@ class MultipleSpeedMechanicalSystem( HybridMechanicalSystem ):
         State-dependent dissipative forces : dof x 1
         """
         
-        d = np.ones( self.dof ) 
+        d = np.zeros( self.dof ) 
         
         return d
     
@@ -332,11 +330,9 @@ class MultipleSpeedMechanicalSystem( HybridMechanicalSystem ):
         State-dependent dissipative forces : dof x 1
         """
         
-        k = self.u2k()
+        R = self.R_options[k]
         
-        R = self.R_options(k)
-        
-        d = self.d_mech(q, dq) + R.T @ self.B_actuators @ R
+        d = self.d_mech(q, dq) + R.T @ self.B_actuators @ R @ dq
         
         return d
 
@@ -452,11 +448,11 @@ class TwoSpeedLinearActuator( HybridMechanicalSystem ):
 
 if __name__ == "__main__":     
     
-    sys = TwoSpeedLinearActuator()
+    sys = MultipleSpeedMechanicalSystem(2,2)
     
     sys.x0[1] = 0
     
-    sys.ubar[0] = 0
+    sys.ubar[0] = 1
     sys.ubar[1] = 5
     
     sys.compute_trajectory()

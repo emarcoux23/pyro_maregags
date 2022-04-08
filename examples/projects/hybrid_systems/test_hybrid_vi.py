@@ -9,13 +9,14 @@ Created on Wed Apr  6 14:53:54 2022
 ###############################################################################
 import numpy as np
 ###############################################################################
-from pyro.dynamic  import hybrid_mechanical
+from hybrid_mechanical import TwoSpeedLinearActuator
+
 from pyro.planning import discretizer
 from pyro.analysis import costfunction
 from pyro.planning import valueiteration
 ###############################################################################
 
-sys  = hybrid_mechanical.TwoSpeedLinearActuator()
+sys  = TwoSpeedLinearActuator()
 
 ###############################################################################
 
