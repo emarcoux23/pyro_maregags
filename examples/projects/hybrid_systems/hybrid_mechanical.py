@@ -178,7 +178,7 @@ class HybridMechanicalSystem( mechanical.MechanicalSystem , SwitchedSystem ):
     def actuator_forces(self, q  , dq  , ddq , k , t = 0 ):
         """ Computed actuator forces given a trajectory (inverse dynamic) """  
         
-        if self.dof == self.m:
+        if self.dof == (self.m - 1):
         
             B = self.B( q , k )
                     
