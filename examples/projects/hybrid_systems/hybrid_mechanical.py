@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Apr  6 13:46:06 2022
-
 @author: alex
 """
 
@@ -222,7 +221,126 @@ class HybridMechanicalSystem( mechanical.MechanicalSystem ):
         
         return e_k
     
+
+##############################################################################
+# ybridMechanicalSystem
+##############################################################################
+
+class MultipleSpeedMechanicalSystem( HybridMechanicalSystem ):
+    """ 
+    Mechanical system with Equation of Motion in the form of
+    -------------------------------------------------------
+    [ H(q) + R(k)^T I R(k) ] ddq + C(q,dq) dq + [d_mech(q,dq) + R(k)^T B R(k) dq]  + g(q) = R(k)^T e
+    -------------------------------------------------------
+    u           :  dim = (m+1, 1)   : mode + force input variables
+    k=u[0]      :  integer          : operating mode
+    e = u[1,:]  :  dim = (m, 1)     : force/torque input variables  
+    q           :  dim = (dof, 1)   : position variables 
+    dq          :  dim = (dof, 1)   : velocity variables     
+    ddq         :  dim = (dof, 1)   : acceleration variables
+    H_mech(q)   :  dim = (dof, dof) : mechanism inertia matrix
+    I_actuator  :  dim = (dof, dof) : actuator inertia matrix
+    B_actuator  :  dim = (dof, dof) : actuator damping matrix
+    C(q)        :  dim = (dof, dof) : corriolis matrix
+    R           :  dim = (dof, m)   : actuator matrix
+    ddq         :  dim = (dof, 1)   : acceleration variables
+    d_mech(q,dq):  dim = (dof, 1)   : state-dependent dissipative forces
+    g(q)        :  dim = (dof, 1)   : state-dependent conservatives forces
     
+    """
+    
+    ############################
+    def __init__(self, dof = 1 , k = 2):
+        """ """
+        
+        super().__init__(dof, dof, k)
+        
+        # Name
+        self.name = str(dof) + ' DoF Multiple Speed Mechanical System'
+        
+        # Number of discrete modes
+        self.k = k  
+        
+        # Actuator
+        self.I_actuators = np.diag( np.ones( self.dof ) )
+        self.B_actuators = np.diag( np.ones( self.dof ) )
+        
+        # Transmissions
+        self.R_options = [ np.diag( np.ones( self.dof ) ) , 
+                           np.diag( np.ones( self.dof ) ) * 10 ]
+        
+        
+            
+    ###########################################################################
+    # The following functions needs to be overloaded by child classes
+    # to represent the dynamic of the system
+    ###########################################################################
+    
+    ###########################################################################
+    def H_mech(self, q ):
+        """ 
+        Inertia matrix of arm mechanism only
+        ----------------------------------
+        dim( H ) = ( dof , dof )
+        
+        """  
+        
+        H = np.diag( np.ones( self.dof ) ) # Default is identity matrix
+        
+        return H
+    
+        
+    ###########################################################################
+    def H(self, q , u ):
+        """   """  
+        
+        k = self.u2k()
+        
+        R = self.R_options(k)
+        
+        H = self.H_mech(q) + R.T @ self.I_actuators @ R
+        
+        return H
+    
+    
+    ###########################################################################
+    def B(self, q , k ):
+        """ 
+        Actuator Matrix  : dof x m
+        """
+        
+        k = self.u2k()
+        
+        R = self.R_options(k)
+        
+        return R.T
+    
+    ###########################################################################
+    def d_mech(self, q , dq ):
+        """ 
+        State-dependent dissipative forces : dof x 1
+        """
+        
+        d = np.ones( self.dof ) 
+        
+        return d
+    
+        
+    ###########################################################################
+    def d(self, q , dq , k ):
+        """ 
+        State-dependent dissipative forces : dof x 1
+        """
+        
+        k = self.u2k()
+        
+        R = self.R_options(k)
+        
+        d = self.d_mech(q, dq) + R.T @ self.B_actuators @ R
+        
+        return d
+
+
 
 
 ###########################################################################
