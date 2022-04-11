@@ -19,7 +19,7 @@ from pyro.dynamic import mechanical
 # 2D planar drone
 ##############################################################################
         
-class rocket( mechanical.MechanicalSystemWithPositionInputs ):
+class Rocket( mechanical.MechanicalSystemWithPositionInputs ):
     """ 
     Equations of Motion
     -------------------------
@@ -155,7 +155,7 @@ class rocket( mechanical.MechanicalSystemWithPositionInputs ):
     def forward_kinematic_domain(self, q ):
         """ 
         """
-        l = self.width * 3
+        l = self.height * 3
         
         x = q[0]
         y = q[1]
@@ -211,8 +211,7 @@ class rocket( mechanical.MechanicalSystemWithPositionInputs ):
         y = q[1]
         s = np.sin(q[2])
         c = np.cos(q[2])
-        l = self.width
-        h = self.height
+        l = self.height
         
         pts      = np.zeros(( 3 , 3 ))
         pts[0,:] = np.array([x-l*s,y+l*c,0])
@@ -254,31 +253,27 @@ class rocket( mechanical.MechanicalSystemWithPositionInputs ):
         # trust force vectors
         ###########################
         
-        xcg = x[0]
-        ycg = x[1]
+        l = self.height
+        
         s = np.sin(x[2])
         c = np.cos(x[2])
-        l = self.width
-        h = self.height 
-        h2 = self.height * u[0]
+        
+        
+        xb = x[0]+l*s
+        yb = x[1]-l*c
+        
+        s = np.sin(x[2]+u[1])
+        c = np.cos(x[2]+u[1])
+        
+        T = u[0] * 0.0002
+        h = self.width
         
         pts      = np.zeros(( 5 , 3 ))
-        pts[0,:] = np.array([xcg+l*c-h*s,ycg+l*s+h*c,0])
-        pts[1,:] = np.array([xcg+l*c-h2*s,ycg+l*s+h2*c,0])
-        pts[2,:] = pts[1,:] + np.array([-h*c+h*s,-h*s-h*c,0])
+        pts[0,:] = np.array([xb,yb,0])
+        pts[1,:] = pts[0,:] + np.array([T*s,-T*c,0])
+        pts[2,:] = pts[1,:] + np.array([h*c-h*s,h*s+h*c,0])
         pts[3,:] = pts[1,:] 
-        pts[4,:] = pts[1,:] + np.array([h*c+h*s,h*s-h*c,0])
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r' )
-        
-        pts      = np.zeros(( 5 , 3 ))
-        pts[0,:] = np.array([xcg-l*c-h*s,ycg-l*s+h*c,0])
-        pts[1,:] = np.array([xcg-l*c-h2*s,ycg-l*s+h2*c,0])
-        pts[2,:] = pts[1,:] + np.array([-h*c+h*s,-h*s-h*c,0])
-        pts[3,:] = pts[1,:] 
-        pts[4,:] = pts[1,:] + np.array([h*c+h*s,h*s-h*c,0])
+        pts[4,:] = pts[1,:] + np.array([-h*c-h*s,-h*s+h*c,0])
         
         lines_pts.append( pts )
         lines_style.append( '-')
@@ -298,11 +293,11 @@ class rocket( mechanical.MechanicalSystemWithPositionInputs ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    sys = rocket()
+    sys = Rocket()
     
     sys.x0[0] = 0
     
-    sys.ubar[0] = sys.mass * sys.gravity * 1.1
+    sys.ubar[0] = sys.mass * -sys.gravity * 1.1
     sys.ubar[1] = 0.1
     
     sys.plot_trajectory()
