@@ -29,7 +29,7 @@ cf.R[0,0] = 0.001
 cf.R[1,1] = 0.001
 
 # LQR controller
-ctl = synthesize_lqr_controller( ss , cf )
+ctl = synthesize_lqr_controller( ss , cf , sys.xbar , sys.ubar )
 
 # Simulation Closed-Loop Non-linear with LQR controller
 cl_sys = ctl + sys
