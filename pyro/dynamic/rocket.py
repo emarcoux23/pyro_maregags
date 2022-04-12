@@ -52,7 +52,7 @@ class Rocket( mechanical.MechanicalSystemWithPositionInputs ):
         self.mass           = 1000
         self.inertia        = 100
         self.ycg            = 1
-        self.gravity        = -9.8
+        self.gravity        = 9.8
         self.cda            = 1
         
         # Kinematic param
@@ -112,7 +112,7 @@ class Rocket( mechanical.MechanicalSystemWithPositionInputs ):
         delta = u[1]
         
         # TODO PLACE HOLDER
-        B[0,0] = np.sin( q[2] + delta )
+        B[0,0] = -np.sin( q[2] + delta )
         B[1,0] = np.cos( q[2] + delta)
         B[2,0] = - self.ycg * np.sin( delta )
         
@@ -212,15 +212,23 @@ class Rocket( mechanical.MechanicalSystemWithPositionInputs ):
         s = np.sin(q[2])
         c = np.cos(q[2])
         l = self.height
+        w = self.width
         
-        pts      = np.zeros(( 3 , 3 ))
-        pts[0,:] = np.array([x-l*s,y+l*c,0])
-        pts[1,:] = np.array([x,y,0])
-        pts[2,:] = np.array([x+l*s,y-l*c,0])
+        pts      = np.zeros(( 10 , 3 ))
+        pts[0,:] = np.array([x+l*s,y-l*c,0])
+        pts[1,:] = pts[0,:] + np.array([-w*c,-w*s,0])
+        pts[2,:] = pts[1,:] + np.array([-2*l*s,2*l*c,0])
+        pts[3,:] = np.array([x-(l+w)*s,y+(l+w)*c,0])
+        pts[4,:] = np.array([x-l*s+w*c,y+l*c+w*s,0])
+        pts[5,:] = pts[4,:] + np.array([2*l*s,-2*l*c,0])
+        pts[6,:] = pts[0,:]
+        pts[7,:] = pts[0,:] + np.array([w*s-w*c,-w*c-w*s,0])
+        pts[8,:] = pts[0,:] + np.array([w*s+w*c,-w*c+w*s,0])
+        pts[9,:] = pts[0,:]
         
         
         lines_pts.append( pts )
-        lines_style.append( 'o-')
+        lines_style.append( '-')
         lines_color.append( 'b' )
         
         ###########################
@@ -297,8 +305,8 @@ if __name__ == "__main__":
     
     sys.x0[0] = 0
     
-    sys.ubar[0] = sys.mass * -sys.gravity * 1.1
-    sys.ubar[1] = 0.1
+    sys.ubar[0] = sys.mass * sys.gravity * 1.1
+    sys.ubar[1] = -0.005
     
     sys.plot_trajectory()
     sys.animate_simulation()

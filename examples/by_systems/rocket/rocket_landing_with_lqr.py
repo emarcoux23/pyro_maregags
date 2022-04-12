@@ -17,26 +17,31 @@ from pyro.control.lqr           import synthesize_lqr_controller
 # Non-linear model
 sys = Rocket()
 
-sys.xbar =  np.array([0,0,0.0,0,0,0])
-sys.ubar =  np.array([1,0.0]) * sys.mass * sys.gravity * -1
+sys.xbar =  np.array([0,2,0,0,0,0])
+sys.ubar =  np.array([1,0]) * sys.mass * sys.gravity 
     
 # Linear model
 ss  = linearize( sys , 0.01 )
 
 # Cost function
 cf  = QuadraticCostFunction.from_sys( sys )
-cf.Q[0,0] = 100
+cf.Q[0,0] = 1
 cf.Q[1,1] = 100
-cf.Q[2,2] = 1
-cf.R[0,0] = 1
-cf.R[1,1] = 0.1
+cf.Q[2,2] = 0.1
+cf.Q[3,3] = 0
+cf.Q[4,4] = 0
+cf.Q[5,5] = 0
+cf.R[0,0] = 0.01
+cf.R[1,1] = 10.0
 
 # LQR controller
-ctl = synthesize_lqr_controller( ss , cf )
+ctl = synthesize_lqr_controller( ss , cf , sys.xbar , sys.ubar )
+
+ctl.ubar
 
 # Simulation Closed-Loop Non-linear with LQR controller
 cl_sys = ctl + sys
-cl_sys.x0 = np.array([1,10,0,0,0,0])
-cl_sys.compute_trajectory(50)
+cl_sys.x0 = np.array([1,4,0.2,0,0,0])
+cl_sys.compute_trajectory(10)
 cl_sys.plot_trajectory('xu')
 cl_sys.animate_simulation()
