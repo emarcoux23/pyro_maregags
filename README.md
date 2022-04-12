@@ -26,8 +26,7 @@ A object-based toolbox for robot dynamic simulation, analysis, control and plann
 ### Dependencies ####
 * numpy
 * scipy
-* matplotlib![two_mass_spring_pid](https://user-images.githubusercontent.com/16725496/163005898-91178552-270e-4b60-9ae2-2930a874caa8.gif)
-
+* matplotlib
 
 ### Recommended environment ###
 Anaconda distribution + spyder IDE available here: https://www.anaconda.com/products/individual
