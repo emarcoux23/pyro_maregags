@@ -1,6 +1,6 @@
-# Pyro (Python Robotics)
+# Pyro 
 
-A object-based toolbox for robot dynamic simulation, analysis, control and planning. 
+Pyro (Python Robotics) is a object-based toolbox for robot dynamic simulation, analysis, control and planning. 
 
 <table>
   <tr>
