@@ -1,4 +1,4 @@
-# Python Robotics
+# Pyro (Python Robotics)
 
 A object-based toolbox for robot dynamic simulation, analysis, control and planning. 
 
@@ -76,7 +76,9 @@ Cooming soon..
 
 ## How to use ##
 
-See exemples scripts in pyro/examples.
+See exemples scripts in pyro/examples/
+
+Notebook colab pages example availables in pyro/examples/notebooks/
 
 Coming soon..
 
