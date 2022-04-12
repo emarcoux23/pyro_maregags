@@ -2,6 +2,9 @@
 
 A object-based toolbox for robot dynamic simulation, analysis, control and planning. 
 
+![rocket](https://user-images.githubusercontent.com/16725496/162986261-b3f6950b-e417-403b-8e81-81b30a542d6c.gif)
+
+
 ## Installation ##
 
 ### Dependencies ####
