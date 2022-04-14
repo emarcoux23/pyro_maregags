@@ -828,7 +828,7 @@ if __name__ == "__main__":
     
     #sys = SinglePendulum()
     
-    #sys = TwoIndependentSinglePendulum()
+    sys = TwoIndependentSinglePendulum()
     
     def t2u(t):
         return np.array([ t + sys.u_lb[0] , t + sys.u_lb[1]])

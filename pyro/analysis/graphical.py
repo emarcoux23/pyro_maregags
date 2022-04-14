@@ -167,8 +167,8 @@ class TrajectoryPlotter:
         pp.plot()
 
         plt.plot(traj.x[:,x_axis], traj.x[:,y_axis], 'b-') # path
-        plt.plot([traj.x[0,x_axis]], [traj.x[0,y_axis]], 'o') # start
-        plt.plot([traj.x[-1,x_axis]], [traj.x[-1,y_axis]], 's') # end
+        plt.plot([traj.x[0,x_axis]], [traj.x[0,y_axis]], 'ko') # start
+        plt.plot([traj.x[-1,x_axis]], [traj.x[-1,y_axis]], 'rx') # end
         
         plt.draw()
 
