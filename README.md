@@ -24,10 +24,17 @@ Pyro (Python Robotics) is a object-based toolbox for robot dynamic simulation, a
 ## Library Architecture ##
 
 The concept of this toolbox is based on a hierachy of dynamic object, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order diff. equations), linear state space, manipulator equations, etc. This structure is then leverage by analysis tools, generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, and system specific tools such as modal analysis for linear sub-class:
-<img width="800" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg">
 
-The core of the library is base on a mother "dyanmic system" class that is defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = fwd_kinematic(x,u,t)$ that is used for generating animations.
-<img width="800" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg">
+<img width="900" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg">
+
+The core of the library is base on a mother "dyanmic system" class that is defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = fwd_kinematic(x,u,t)$ that is used for generating animations:
+
+<img width="900" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg">
+
+## How to use ##
+
+Coming soon.. see exemples scripts in pyro/examples/ and colab pages example availables in pyro/examples/notebooks/
+
 
 ## Installation ##
 
@@ -49,7 +56,8 @@ git clone https://github.com/SherbyRobotics/pyro.git
 ```
 then add the pyro folder to the pythonpath variable of your environment. In spyder this option is found in the menu at python/PYTHONPATH manager.
 
-## Library Architecture ##
+
+## Pyro structure ##
 
 ### Dynamic objects ###
 
@@ -57,12 +65,17 @@ At the core of pyro is a mother-class representing generic non-linear dynamic sy
 
 <img width="929" alt="Screen Shot 2021-05-02 at 15 57 47" src="https://user-images.githubusercontent.com/16725496/116826021-fd9b7a80-ab5f-11eb-8e50-d7361094cbee.png">
 
-Other more specific mother-class are 
+Other more specific sub-class are 
 1. Linear System
 2. Mechanical System
 3. Manipulator Robot
 
 ![pyro_system_class](https://user-images.githubusercontent.com/16725496/161467982-e0f815f0-e18f-4f3f-b6dc-34ff35e22120.jpg)
+
+### Analysis tool ###
+
+Cooming soon..
+
 
 
 ### Controller objects ###
@@ -77,18 +90,17 @@ For "memoryless" controller, this operation is
 
 Available control algorithms: PID, LQR, Computed-Torque, End-point Impedance, Value-Iteration, Sliding-mode controller, etc.
 
-### Trajectory planner objects ###
+### Planner objects ###
 
 Cooming soon..
 
+Implemented planner algorithm:
+1. RRT tree search
+2. Direct collocation trajectory optimisation
+3. Value-iteration 
 
-## How to use ##
 
-See exemples scripts in pyro/examples/
 
-Notebook colab pages example availables in pyro/examples/notebooks/
-
-Coming soon..
 
 ## Gallery of exemples ##
 
