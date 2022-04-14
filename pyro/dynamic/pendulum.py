@@ -594,14 +594,14 @@ class DoublePendulum( mechanical.MechanicalSystem ):
             lines_color.append( 'r' )
             
             # Draw Arrow
-            a = max_angle1 + q12 
+            a = max_angle2 + q12 
             c = np.cos( a )
             s = np.sin( a )
             
             pts = np.zeros((3,3))
     
             pts[1,:] =  [ r * c + x2 , r * s + y2 , 0 ]
-            if f1_pos:
+            if f2_pos:
                 pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
                 pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
             else:
@@ -834,7 +834,8 @@ if __name__ == "__main__":
         return np.array([ t + sys.u_lb[0] , t + sys.u_lb[1]])
     
     sys.t2u   = t2u
-    sys.ubar[0] = 1
+    sys.ubar[0] = 2
+    sys.ubar[1] = 1
     sys.x0[0] = 3.14
     sys.compute_trajectory( 10 )
     sys.plot_trajectory('xu')
