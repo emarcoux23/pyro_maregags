@@ -1,6 +1,25 @@
-# Python Robotics
+# Pyro 
 
-A object-based toolbox for robot dynamic simulation, analysis, control and planning. 
+Pyro (Python Robotics) is a object-based toolbox for robot dynamic simulation, analysis, control and planning. 
+
+<table>
+  <tr>
+    <th>
+    <img src="https://user-images.githubusercontent.com/16725496/162986261-b3f6950b-e417-403b-8e81-81b30a542d6c.gif" alt="rocket" width="400"/>
+    </th>
+    <th>
+    <img src="https://user-images.githubusercontent.com/16725496/163005905-ad2205b0-150d-44de-bd43-a3b31a0bf10e.gif" alt="cartpole" width="400"/>
+    </th> 
+  </tr>
+  <tr>
+    <td>
+      <img src="https://user-images.githubusercontent.com/16725496/163005883-5ec9b6f8-d8ab-44b1-bc9d-ac5ca2d6b4a9.gif" alt="drone" width="400"/>
+    </td>
+    <td>
+    <img src="https://user-images.githubusercontent.com/16725496/163005950-665132ae-c1d5-486c-8bf1-3c3fa9aa4140.gif" alt="mass-spring" width="400"/>
+    </td> 
+  </tr>
+</table>
 
 ## Installation ##
 
@@ -31,11 +50,11 @@ At the core of pyro is a mother-class representing generic non-linear dynamic sy
 <img width="929" alt="Screen Shot 2021-05-02 at 15 57 47" src="https://user-images.githubusercontent.com/16725496/116826021-fd9b7a80-ab5f-11eb-8e50-d7361094cbee.png">
 
 Other more specific mother-class are 
--Linear System
--Mechanical System
--Manipulator Robot
+1. Linear System
+2. Mechanical System
+3. Manipulator Robot
 
-<img width="763" alt="Screen Shot 2021-05-02 at 16 13 51" src="https://user-images.githubusercontent.com/16725496/116826418-dc3b8e00-ab61-11eb-9372-09ae08f0b15a.png">
+![pyro_system_class](https://user-images.githubusercontent.com/16725496/161467982-e0f815f0-e18f-4f3f-b6dc-34ff35e22120.jpg)
 
 
 ### Controller objects ###
@@ -57,7 +76,9 @@ Cooming soon..
 
 ## How to use ##
 
-See exemples scripts in pyro/examples.
+See exemples scripts in pyro/examples/
+
+Notebook colab pages example availables in pyro/examples/notebooks/
 
 Coming soon..
 
