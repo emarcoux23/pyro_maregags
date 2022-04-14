@@ -31,7 +31,7 @@ The core of the library is a mother "dyanmic system" class defined by a differen
 
 <img width="600" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg" class="center">
 
-By creating a class defining these three base functions, most of the library tools can then by use directly to analyze or to generate model-based controllers.
+By creating a class defining these three base functions, most of the library tools can then be used directly to analyze or to generate model-based controllers.
 
 ## How to use ##
 
