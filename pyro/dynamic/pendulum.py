@@ -223,39 +223,51 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         da        = 0.2            # angle discretization
         
         
+        if abs(f) > (self.u_ub[0] * 0.05):
         
-        if f_pos:
-            angles = np.arange( 0, max_angle , da  ) + q 
+            if f_pos:
+                angles = np.arange( 0, max_angle , da  ) + q 
+            else:
+                angles = np.arange( 0, max_angle * -1 , da  ) * -1 + q 
+            n      = angles.size
+            
+            # Draw arc
+            pts = np.zeros((n,3))
+            for i , a in enumerate( angles ):
+                pts[i,:] = [ r * np.cos(a) , r * np.sin(a) , 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            # Draw Arrow
+            c = np.cos( max_angle + q )
+            s = np.sin( max_angle + q )
+            
+            pts = np.zeros((3,3))
+            pts[1,:] = [ r * c , r * s , 0 ]
+            if f_pos:
+                pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
+            else:
+                pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
         else:
-            angles = np.arange( 0, max_angle * -1 , da  ) * -1 + q 
-        n      = angles.size
-        
-        # Draw arc
-        pts = np.zeros((n,3))
-        for i , a in enumerate( angles ):
-            pts[i,:] = [ r * np.cos(a) , r * np.sin(a) , 0 ]
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r' )
-        
-        # Draw Arrow
-        
-        c = np.cos( max_angle + q + da)
-        s = np.sin( max_angle + q + da)
-        
-        pts = np.zeros((3,3))
-        pts[1,:] = [ r * c , r * s , 0 ]
-        if f_pos:
-            pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
-            pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
-        else:
-            pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
-            pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r' )
+            
+            pts = np.zeros((3,3))
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
         
                 
         return lines_pts , lines_style , lines_color
@@ -506,39 +518,54 @@ class DoublePendulum( mechanical.MechanicalSystem ):
         q1         = -x[0] +  np.pi /2     # rigid link angle
         max_angle1 = f1 * ( np.pi * 2 /3 / ( self.u_ub[0] ) )
         
-        if f1_pos:
-            angles = np.arange( 0, max_angle1 , da  ) + q1 
+        if abs(f1) > (self.u_ub[0] * 0.05):
+        
+            if f1_pos:
+                angles = np.arange( 0, max_angle1 , da  ) + q1 
+            else:
+                angles = np.arange( 0, max_angle1 * -1 , da  ) * -1 + q1 
+            n      = angles.size
+            
+            # Draw arc
+            pts = np.zeros((n,3))
+            for i , a in enumerate( angles ):
+                pts[i,:] = [ r * np.cos(a) + x1 , r * np.sin(a) + y1 , 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-' )
+            lines_color.append( 'r' )
+            
+            # Draw Arrow
+            a = max_angle1 + q1 
+            c = np.cos( a )
+            s = np.sin( a )
+            
+            pts = np.zeros((3,3))
+    
+            pts[1,:] =  [ r * c + x1 , r * s + y1 , 0 ]
+            if f1_pos:
+                pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
+            else:
+                pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
         else:
-            angles = np.arange( 0, max_angle1 * -1 , da  ) * -1 + q1 
-        n      = angles.size
-        
-        # Draw arc
-        pts = np.zeros((n,3))
-        for i , a in enumerate( angles ):
-            pts[i,:] = [ r * np.cos(a) + x1 , r * np.sin(a) + y1 , 0 ]
-        
-        lines_pts.append( pts )
-        lines_style.append( '-' )
-        lines_color.append( 'r' )
-        
-        # Draw Arrow
-        a = max_angle1 - da + q1 
-        c = np.cos( a )
-        s = np.sin( a )
-        
-        pts = np.zeros((3,3))
-
-        pts[1,:] =  [ r * c + x1 , r * s + y1 , 0 ]
-        if f1_pos:
-            pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
-            pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
-        else:
-            pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
-            pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r' )
+            
+            pts = np.zeros((3,3))
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
         
         # Torque 2
         x2         = self.l1 * np.sin( -q1 + np.pi /2 )
@@ -548,39 +575,55 @@ class DoublePendulum( mechanical.MechanicalSystem ):
         q12        = - x[0] - x[1] +  np.pi /2  # rigid link angle
         max_angle2 = f2 * ( np.pi * 2 /3 / ( self.u_ub[1] ) )
         
-        if f2_pos:
-            angles = np.arange( 0, max_angle2 , da  ) + q12 
+        
+        if abs(f2) > (self.u_ub[0] * 0.05):
+        
+            if f2_pos:
+                angles = np.arange( 0, max_angle2 , da  ) + q12 
+            else:
+                angles = np.arange( 0, max_angle2 * -1 , da  ) * -1 + q12 
+            n      = angles.size
+            
+            # Draw arc
+            pts = np.zeros((n,3))
+            for i , a in enumerate( angles ):
+                pts[i,:] = [ r * np.cos(a) + x2 , r * np.sin(a) + y2 , 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-' )
+            lines_color.append( 'r' )
+            
+            # Draw Arrow
+            a = max_angle1 + q12 
+            c = np.cos( a )
+            s = np.sin( a )
+            
+            pts = np.zeros((3,3))
+    
+            pts[1,:] =  [ r * c + x2 , r * s + y2 , 0 ]
+            if f1_pos:
+                pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
+            else:
+                pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
         else:
-            angles = np.arange( 0, max_angle2 * -1 , da  ) * -1 + q12 
-        n      = angles.size
-        
-        # Draw arc
-        pts = np.zeros((n,3))
-        for i , a in enumerate( angles ):
-            pts[i,:] = [ r * np.cos(a) + x2 , r * np.sin(a) + y2 , 0 ]
-        
-        lines_pts.append( pts )
-        lines_style.append( '-' )
-        lines_color.append( 'r' )
-        
-        # Draw Arrow
-        a = max_angle1 - da + q12 
-        c = np.cos( a )
-        s = np.sin( a )
-        
-        pts = np.zeros((3,3))
-
-        pts[1,:] =  [ r * c + x2 , r * s + y2 , 0 ]
-        if f1_pos:
-            pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
-            pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
-        else:
-            pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
-            pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
-        
-        lines_pts.append( pts )
-        lines_style.append( '-')
-        lines_color.append( 'r' )
+            
+            pts = np.zeros((3,3))
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
         
                 
         return lines_pts , lines_style , lines_color
@@ -790,8 +833,8 @@ if __name__ == "__main__":
     def t2u(t):
         return np.array([ t + sys.u_lb[0] , t + sys.u_lb[1]])
     
-    #sys.t2u   = t2u
-    sys.ubar = np.array([1,0])
+    sys.t2u   = t2u
+    sys.ubar[0] = 1
     sys.x0[0] = 3.14
     sys.compute_trajectory( 10 )
     sys.plot_trajectory('xu')
