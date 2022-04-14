@@ -23,11 +23,11 @@ Pyro (Python Robotics) is a object-based toolbox for robot dynamic simulation, a
 
 ## Library Architecture ##
 
-The concept of this toolbox is based on a hierachy of dynamic object, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order diff. equations), linear state space, manipulator equations, etc. This structure is then leverage by analysis tools and control algorithms.
+The concept of this toolbox is based on a hierachy of dynamic object, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order diff. equations), linear state space, manipulator equations, etc. This structure is then leverage by analysis tools, generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, and system specific tools such as modal analysis for linear sub-class:
+<img width="800" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg">
 
-![IMG_1294](https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg)
-
-![IMG_1295](https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg)
+The core of the library is base on a mother "dyanmic system" class that is defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = fwd_kinematic(x,u,t)$ that is used for generating animations.
+<img width="800" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg">
 
 ## Installation ##
 
