@@ -1,6 +1,6 @@
 # Pyro 
 
-Pyro (Python Robotics) is a object-based toolbox for robot dynamic simulation, analysis, control and planning. 
+An object-based toolbox for robot dynamic simulation, analysis, control and planning. 
 
 <table>
   <tr>
@@ -23,13 +23,15 @@ Pyro (Python Robotics) is a object-based toolbox for robot dynamic simulation, a
 
 ## Library Architecture ##
 
-The concept of this toolbox is based on a hierachy of dynamic object, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order diff. equations), linear state space, manipulator equations, etc. This structure is then leverage by analysis tools, generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, and system specific tools such as modal analysis for linear sub-class:
+The concept of this toolbox is a hierachy of dynamic object, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order equations), linear state space, manipulator equations, etc. This structure is then leveraged by analysis tools, from generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, to system-specific tools such as modal analysis that leverage propreties specific to linear sub-class:
 
-<img width="900" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg">
+<img width="900" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg" class="center">
 
-The core of the library is base on a mother "dyanmic system" class that is defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = fwd_kinematic(x,u,t)$ that is used for generating animations:
+The core of the library is a mother "dyanmic system" class defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = fwd_kinematic(x,u,t)$ that is used for generating animations:
 
-<img width="900" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg">
+<img width="900" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg" class="center">
+
+By creating a class defining these three base functions, most of the library tools can then by use directly to analyze or generating model-based controllers.
 
 ## How to use ##
 
@@ -43,7 +45,7 @@ Coming soon.. see exemples scripts in pyro/examples/ and colab pages example ava
 * scipy
 * matplotlib
 
-### Recommended environment ###
+### Recommended environment (supported configuration for UdeS classes)###
 Anaconda distribution + spyder IDE available here: https://www.anaconda.com/products/individual
 
 Note: If graphical animations are not working, try changing the graphics backend. In spyder this option is found in the menu at python/Preferences/IPython console/Backend. Inline does not allow animations, it is best to use Automatic (for Windows and Ubuntu) or OS X (for Mac).
@@ -57,7 +59,7 @@ git clone https://github.com/SherbyRobotics/pyro.git
 then add the pyro folder to the pythonpath variable of your environment. In spyder this option is found in the menu at python/PYTHONPATH manager.
 
 
-## Pyro structure ##
+## Pyro internal structure ##
 
 ### Dynamic objects ###
 
