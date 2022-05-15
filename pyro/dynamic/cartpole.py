@@ -24,7 +24,7 @@ class RotatingCartPole( mechanical.MechanicalSystem ):
         """ """
                
         # initialize standard params
-        super().__init__(2)
+        mechanical.MechanicalSystem.__init__( self, 2)
         
         # Name
         self.name = 'Rotating Cart Pole'
