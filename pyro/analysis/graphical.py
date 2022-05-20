@@ -342,7 +342,7 @@ class Animator:
             x_pts     = pts[:, x_axis ]
             y_pts     = pts[:, y_axis ]
             linestyle = lines_style[j] + lines_color[j]
-            line      = self.showax.plot( x_pts, y_pts, linestyle )
+            line,     = self.showax.plot( x_pts, y_pts, linestyle )
             
             self.showlines.append( line )
 
@@ -383,7 +383,7 @@ class Animator:
             y_pts     = pts[:, 1 ]
             z_pts     = pts[:, 2 ]
             linestyle = lines_style[j] + lines_color[j]
-            line      = self.show3ax.plot( x_pts, y_pts, z_pts, linestyle)
+            line,     = self.show3ax.plot( x_pts, y_pts, z_pts, linestyle)
             
             self.show3lines.append( line )
             
