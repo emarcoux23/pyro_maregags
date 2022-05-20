@@ -293,6 +293,8 @@ class DoublePendulum( mechanical.MechanicalSystem ):
         
         # params
         self.setparams()
+        
+        self.l_domain = 3
                 
             
     #############################
@@ -438,7 +440,7 @@ class DoublePendulum( mechanical.MechanicalSystem ):
     def forward_kinematic_domain(self, q ):
         """ 
         """
-        l = 3
+        l = self.l_domain
         
         domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
                 
