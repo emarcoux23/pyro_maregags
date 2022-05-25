@@ -39,7 +39,7 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         """ """
                
         # initialize standard params
-        super().__init__(1)
+        mechanical.MechanicalSystem.__init__(self, 1)
         
         # Name
         self.name = 'Single Pendulum'
@@ -286,7 +286,7 @@ class DoublePendulum( mechanical.MechanicalSystem ):
         """ """
                
         # initialize standard params
-        super().__init__(2)
+        mechanical.MechanicalSystem.__init__(self, 2 )
         
         # Name
         self.name = 'Double Pendulum'
@@ -642,7 +642,7 @@ class TwoIndependentSinglePendulum( mechanical.MechanicalSystem ):
         """ """
                
         # initialize standard params
-        super().__init__(2)
+        mechanical.MechanicalSystem.__init__(self, 2)
         
         # Name
         self.name = 'Two Independent Single Pendulum'

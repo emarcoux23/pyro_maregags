@@ -37,7 +37,7 @@ class SingleMass( statespace.StateSpaceSystem ):
         self.compute_ABCD()
         
         # initialize standard params
-        super().__init__(self.A, self.B, self.C, self.D)
+        statespace.StateSpaceSystem.__init__( self, self.A, self.B, self.C, self.D)
         
         # Name and labels
         self.name = 'Linear-Spring-Damper'
@@ -216,7 +216,7 @@ class TwoMass( statespace.StateSpaceSystem ):
         self.compute_ABCD()
         
         # initialize standard params
-        super().__init__(self.A, self.B, self.C, self.D)
+        statespace.StateSpaceSystem.__init__( self, self.A, self.B, self.C, self.D)
         
         # Name and labels
         self.name = 'Two mass with linear spring-dampers'
@@ -455,7 +455,7 @@ class ThreeMass( statespace.StateSpaceSystem ):
         self.compute_ABCD()
         
         # initialize standard params
-        super().__init__(self.A, self.B, self.C, self.D)
+        statespace.StateSpaceSystem.__init__( self, self.A, self.B, self.C, self.D)
         
         # Name and labels
         self.name = 'Three mass with linear spring-dampers'
@@ -728,7 +728,7 @@ class FloatingSingleMass( SingleMass ):
     ############################
     def __init__(self, m=1, b=0):
         """ """
-        super().__init__(m,0,b)
+        SingleMass.__init__(self,m,0,b)
         
         # Name and labels
         self.name = 'Mass'
@@ -778,7 +778,7 @@ class FloatingTwoMass( TwoMass ):
     ############################
     def __init__(self, m=1, k=1, b=0, output_mass=2):
         """ """
-        super().__init__(m,k,b,output_mass)
+        TwoMass.__init__(self,m,k,b,output_mass)
         
         self.k1 = 0  # no base spring
         self.compute_ABCD()
@@ -872,7 +872,7 @@ class FloatingThreeMass( ThreeMass ):
     ############################
     def __init__(self, m=1, k=1, b=0, output_mass=3):
         """ """
-        super().__init__(m,k,b,output_mass)
+        ThreeMass.__init__(self,m,k,b,output_mass)
         self.k1 = 0
         self.compute_ABCD()
     

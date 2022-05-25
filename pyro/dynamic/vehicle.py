@@ -36,7 +36,7 @@ class KinematicBicyleModel( system.ContinuousDynamicSystem ):
         self.p = 3
         
         # initialize standard params
-        super().__init__(self.n, self.m, self.p)
+        system.ContinuousDynamicSystem.__init__(self, self.n, self.m, self.p)
         
         # Labels
         self.name = 'Kinematic Bicyle Model'
@@ -217,7 +217,7 @@ class HolonomicMobileRobot( system.ContinuousDynamicSystem ):
         self.p = 2
         
         # initialize standard params
-        super().__init__(self.n, self.m, self.p)
+        system.ContinuousDynamicSystem.__init__(self, self.n, self.m, self.p)
         
         # Labels
         self.name = 'Holonomic Mobile Robot'
@@ -346,8 +346,8 @@ class HolonomicMobileRobotwithObstacles( HolonomicMobileRobot ):
     def __init__(self):
         """ """
         # initialize standard params
-        super().__init__()
-
+        HolonomicMobileRobot.__init__(self)
+        
         # Labels
         self.name = 'Holonomic Mobile Robot with Obstacles'
 
@@ -476,7 +476,7 @@ class Holonomic3DMobileRobot(system.ContinuousDynamicSystem):
         self.p = 3
 
         # initialize standard params
-        super().__init__(self.n, self.m, self.p)
+        system.ContinuousDynamicSystem.__init__(self, self.n, self.m, self.p)
 
         # Labels
         self.name = 'Holonomic 3D Mobile Robot'
@@ -598,7 +598,7 @@ class Holonomic3DMobileRobotwithObstacles(Holonomic3DMobileRobot):
     def __init__(self):
         """ """
         # initialize standard params
-        super().__init__()
+        Holonomic3DMobileRobot.__init__(self)
 
         # Labels
         self.name = 'Holonomic 3D Mobile Robot with Obstacles'
@@ -734,7 +734,7 @@ class KinematicCarModel( KinematicBicyleModel ):
         """ """
         
         # initialize standard params
-        super().__init__()
+        KinematicBicyleModel.__init__( self )
         
         # Model param
         self.width  = 2.00
@@ -989,7 +989,7 @@ class KinematicCarModelwithObstacles( KinematicCarModel ):
     def __init__(self):
         """ """
         # initialize standard params
-        super().__init__()
+        KinematicCarModel.__init__(self)
         
         # Labels
         self.name = 'Kinematic Car Model with Obstacles'
@@ -1081,7 +1081,7 @@ class UdeSRacecar( KinematicCarModelwithObstacles ):
         """ """
 
         # initialize standard params
-        super().__init__()
+        KinematicCarModelwithObstacles.__init__( self )
 
         # Model param
         self.width = 0.17

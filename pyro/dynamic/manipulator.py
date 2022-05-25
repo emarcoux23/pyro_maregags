@@ -70,7 +70,7 @@ class Manipulator( mechanical.MechanicalSystem ):
         self.e = e
                
         # initialize standard params
-        super().__init__( dof )
+        mechanical.MechanicalSystem.__init__( self , dof )
         
         # Name
         self.name = str(dof) + 'Joint Manipulator Robot'
@@ -343,7 +343,7 @@ class SpeedControlledManipulator( system.ContinuousDynamicSystem ):
         n = dof
         
         # initialize standard params
-        super().__init__(dof, dof, dof)
+        system.ContinuousDynamicSystem.__init__( self, dof, dof, dof)
         
         # Name
         self.name = str(n) + ' Joint Speed Controlled Manipulator'
@@ -461,7 +461,7 @@ class OneLinkManipulator( Manipulator ):
         e   = 2
                
         # initialize standard params
-        super().__init__(dof , m , e)
+        Manipulator.__init__( self, dof , m , e)
         
         # Name
         self.name = 'One Link Manipulator'
@@ -742,7 +742,7 @@ class TwoLinkManipulator( Manipulator ):
         e   = 2
                
         # initialize standard params
-        super().__init__(dof , m , e)
+        Manipulator.__init__( self, dof , m , e)
         
         # Name
         self.name = 'Two Link Manipulator'
@@ -1030,7 +1030,7 @@ class ThreeLinkManipulator3D( Manipulator ):
         e   = 3
                
         # initialize standard params
-        super().__init__(dof , m , e)
+        Manipulator.__init__( self, dof , m , e)
         
         # Name
         self.name = 'Three Link Manipulator'
@@ -1440,7 +1440,7 @@ class FiveLinkPlanarManipulator( Manipulator ):
         e   = 2
                
         # initialize standard params
-        super().__init__(dof , m , e)
+        Manipulator.__init__( self, dof , m , e)
         
         # Name
         self.name = 'Five Link Manipulator'
@@ -1619,7 +1619,7 @@ class TwoLinkManipulatorwithObstacles( TwoLinkManipulator ):
     def __init__(self):
         """ """
         # initialize standard params
-        super().__init__()
+        TwoLinkManipulator.__init__( self )
         
         self.l1 = 1.1
         self.l2 = 0.9
@@ -1731,7 +1731,7 @@ class FiveLinkPlanarManipulatorwithObstacles( FiveLinkPlanarManipulator ):
     def __init__(self):
         """ """
         # initialize standard params
-        super().__init__()
+        FiveLinkPlanarManipulator.__init__( self )
         
         # Labels
         self.name = 'Five Link Planar Manipulator with Obstacles'
