@@ -749,6 +749,9 @@ class TwoLinkManipulator( Manipulator ):
         
         # params
         self.setparams()
+        
+        # Graphic output
+        self.l_domain = 1.
                 
             
     #############################
@@ -934,7 +937,7 @@ class TwoLinkManipulator( Manipulator ):
     def forward_kinematic_domain(self, q ):
         """ 
         """
-        l = 1
+        l = self.l_domain
         
         domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
                 

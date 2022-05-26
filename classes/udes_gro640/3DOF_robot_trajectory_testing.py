@@ -26,3 +26,6 @@ sys.traj.x[:,2]  = np.linspace(-1.3,2, n)  # q3(t)
 
 # Visualise trajectory with animation
 sys.animate_simulation( is_3d = True )
+
+# Visualise x-y-z trajectory of the end-effector
+sys.plot_end_effector_trajectory()
