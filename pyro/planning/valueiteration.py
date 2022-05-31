@@ -548,19 +548,21 @@ class ValueIteration_ND:
         """ controller from optimal actions """
 
         u = np.zeros(self.sys.m)
+        
+        x_clipped = x.copy()
 
         for i in range(self.sys.n):
             if x[i] < self.sys.x_lb[i]:
-                x[i] = self.sys.x_lb[i]
+                x_clipped[i] = self.sys.x_lb[i]
             if x[i] > self.sys.x_ub[i]:
-                x[i] = self.sys.x_ub[i]
+                x_clipped[i] = self.sys.x_ub[i]
 
         # for all inputs
         for k in range(self.sys.m):
             if self.n_dim == 2:
-                u[k] = self.interpol_functions[k](x[0], x[1])
+                u[k] = self.interpol_functions[k]( x_clipped[0], x_clipped[1])
             else:
-                u[k] = self.interpol_functions[k](x)
+                u[k] = self.interpol_functions[k]( x_clipped )
 
         return u
 
