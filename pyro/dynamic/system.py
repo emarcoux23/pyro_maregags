@@ -525,7 +525,7 @@ class ContinuousDynamicSystem:
             self.compute_trajectory()
             
         animator = self.get_animator()
-        animator.animate_simulation( self.traj, show = False )
+        animator.animate_simulation( self.traj, show = False , **kwargs )
         html_video = animator.ani.to_html5_video()
         
         return html_video

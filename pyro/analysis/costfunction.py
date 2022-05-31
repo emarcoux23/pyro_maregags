@@ -121,7 +121,7 @@ class QuadraticCostFunction( CostFunction ):
     ############################
     def __init__(self, n, m, p):
         
-        super().__init__()
+        CostFunction.__init__(self)
 
         self.n = n
         self.m = m
@@ -218,7 +218,7 @@ class TimeCostFunction( CostFunction ):
     ############################
     def __init__(self, xbar ):
 
-        super().__init__()
+        CostFunction.__init__(self)
         
         self.xbar = xbar
         

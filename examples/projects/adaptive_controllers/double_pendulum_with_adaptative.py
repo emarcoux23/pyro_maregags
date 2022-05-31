@@ -53,5 +53,5 @@ cl_sys.state_label[8] = 'g'
 cl_sys.compute_trajectory(tf=10, n=20001, solver='euler')
 cl_sys.plot_phase_plane_trajectory()
 cl_sys.plot_trajectory('xu')
-cl_sys.plot_internal_states_5()
+cl_sys.plot_internal_controller_states()
 cl_sys.animate_simulation()

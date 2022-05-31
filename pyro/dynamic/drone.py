@@ -35,7 +35,7 @@ class Drone2D( mechanical.MechanicalSystem ):
         actuators = 2
         
         # initialize standard params
-        super().__init__( dof, actuators )
+        mechanical.MechanicalSystem.__init__( self, dof, actuators )
         
         # Labels
         self.name = '2D drone model'
