@@ -88,10 +88,10 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         
         #Time scaling for the mode
         norm = np.sqrt(self.poles[i].real**2 + self.poles[i].imag**2)
-        if norm<0.0001:
-            tf = 10
-        else:
-            tf = max( 1. / norm * 2 * np.pi + 1,100)
+        
+        tf = 2. / norm * 2 * np.pi + 1
+        tf = np.clip(tf , 1 , 30)
+            
         n  = 2001
 
         sim = simulation.Simulator(self, tf, n)
