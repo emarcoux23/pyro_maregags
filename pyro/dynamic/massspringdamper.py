@@ -196,7 +196,9 @@ class TwoMass( statespace.StateSpaceSystem ):
 
     ############################
     def __init__(self, m=1, k=2, b=0.2, output_mass = 2):
-        """ """
+        """ 
+        
+        """
 
         # params
         self.m1 = m
@@ -233,7 +235,14 @@ class TwoMass( statespace.StateSpaceSystem ):
     ###########################################################################
     def compute_ABCD(self):
         """ 
+        This function recompute the state-space representation matrix, 
+        based on m1, m2, k1, k2, b1, b2 parameters. 
+        
+        The matrix C can also be adjusted to represent using mass 1 or mass 2 
+        position as the system output, according to this attribute:
+        self.output_mass = 1 or self.output_mass = 2
         """
+        
         self.A = np.array([ [ 0, 0, 1, 0 ],
                             [ 0, 0, 0, 1 ],
                             [ -(self.k1+self.k2)/self.m1, +self.k2/self.m1, -self.b1/self.m1, 0],
@@ -264,7 +273,7 @@ class TwoMass( statespace.StateSpaceSystem ):
     def xut2q( self, x , u , t ):
         """ Compute configuration variables ( q vector ) """
         
-        q = np.array([ x[0], x[1], u[0] ])
+        q = np.array([ x[0], x[1] ])
 
         return q
     
@@ -282,13 +291,15 @@ class TwoMass( statespace.StateSpaceSystem ):
     ###########################################################################
     def forward_kinematic_lines(self, q ):
         """ 
-        Compute points p = [x;y;z] positions given config q 
+        Compute 3D lines  given config q 
         ----------------------------------------------------
-        - points of interest for ploting
+        Inputs:
+        q : array describing the system configuration
         
         Outpus:
-        lines_pts = [] : a list of array (n_pts x 3) for each lines
-        
+        lines_pts   = [] : a list of array (n_pts x 3) 
+        lines_style = [] : a list of line styles
+        lines_color = [] : a list of line color
         """
         
         lines_pts   = [] # list of array (n_pts x 3) for each lines
