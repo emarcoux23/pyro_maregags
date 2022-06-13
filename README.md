@@ -35,7 +35,11 @@ By creating a class defining these three base functions, most of the library too
 
 ## How to use ##
 
-Coming soon.. see exemples scripts in pyro/examples/ and colab pages example availables in pyro/examples/notebooks/
+This is a link to a tutorial, hosted on colab:
+https://colab.research.google.com/drive/18eEL-n-dv9JZz732nFCMtqMThDcfD2Pr?usp=sharing
+
+
+Also see exemples scripts in pyro/examples/ and colab pages example availables in pyro/examples/notebooks/
 
 
 ## Installation ##
@@ -112,21 +116,16 @@ Available control algorithms:
 - Sliding-mode controller
 - End-point Impedance
 - Value-Iteration
+- End-point impedance controller for robot arms
+- End-point trajectory controller for robot arms
 
 
 ### Planner objects ###
 
-Cooming soon..
-
-Implemented planner algorithm:
+Available planner algorithm:
 1. RRT tree search
 2. Direct collocation trajectory optimisation
 3. Value-iteration 
-
-
-## Gallery of exemples ##
-
-Coming soon.. 
 
 
 
