@@ -89,8 +89,11 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         #Time scaling for the mode
         norm = np.sqrt(self.poles[i].real**2 + self.poles[i].imag**2)
         
-        tf = 2. / norm * 2 * np.pi + 1
-        tf = np.clip(tf , 1 , 30)
+        if norm > 0.001:
+            tf = 2. / norm * 2 * np.pi + 1
+            tf = np.clip(tf , 1 , 30)
+        else:
+            tf = 5
             
         n  = 2001
 
