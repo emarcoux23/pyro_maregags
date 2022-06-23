@@ -55,7 +55,7 @@ Pyro is built only using core python librairies:
 * scipy
 * matplotlib
 
-## Using in Colab ##
+### Using in Colab ###
 
 ```
 !git clone https://github.com/SherbyRobotics/pyro
