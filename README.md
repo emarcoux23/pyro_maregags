@@ -50,22 +50,33 @@ Also see exemples scripts in pyro/examples/
 ## Installation ##
 
 ### Dependencies ####
+Pyro is built only using core python librairies: 
 * numpy
 * scipy
 * matplotlib
 
-### Recommended environment (supported configuration for UdeS classes)###
-Anaconda distribution + spyder IDE available here: https://www.anaconda.com/products/individual
+## Using in Colab ##
 
-Note: If graphical animations are not working, try changing the graphics backend. In spyder this option is found in the menu at python/Preferences/IPython console/Backend. Inline does not allow animations, it is best to use Automatic (for Windows and Ubuntu) or OS X (for Mac).
+```
+!git clone https://github.com/SherbyRobotics/pyro
+import sys
+sys.path.append('/content/pyro')
+import pyro
+```
 
-### Clone repo and add to python path ###
+### Using with Anaconda and Spyder IDE ###
+1. Download anaconda distribution (including spyder IDE) available here: https://www.anaconda.com/products/individual
 
+2. Dowload pyro source code. 
 A simple option for development is simply to clone the repo:
 ```bash
 git clone https://github.com/SherbyRobotics/pyro.git
 ```
 then add the pyro folder to the pythonpath variable of your environment. In spyder this option is found in the menu at python/PYTHONPATH manager.
+
+3. Change the graphical backend in Spyder for enabling animation
+If graphical animations are not working, try changing the graphics backend in the menu at python/Preferences/IPython console/Backend. Inline does not allow animations, it is best to use Automatic (for Windows and Ubuntu) or OS X (for Mac).
+
 
 
 ## Pyro internal structure ##
