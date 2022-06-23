@@ -35,11 +35,16 @@ By creating a class defining these three base functions, most of the library too
 
 ## How to use ##
 
-This is a link to a tutorial, hosted on colab:
-https://colab.research.google.com/drive/18eEL-n-dv9JZz732nFCMtqMThDcfD2Pr?usp=sharing
+To learn how to use pyro, see the following notebook tutorials hosted on colab:
 
+1.   [The Dynamic System class and basic functionnality](https://colab.research.google.com/drive/18eEL-n-dv9JZz732nFCMtqMThDcfD2Pr?usp=sharing)
+2.   [Creating a custom dynamic class](https://colab.research.google.com/drive/1ILfRpL1zgiQZBOxwtbbpe0nl2znvzdWl?usp=sharing)
+3.   [Closed-loop system and controllers objects](https://colab.research.google.com/drive/1mog1HAFN2NFEdw6sPudzW2OaTk_li0Vx?usp=sharing)
+4.   The Linear System class (comin soon..)
+4.   The Mechanical System class (coming soon..)
+5.   [The Manipulator Robot class](https://colab.research.google.com/drive/1OILAhXRxM1r5PEB1BWaYtbR147Ff3gr1?usp=sharing)
 
-Also see exemples scripts in pyro/examples/ and colab pages example availables in pyro/examples/notebooks/
+Also see exemples scripts in pyro/examples/ 
 
 
 ## Installation ##
