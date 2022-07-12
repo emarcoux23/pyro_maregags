@@ -1,6 +1,8 @@
+from argparse import ArgumentError
 import numpy as np
 
 from scipy import linalg
+from scipy.interpolate import interp1d
 
 from pyro.dynamic  import ContinuousDynamicSystem
 from pyro.analysis import simulation
@@ -278,6 +280,134 @@ def linearize(sys, epsilon_x=0.001, epsilon_u=None):
     ss.forward_kinematic_lines  = sys.forward_kinematic_lines
 
     return ss
+
+
+class StateObserver(StateSpaceSystem):
+    """Linear time-invariant continuous-time state observer
+
+    f = d(x_est)/dt = A x_est + B u + L(y - y_est)
+    h = C x + D u
+
+    Where x_est is the estimate of x, the state vector and y_est is the
+    estimate of y, the output vector.
+
+    Parameters
+    ----------
+    sys: instance of `ContinuousDynamicSystem`
+        The "real" system model that is observed.
+
+    A, B, C, D: array-like
+        Matrices that correspond to the "plant" model used by the observer to
+        approximate the real system. The shapes of the matrices must be coherent
+        with the number of states, inputs and outputs (n, m, p) of `sys`.
+
+    L: n x p array-like
+        Observer gain matrix. n and p refer respectively to the number of states and the
+        number of outputs of `sys`.
+
+    """
+
+    def __init__(self, sys, A, B, C, D, L):
+        self.A = np.asarray(A)
+        self.B = np.asarray(B)
+        self.C = np.asarray(C)
+        self.D = np.asarray(D)
+        self.L = np.asarray(L)
+
+        self.realsys = sys # Keep a reference to real system model for simulation
+
+        self._check_dimensions()
+
+        n = self.A.shape[1] * 2 # Number states = Real states + estimated states
+        m = self.B.shape[1]     # Same inputs as original system
+        p = self.A.shape[1]     # Outputs of observer = estimated states
+
+        ContinuousDynamicSystem.__init__( self, n, m, p)
+
+    def _check_dimensions(self):
+        super()._check_dimensions(self)
+
+        # L must be n x p of sys
+        if self.L.shape[0] != self.plant.n or self.L.shape[1] != self.plant.p:
+            raise ValueError("Dimensions of gain matrix L do not match system ss.")
+
+        # A, B, C, D must correspond to sys n,m,p
+        if self.A.shape[0] != self.realsys.n:
+            raise ValueError("Shape of A must correspond to number of states n of sys")
+
+        if not (self.B.shape[1] == self.realsys.m):
+            raise ValueError("Shape of B must correspond to number of inputs m of sys")
+
+        if not (self.C.shape[0] == self.realsys.p):
+            raise ValueError("Shape of C must correspond to number of outputs p of sys")
+
+    def f(self, x, u, t):
+        assert u.size == self.m
+        assert x.size == self.n
+
+        n_orig = self.n / 2
+        x_orig, x_est = x[n_orig:], x[:n_orig]
+
+        dx_orig = self.sys.f(x_orig, u, t)
+        y_orig = self.sys.h(x_orig, u, t)
+
+        dx_est = self.f_est(x_est, u, y_orig)
+
+        dx = np.concatenate([dx_orig, dx_est], axis=0)
+        assert dx.shape[0] == self.n and dx.size == self.n
+
+        return dx
+
+    def h(self, x, u, t):
+        # Output of observer system is the full vector of estimated states
+        n_orig = self.n / 2
+        x_est = x[:n_orig]
+        return x_est
+
+    def t2u(self, t):
+        return self.realsys.t2u(t)
+
+    def f_est(self, x_est, u, y_orig):
+        y_est = np.dot(self.C, x_est) + np.dot(self.D, u)
+        dx_est = np.dot(self.A, x_est) \
+                 + np.dot(self.B, u) \
+                 + np.dot(self.L, (y_orig - y_est))
+        return dx_est
+
+    def compute_estimates_from_outputs(self, x_est_0, y, u, t):
+        """
+        Compute observer estimates based on time-series data of system inputs and
+        outputs.
+        """
+        y = np.asarray(y)
+        t = np.asarray(t)
+
+        if not y.size == t.size:
+            raise ValueError("Shapes of y and t do not match")
+
+        if u is None:
+            def get_u(t):
+                return self.t2u(t)
+        elif np.isscalar(u):
+            def get_u(t):
+                return u
+        elif np.asarray(u).size == np.asarray(t).size:
+            get_u = interp1d(t, u)
+        else:
+            raise ValueError(
+                "u must be either None, a scalar, or a vector with identical shape as t"
+            )
+
+        y_interp = interp1d(t, y)
+            
+        def fsim(x_est, t):
+            uu = get_u(t)
+            yy = y_interp(t)
+            return self.f_est(x_est, uu, yy)
+
+
+
+
 
 '''
 #################################################################
