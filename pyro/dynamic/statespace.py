@@ -3,6 +3,7 @@ import numpy as np
 
 from scipy import linalg
 from scipy.interpolate import interp1d
+from scipy.integrate import solve_ivp
 
 from pyro.dynamic  import ContinuousDynamicSystem
 from pyro.analysis import simulation
@@ -325,10 +326,10 @@ class StateObserver(StateSpaceSystem):
         ContinuousDynamicSystem.__init__( self, n, m, p)
 
     def _check_dimensions(self):
-        super()._check_dimensions(self)
+        super()._check_dimensions()
 
         # L must be n x p of sys
-        if self.L.shape[0] != self.plant.n or self.L.shape[1] != self.plant.p:
+        if self.L.shape[0] != self.realsys.n or self.L.shape[1] != self.realsys.p:
             raise ValueError("Dimensions of gain matrix L do not match system ss.")
 
         # A, B, C, D must correspond to sys n,m,p
@@ -340,6 +341,11 @@ class StateObserver(StateSpaceSystem):
 
         if not (self.C.shape[0] == self.realsys.p):
             raise ValueError("Shape of C must correspond to number of outputs p of sys")
+
+    @classmethod
+    def from_ss(cls, ss, L):
+        """Create a state observer based on an existing state-space system"""
+        return cls(ss, ss.A, ss.B, ss.C, ss.D, L)
 
     def f(self, x, u, t):
         assert u.size == self.m
@@ -399,13 +405,15 @@ class StateObserver(StateSpaceSystem):
             )
 
         y_interp = interp1d(t, y)
-            
-        def fsim(x_est, t):
+
+        def fsim(t, x_est):
             uu = get_u(t)
             yy = y_interp(t)
             return self.f_est(x_est, uu, yy)
 
+        sol = solve_ivp(fsim, [t[0], t[-1]], x_est_0, t_eval=t)
 
+        return sol.y
 
 
 
