@@ -308,11 +308,11 @@ class StateObserver(StateSpaceSystem):
     """
 
     def __init__(self, sys, A, B, C, D, L):
-        self.A = np.asarray(A)
-        self.B = np.asarray(B)
-        self.C = np.asarray(C)
-        self.D = np.asarray(D)
-        self.L = np.asarray(L)
+        self.A = np.array(A, ndmin=2, dtype=np.float64)
+        self.B = np.array(B, ndmin=2, dtype=np.float64)
+        self.C = np.array(C, ndmin=2, dtype=np.float64)
+        self.D = np.array(D, ndmin=2, dtype=np.float64)
+        self.L = np.array(L, ndmin=2, dtype=np.float64)
 
         self.realsys = sys # Keep a reference to real system model for simulation
 
@@ -323,6 +323,7 @@ class StateObserver(StateSpaceSystem):
         p = self.A.shape[1]     # Outputs of observer = estimated states
 
         ContinuousDynamicSystem.__init__( self, n, m, p)
+
 
     def _check_dimensions(self):
         super()._check_dimensions()
@@ -341,10 +342,116 @@ class StateObserver(StateSpaceSystem):
         if not (self.C.shape[0] == self.realsys.p):
             raise ValueError("Shape of C must correspond to number of outputs p of sys")
 
+
     @classmethod
     def from_ss(cls, ss, L):
         """Create a state observer based on an existing state-space system"""
         return cls(ss, ss.A, ss.B, ss.C, ss.D, L)
+
+
+    @classmethod
+    def kalman(cls, sys, A, B, C, D, Q, R, G=None):
+        """ Create a state observer by calculating the Kalman gain matrix.
+
+        This method calculates the Kalman gain matrix L_Kalman for the system:
+
+        dx/dt = Ax + Bu + Gw
+        y = Cx + Du + v
+
+        Where w and v are normally distributed random vectors with 0 mean and
+        covariance matrices Q and V.
+
+        Notes on matrix G:
+
+            - In the case where the noise process w is additive onto the system inputs,
+              dx/dt = Ax + B(u + w), we have B(u + w) = Bu + Bw and therefore `G` = `B`.
+              This is the default case when `G` is left unspecified or `None`.
+
+            - If the noise process is additive onto the system states,
+              dx/dt = Ax + Bu + w, then `G=I` should be passed as an argument, where `I`
+              is the identity matrix with the same shape as A (n x n).
+
+        Parameters
+        ----------
+
+        A : array-like      n x n
+            Systems dynamics (state transition) matrix of the filter plant model
+        B : array-like      n x m
+            Input matrix of the filter plant model
+        C : array-like      p x n
+            State-Output matrix of the filter plant model
+        D : array-like      p x m
+            Input-Output matrix of the filter plant model
+        Q : array-like      q x q
+            Covariance matrix of the noise process w (q x 1)
+        R : array-like      p x p
+            Covariance matrix of the noise process v (m x 1)
+        G : array-like      n x q
+            Input matrix for the noise process w. By default (`G=None`), it is assumed
+            that the noise process w is additive on the input u, therefore G = B and
+            q = m.
+
+        Returns
+        ----------
+
+        Instance of `StateObserver` with L, the Kalman gain matrix.
+
+        """
+
+        A = np.array(A, ndmin=2, dtype=np.float64)
+        B = np.array(B, ndmin=2, dtype=np.float64)
+        C = np.array(C, ndmin=2, dtype=np.float64)
+        D = np.array(D, ndmin=2, dtype=np.float64)
+        Q = np.array(Q, ndmin=2, dtype=np.float64)
+        R = np.array(R, ndmin=2, dtype=np.float64)
+
+        if G is None:
+            G = B
+        else:
+            G = np.array(G, ndmin=2, dtype=np.float64)
+
+        L = np.zeros([A.shape[0], C.shape[0]]) # temporary
+        obs = cls(sys, A, B, C, D, L)
+
+        # Check dimensions of Q, R and G matrices
+        if not Q.shape[0] == Q.shape[1]:
+            raise ValueError("Q must be square")
+        if not R.shape[0] == R.shape[1]:
+            raise ValueError("R must be square")
+        if not G.shape[0] == A.shape[0]:
+            raise ValueError("Shape[0] of G does not match shape of A")
+        if not G.shape[1] == Q.shape[0]:
+            raise ValueError("Shape[1] of G does not match shape of Q")
+        if not R.shape[0] == C.shape[0]:
+            raise ValueError("Shape of R must match number of outputs of C")
+
+        P = linalg.solve_continuous_are(a=A.T, b=C.T, q=(G @ Q @ G.T), r=R)
+        LT = np.linalg.solve(R.T, (C @ P.T))
+        if LT.ndim < 2:
+            LT = LT[:, np.newaxis]
+        L_kalm = LT.T
+        assert L_kalm.shape == obs.L.shape
+
+        obs.L = L_kalm
+        return obs
+
+
+    @classmethod
+    def kalman_from_ss(cls, ss, Q, R, G=None):
+        """Create a state observer by calculating the Kalman gain matrix.
+
+        See documentation for `kalman(...)`. This method uses the A, B, C, D matrices
+        from the system `ss`.
+
+        Returns
+        ----------
+
+        Instance of `StateObserver` with L, the Kalman gain matrix.
+
+        """
+
+        return cls.kalman(ss, ss.A, ss.B, ss.C, ss.D, Q, R, G)
+
 
     def f(self, x, u, t):
         assert u.size == self.m
