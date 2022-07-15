@@ -285,72 +285,81 @@ def linearize(sys, epsilon_x=0.001, epsilon_u=None):
 class StateObserver(StateSpaceSystem):
     """Linear time-invariant continuous-time state observer
 
-    f = d(x_est)/dt = A x_est + B u + L(y - y_est)
-    h = C x + D u
+    f = d(x_est)/dt = A x_est + B u_sys + L(y_sys - y_est)
 
     Where x_est is the estimate of x, the state vector and y_est is the
-    estimate of y, the output vector.
+    estimate of y, the output vector, based on x_est and u_sys.
+
+    States of observer (n = n_sys):
+
+        x = x_est
+
+    Inputs of observer (m = m_sys + p_sys):
+
+        u = [u_sys; y_sys]
+
+    Outputs of observer (p = n = n_sys):
+
+        y = x = x_est
+
 
     Parameters
     ----------
-    sys: instance of `ContinuousDynamicSystem`
-        The "real" system model that is observed.
-
-    A, B, C, D: array-like
-        Matrices that correspond to the "plant" model used by the observer to
-        approximate the real system. The shapes of the matrices must be coherent
-        with the number of states, inputs and outputs (n, m, p) of `sys`.
-
-    L: n x p array-like
+    A : array-like      n x n
+        Systems dynamics (state transition) matrix of the observer plant model
+    B : array-like      n x m
+        Input matrix of the observer plant model
+    C : array-like      p x n
+        State-Output matrix of the observer plant model
+    D : array-like      p x m
+        Input-Output matrix of the observer plant model
+    L:  array-like      n x p
         Observer gain matrix. n and p refer respectively to the number of states and the
         number of outputs of `sys`.
 
     """
 
-    def __init__(self, sys, A, B, C, D, L):
+    def __init__(self, A, B, C, D, L):
         self.A = np.array(A, ndmin=2, dtype=np.float64)
         self.B = np.array(B, ndmin=2, dtype=np.float64)
         self.C = np.array(C, ndmin=2, dtype=np.float64)
         self.D = np.array(D, ndmin=2, dtype=np.float64)
         self.L = np.array(L, ndmin=2, dtype=np.float64)
 
-        self.realsys = sys # Keep a reference to real system model for simulation
+
+        self.m_plant = self.B.shape[1]
+        self.p_plant = self.C.shape[0]
+
+        # Observer states = Estimated states
+        n = self.A.shape[1]
+
+        # Observer inputs = concatenation of y and u of observed system
+        m = self.m_plant + self.p_plant
+
+        # Outputs of observer = estimated states
+        p = n
+
+        ContinuousDynamicSystem.__init__(self, n, m, p)
 
         self._check_dimensions()
-
-        n = self.A.shape[1] * 2 # Number states = Real states + estimated states
-        m = self.B.shape[1]     # Same inputs as original system
-        p = self.A.shape[1]     # Outputs of observer = estimated states
-
-        ContinuousDynamicSystem.__init__( self, n, m, p)
 
 
     def _check_dimensions(self):
         super()._check_dimensions()
 
         # L must be n x p of sys
-        if self.L.shape[0] != self.realsys.n or self.L.shape[1] != self.realsys.p:
+        if self.L.shape[0] != self.n or self.L.shape[1] != self.p_plant:
             raise ValueError("Dimensions of gain matrix L do not match system ss.")
-
-        # A, B, C, D must correspond to sys n,m,p
-        if self.A.shape[0] != self.realsys.n:
-            raise ValueError("Shape of A must correspond to number of states n of sys")
-
-        if not (self.B.shape[1] == self.realsys.m):
-            raise ValueError("Shape of B must correspond to number of inputs m of sys")
-
-        if not (self.C.shape[0] == self.realsys.p):
-            raise ValueError("Shape of C must correspond to number of outputs p of sys")
 
 
     @classmethod
     def from_ss(cls, ss, L):
         """Create a state observer based on an existing state-space system"""
-        return cls(ss, ss.A, ss.B, ss.C, ss.D, L)
+        return cls(ss.A, ss.B, ss.C, ss.D, L)
 
 
     @classmethod
-    def kalman(cls, sys, A, B, C, D, Q, R, G=None):
+    def kalman(cls, A, B, C, D, Q, R, G=None):
         """ Create a state observer by calculating the Kalman gain matrix.
 
         This method calculates the Kalman gain matrix L_Kalman for the system:
@@ -374,18 +383,12 @@ class StateObserver(StateSpaceSystem):
         Parameters
         ----------
 
-        A : array-like      n x n
-            Systems dynamics (state transition) matrix of the filter plant model
-        B : array-like      n x m
-            Input matrix of the filter plant model
-        C : array-like      p x n
-            State-Output matrix of the filter plant model
-        D : array-like      p x m
-            Input-Output matrix of the filter plant model
+        A, B, C, D : array-like
+            See description in `StateObserver` class.
         Q : array-like      q x q
-            Covariance matrix of the noise process w (q x 1)
+            Covariance matrix of the process noise w (q x 1)
         R : array-like      p x p
-            Covariance matrix of the noise process v (m x 1)
+            Covariance matrix of the output noise v (m x 1)
         G : array-like      n x q
             Input matrix for the noise process w. By default (`G=None`), it is assumed
             that the noise process w is additive on the input u, therefore G = B and
@@ -411,7 +414,7 @@ class StateObserver(StateSpaceSystem):
             G = np.array(G, ndmin=2, dtype=np.float64)
 
         L = np.zeros([A.shape[0], C.shape[0]]) # temporary
-        obs = cls(sys, A, B, C, D, L)
+        obs = cls(A, B, C, D, L)
 
         # Check dimensions of Q, R and G matrices
         if not Q.shape[0] == Q.shape[1]:
@@ -450,76 +453,99 @@ class StateObserver(StateSpaceSystem):
 
         """
 
-        return cls.kalman(ss, ss.A, ss.B, ss.C, ss.D, Q, R, G)
+        return cls.kalman(ss.A, ss.B, ss.C, ss.D, Q, R, G)
 
-
-    def f(self, x, u, t):
-        assert u.size == self.m
-        assert x.size == self.n
-
-        n_orig = self.n / 2
-        x_orig, x_est = x[n_orig:], x[:n_orig]
-
-        dx_orig = self.sys.f(x_orig, u, t)
-        y_orig = self.sys.h(x_orig, u, t)
-
-        dx_est = self.f_est(x_est, u, y_orig)
-
-        dx = np.concatenate([dx_orig, dx_est], axis=0)
-        assert dx.shape[0] == self.n and dx.size == self.n
-
-        return dx
 
     def h(self, x, u, t):
         # Output of observer system is the full vector of estimated states
-        n_orig = self.n / 2
-        x_est = x[:n_orig]
+        return x
+
+
+    def f(self, x_est, u, t):
+
+        # Check and adjust dimensions
+
+        assert x_est.size == self.n
+        x_est = x_est.reshape(self.n)
+
+        assert u.size == self.m
+        u = u.reshape(self.m)
+        u_plant, y_plant = u[:self.m_plant], u[self.m_plant]
+
+        assert y_plant.size == self.p_plant
+
+        # State observer equations
+        y_est = (self.C @ x_est) + (self.D @ u_plant)
+        dx_est = (self.A @ x_est) + (self.B @ u_plant) + (self.L @ (y_plant - y_est))
+        return dx_est.flatten()
+
+
+    def __add__(self, sys):
+        return ObservedSystem(sys, self)
+
+
+class ObservedSystem(ContinuousDynamicSystem):
+    """Combination of a dynamic system and a state observer
+
+    States of observed system (n = 2 * n_sys):
+
+        x = [x_sys; x_est]
+
+    Inputs of observed system:
+
+        u = u_sys
+
+    Outputs of observed system:
+
+        y = x_est
+
+    """
+
+    def __init__(self, sys, obs):
+        self.sys = sys
+        self.obs = obs
+
+        n = sys.n * 2
+        m = sys.m
+        p = sys.n
+
+        if not sys.n == obs.n:
+            raise ValueError("Number of states of observer does not match system")
+
+        if not sys.m == obs.m_plant:
+            raise ValueError("Number of plant inputs of observer does not match system")
+
+        if not sys.p == obs.p_plant:
+            raise ValueError("Number of plant outputs of observer does not match system")
+
+        super().__init__(n, m, p)
+
+        self.x0 = np.concatenate([self.sys.x0, self.obs.x0], axis=0)
+
+
+    def f(self, x, u, t):
+        u = u.reshape(self.m)
+        n_sys = self.sys.n
+        x_sys, x_est = x[:n_sys], x[n_sys:]
+        assert x_sys.shape == x_est.shape
+
+        dx_sys = self.sys.f(x_sys, u, t)
+        y_sys = self.sys.h(x_sys, u, t)
+
+        u_obs = np.concatenate([u, y_sys], axis=0)
+        dx_obs = self.obs.f(x_est, u_obs, t)
+
+        return np.concatenate([dx_sys, dx_obs], axis=0)
+
+
+    def h(self, x, u, t):
+        n_sys = self.sys.n
+        x_est = x[n_sys:]
         return x_est
 
+
     def t2u(self, t):
-        return self.realsys.t2u(t)
-
-    def f_est(self, x_est, u, y_orig):
-        y_est = np.dot(self.C, x_est) + np.dot(self.D, u)
-        dx_est = np.dot(self.A, x_est) \
-                 + np.dot(self.B, u) \
-                 + np.dot(self.L, (y_orig - y_est))
-        return dx_est
-
-    def compute_estimates_from_outputs(self, x_est_0, y, u, t):
-        """
-        Compute observer estimates based on time-series data of system inputs and
-        outputs.
-        """
-        y = np.asarray(y)
-        t = np.asarray(t)
-
-        if not y.size == t.size:
-            raise ValueError("Shapes of y and t do not match")
-
-        if u is None:
-            def get_u(t):
-                return self.t2u(t)
-        elif np.isscalar(u):
-            def get_u(t):
-                return u
-        elif np.asarray(u).size == np.asarray(t).size:
-            get_u = interp1d(t, u)
-        else:
-            raise ValueError(
-                "u must be either None, a scalar, or a vector with identical shape as t"
-            )
-
-        y_interp = interp1d(t, y)
-
-        def fsim(t, x_est):
-            uu = get_u(t)
-            yy = y_interp(t)
-            return self.f_est(x_est, uu, yy)
-
-        sol = solve_ivp(fsim, [t[0], t[-1]], x_est_0, t_eval=t)
-
-        return sol.y
+        return self.sys.t2u(t)
 
 
 
