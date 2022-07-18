@@ -524,7 +524,7 @@ class ObservedSystem(ContinuousDynamicSystem):
 
 
     def f(self, x, u, t):
-        u = u.reshape(self.m)
+        u = np.array(u, ndmin=1).reshape(self.m)
         n_sys = self.sys.n
         x_sys, x_est = x[:n_sys], x[n_sys:]
         assert x_sys.shape == x_est.shape
