@@ -3,7 +3,7 @@ import pytest
 
 import numpy as np
 
-from pyro.dynamic.statespace import StateSpaceSystem, StateObserver, ObservedSystem
+from pyro.dynamic.statespace import StateSpaceSystem, StateObserver
 
 from io import StringIO
 

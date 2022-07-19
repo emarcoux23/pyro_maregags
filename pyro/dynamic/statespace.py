@@ -1,8 +1,6 @@
 import numpy as np
 
 from scipy import linalg
-from scipy.interpolate import interp1d
-from scipy.integrate import solve_ivp
 
 from pyro.dynamic  import ContinuousDynamicSystem
 from pyro.analysis import simulation
