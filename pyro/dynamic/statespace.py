@@ -411,11 +411,6 @@ class StateObserver(StateSpaceSystem):
         Instance of `StateObserver` with L, the Kalman gain matrix.
 
         """
-
-        A = np.array(A, ndmin=2, dtype=np.float64)
-        B = np.array(B, ndmin=2, dtype=np.float64)
-        C = np.array(C, ndmin=2, dtype=np.float64)
-        D = np.array(D, ndmin=2, dtype=np.float64)
         Q = np.array(Q, ndmin=2, dtype=np.float64)
         R = np.array(R, ndmin=2, dtype=np.float64)
 
@@ -439,8 +434,8 @@ class StateObserver(StateSpaceSystem):
         if not R.shape[0] == C.shape[0]:
             raise ValueError("Shape of R must match number of outputs of C")
 
-        P = linalg.solve_continuous_are(a=A.T, b=C.T, q=(G @ Q @ G.T), r=R)
-        LT = np.linalg.solve(R.T, (C @ P.T))
+        P = linalg.solve_continuous_are(a=obs.A.T, b=obs.C.T, q=(G @ Q @ G.T), r=R)
+        LT = np.linalg.solve(R.T, (obs.C @ P.T))
         if LT.ndim < 2:
             LT = LT[:, np.newaxis]
         L_kalm = LT.T
