@@ -26,6 +26,10 @@ class TwoDofSs(StateSpaceSystem):
         super().__init__(A, B, C, D)
 
 class Test_Obs_TwoDofSs():
+    """
+    Test data (expected Kalman gains, sim results, etc) were generated with Matlab
+    script "observer_twodofss.m".
+    """
     def test_obs_dimcheck(self):
         sys = TwoDofSs()
         with pytest.raises(ValueError):
