@@ -355,7 +355,20 @@ class StateObserver(StateSpaceSystem):
     @classmethod
     def from_ss(cls, ss, L):
         """Create a state observer based on an existing state-space system"""
-        return cls(ss.A, ss.B, ss.C, ss.D, L)
+        obs = cls(ss.A, ss.B, ss.C, ss.D, L)
+
+        obs.name = "Observer for " + ss.name
+
+        obs.state_label = [f"Estimated {l}" for l in ss.state_label]
+        obs.state_units = ss.state_units
+
+        obs.input_label = ss.input_label + ss.output_label
+        obs.input_units = ss.input_units + ss.output_units
+
+        obs.output_label = obs.state_label
+        obs.output_units = obs.state_units
+
+        return obs
 
 
     @classmethod
@@ -453,7 +466,8 @@ class StateObserver(StateSpaceSystem):
 
         """
 
-        return cls.kalman(ss.A, ss.B, ss.C, ss.D, Q, R, G)
+        L = cls.kalman(ss.A, ss.B, ss.C, ss.D, Q, R, G).L
+        return cls.from_ss(ss, L)
 
 
     def h(self, x, u, t):
@@ -521,6 +535,15 @@ class ObservedSystem(ContinuousDynamicSystem):
         super().__init__(n, m, p)
 
         self.x0 = np.concatenate([self.sys.x0, self.obs.x0], axis=0)
+
+        self.state_label = sys.state_label + [f"Estimated {l}" for l in sys.state_label]
+        self.state_units = sys.state_units + sys.state_units
+
+        self.input_label = sys.input_label
+        self.input_units = sys.input_units
+
+        self.output_label = self.state_label[:sys.n]
+        self.output_units = sys.state_units
 
 
     def f(self, x, u, t):
