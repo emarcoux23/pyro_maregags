@@ -529,6 +529,39 @@ class ContinuousDynamicSystem:
         html_video = animator.ani.to_html5_video()
         
         return html_video
+    
+    
+    #############################
+    def generate_mode_animation_html(self, i = 0 , is_3d = False ):
+        """
+        Linearize and show eigen mode i with html output
+        """
+        
+        from pyro.dynamic.statespace import linearize
+        
+        # 
+        ss = linearize( self )
+        
+        # Compute eigen decomposition
+        ss.compute_eigen_modes()
+        
+        # Simulate one mode
+        traj = ss.compute_eigen_mode_traj( i )
+        
+        # Animate mode
+        animator       = ss.get_animator()
+        
+        #label
+        template = 'Mode %i \n%0.1f+%0.1fj'
+        label    = template % (i, ss.poles[i].real, ss.poles[i].imag)
+        animator.top_right_label = label
+        
+        animator.animate_simulation( traj, 3.0, is_3d , show = False)
+        
+        html_video = animator.ani.to_html5_video()
+        
+        return html_video
+    
         
     #############################
     def plot_linearized_bode(self, u_index=0, y_index=0):
