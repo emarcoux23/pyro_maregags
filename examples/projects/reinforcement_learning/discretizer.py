@@ -16,29 +16,32 @@ class GridDynamicSystem:
     """ Create a discrete gird state-action space for a continous dynamic system """
     
     ############################
-    def __init__(self, sys , xgriddim = ( 101 , 101 ), ugriddim = ( 11 , 1 ) , dt = 0.05 , lookup = True ):
+    def __init__(self, sys , x_grid_dim = ( 101 , 101 ), u_grid_dim = ( 11 , 1 ) , dt = 0.05 , lookup = True ):
         
-        self.sys = sys # Dynamic system class
+        # Dynamic system class
+        self.sys = sys 
         
         # Discretization Parameters
         
-        self.dt    = dt        # time discretization
+        # time discretization
+        self.dt    = dt        
         
         # Grid size
-        self.xgriddim = xgriddim
-        self.ugriddim = ugriddim
+        self.x_grid_dim = x_grid_dim
+        self.u_grid_dim = u_grid_dim
         
         # Options
         self.uselookuptable = lookup
         
+        # Initialize
         self.compute()  
         
     ##############################
     def compute(self):
         """  """
 
-        self.discretizespace()
-        self.discretizeactions() 
+        self.discretize_state_space()
+        self.discretize_input_space() 
         
         print('\nDiscretization:\n---------------------------------')
         print('State space dimensions:', self.sys.n , ' Input space dimension:', self.sys.m )
@@ -53,86 +56,86 @@ class GridDynamicSystem:
             
         
     #############################
-    def discretizespace(self):
+    def discretize_state_space(self):
         """ Grid the state space """
                         
-        self.xd       = []
+        self.x_level  = []
         self.nodes_n  = 1
-        
-        # n-D grid
-        self.x_grid2node    = np.zeros( self.xgriddim , dtype = int )     # grid of corresponding index
         
         # linespace for each x-axis and total number of nodes
         for i in range(self.sys.n):
-            self.xd.append(  np.linspace( self.sys.x_lb[i]  , self.sys.x_ub[i]  , self.xgriddim[i]  ) )
-            self.nodes_n        = self.nodes_n * self.xgriddim[i]
+            self.x_level.append(  np.linspace( self.sys.x_lb[i]  , self.sys.x_ub[i]  , self.x_grid_dim[i]  ) )
+            self.nodes_n        = self.nodes_n * self.x_grid_dim[i]
         
         # 1-D List of nodes
-        self.nodes_state    = np.zeros(( self.nodes_n , self.sys.n ), dtype = float )  # Number of nodes x state dimensions
-        self.nodes_index    = np.zeros(( self.nodes_n , self.sys.n ), dtype = int   )  # Number of nodes x state dimensions
+        self.state_from_node_id = np.zeros(( self.nodes_n , self.sys.n ), dtype = float )  # Number of nodes x state dimensions
+        self.index_from_node_id = np.zeros(( self.nodes_n , self.sys.n ), dtype = int   )  # Number of nodes x state dimensions
         
         
     #############################
-    def discretizeactions(self):
-        """ Grid the action space """
+    def discretize_input_space(self):
+        """ Grid the input space """
         
-        self.ud         = []
+        self.u_level    = []
         self.actions_n  = 1
         
         # linespace for each u-axis and total number of actions
         for i in range(self.sys.m):
-            self.ud.append(  np.linspace( self.sys.u_lb[i]  , self.sys.u_ub[i]  , self.ugriddim[i]  ) )
-            self.actions_n       = self.actions_n * self.ugriddim[i]
+            self.u_level.append(  np.linspace( self.sys.u_lb[i]  , self.sys.u_ub[i]  , self.u_grid_dim[i]  ) )
+            self.actions_n       = self.actions_n * self.u_grid_dim[i]
         
         # 1-D List of actions
-        self.actions_input     =   np.zeros(( self.actions_n , self.sys.m ), dtype = float )  # Number of actions x inputs dimensions
-        self.actions_index     =   np.zeros(( self.actions_n , self.sys.m ), dtype = int   )  # Number of actions x inputs dimensions
+        self.input_from_action_id = np.zeros(( self.actions_n , self.sys.m ), dtype = float )  # Number of actions x inputs dimensions
+        self.index_from_action_id = np.zeros(( self.actions_n , self.sys.m ), dtype = int   )  # Number of actions x inputs dimensions
         
         
     ##############################
     def generate_nodes(self):
         """ Compute 1-D list of nodes """
         
+        # n-D grid of node ID
+        self.node_id_from_index = np.zeros( self.x_grid_dim , dtype = int )     # grid of node ID
+        
         # For all state nodes
-        node = 0
+        node_id = 0
         
         if self.sys.n == 2 :
             
-            for i in range(self.xgriddim[0]):
-                for j in range(self.xgriddim[1]):
+            for i in range(self.x_grid_dim[0]):
+                for j in range(self.x_grid_dim[1]):
                     
                     # State
-                    x = np.array([ self.xd[0][i]  ,  self.xd[1][j] ])
+                    x = np.array([ self.x_level[0][i]  ,  self.x_level[1][j] ])
                     
-                    # State and grid index based on node #
-                    self.nodes_state[node,:] = x
-                    self.nodes_index[node,:] = np.array([i,j])
+                    # State and grid index based on node id
+                    self.state_from_node_id[ node_id , : ] = x
+                    self.index_from_node_id[ node_id , : ] = np.array([i,j])
                     
                     # Node # based on index ij
-                    self.x_grid2node[i,j]    = node
+                    self.node_id_from_index[i,j] = node_id
     
                     # Increment node number
-                    node = node + 1
+                    node_id = node_id + 1
                     
                     
         elif self.sys.n == 3:
             
-            for i in range(self.xgriddim[0]):
-                for j in range(self.xgriddim[1]):
-                    for k in range(self.xgriddim[2]):
+            for i in range(self.x_grid_dim[0]):
+                for j in range(self.x_grid_dim[1]):
+                    for k in range(self.x_grid_dim[2]):
                     
                         # State
-                        x = np.array([ self.xd[0][i]  ,  self.xd[1][j]  , self.xd[2][k] ])
+                        x = np.array([ self.x_level[0][i]  ,  self.x_level[1][j]  , self.x_level[2][k] ])
                         
                         # State and grid index based on node #
-                        self.nodes_state[node,:] = x
-                        self.nodes_index[node,:] = np.array([i,j,k])
+                        self.state_from_node_id[ node_id , : ] = x
+                        self.index_from_node_id[ node_id , : ] = np.array([i,j,k])
                         
                         # Node # based on index ijk
-                        self.x_grid2node[i,j,k]    = node
+                        self.node_id_from_index[i,j,k] = node_id
         
                         # Increment node number
-                        node = node + 1
+                        node_id = node_id + 1
                         
                         
                         
@@ -140,23 +143,23 @@ class GridDynamicSystem:
             
             # NOT yet validated!!!
             
-            for i in range(self.xgriddim[0]):
-                for j in range(self.xgriddim[1]):
-                    for k in range(self.xgriddim[2]):
-                        for l in range(self.xgriddim[3]):
+            for i in range(self.x_grid_dim[0]):
+                for j in range(self.x_grid_dim[1]):
+                    for k in range(self.x_grid_dim[2]):
+                        for l in range(self.x_grid_dim[3]):
                     
                             # State
-                            x = np.array([ self.xd[0][i]  ,  self.xd[1][j]  , self.xd[2][k] , self.xd[3][l]])
+                            x = np.array([ self.x_level[0][i]  ,  self.x_level[1][j]  , self.x_level[2][k] , self.x_level[3][l]])
                             
                             # State and grid index based on node #
-                            self.nodes_state[node,:] = x
-                            self.nodes_index[node,:] = np.array([i,j,k,l])
+                            self.state_from_node_id[ node_id , : ] = x
+                            self.index_from_node_id[ node_id , : ] = np.array([i,j,k,l])
                             
                             # Node # based on index ijkl
-                            self.x_grid2node[i,j,k,l]    = node
+                            self.node_id_from_index[i,j,k,l] = node_id
             
                             # Increment node number
-                            node = node + 1
+                            node_id = node_id + 1
                     
         else:
             
@@ -167,37 +170,46 @@ class GridDynamicSystem:
     def generate_actions(self):
         """ Compute 1-D list of actions """
         
+        # m-D grid of action ID
+        self.action_id_from_index = np.zeros( self.u_grid_dim , dtype = int )     # grid of node ID
+        
         # For all state nodes
-        action = 0
+        action_id = 0
         
         # Single input
         
         if self.sys.m == 1 :
         
-            for k in range(self.ugriddim[0]):
+            for k in range(self.u_grid_dim[0]):
                     
-                u = np.array([ self.ud[0][k] ])
+                u = np.array([ self.u_level[0][k] ])
                 
                 # State and grid index based on node #
-                self.actions_input[action,:] = u
-                self.actions_index[action,:] = k
+                self.input_from_action_id[ action_id , : ] = u
+                self.index_from_action_id[ action_id , : ] = k
+                
+                # Action # based on index k
+                self.action_id_from_index[k] = action_id
     
                 # Increment node number
-                action = action + 1
+                action_id = action_id + 1
                 
         elif self.sys.m == 2 :
             
-            for k in range(self.ugriddim[0]):
-                for l in range(self.ugriddim[1]):
+            for k in range(self.u_grid_dim[0]):
+                for l in range(self.u_grid_dim[1]):
                     
-                    u = np.array([ self.ud[0][k] , self.ud[1][l] ])
+                    u = np.array([ self.u_level[0][k] , self.u_level[1][l] ])
                     
                     # State and grid index based on node #
-                    self.actions_input[action,:] = u
-                    self.actions_index[action,:] = np.array([k,l])
+                    self.input_from_action_id[ action_id , : ] = u
+                    self.index_from_action_id[ action_id , : ] = np.array([k,l])
+                    
+                    # Action # based on index k
+                    self.action_id_from_index[k,l] = action_id
         
                     # Increment node number
-                    action = action + 1
+                    action_id = action_id + 1
         
         else:
             
@@ -207,31 +219,30 @@ class GridDynamicSystem:
     ##############################
     def compute_lookuptable(self):
         """ Compute lookup table for faster evaluation """
-
-        if self.uselookuptable:
-            # Evaluation lookup tables      
-            self.action_isok   = np.zeros( ( self.nodes_n , self.actions_n ) , dtype = bool )
-            self.x_next        = np.zeros( ( self.nodes_n , self.actions_n , self.sys.n ) , dtype = float ) # lookup table for dynamic
             
-            # For all state nodes        
-            for node in range( self.nodes_n ):  
-                
-                    x = self.nodes_state[ node , : ]
-                
-                    # For all control actions
-                    for action in range( self.actions_n ):
-                        
-                        u = self.actions_input[ action , : ]
-                        
-                        # Compute next state for all inputs
-                        x_next = self.sys.f( x , u ) * self.dt + x
-                        
-                        # validity of the options
-                        x_ok = self.sys.isavalidstate(x_next)
-                        u_ok = self.sys.isavalidinput(x,u)
-                        
-                        self.x_next[ node,  action, : ] = x_next
-                        self.action_isok[ node, action] = ( u_ok & x_ok )
+        # Evaluation lookup tables      
+        self.action_isok   = np.zeros( ( self.nodes_n , self.actions_n ) , dtype = bool )
+        self.x_next        = np.zeros( ( self.nodes_n , self.actions_n , self.sys.n ) , dtype = float ) # lookup table for dynamic
+        
+        # For all state nodes        
+        for node_id in range( self.nodes_n ):  
+            
+                x = self.state_from_node_id[ node_id , : ]
+            
+                # For all control actions
+                for action_id in range( self.actions_n ):
+                    
+                    u = self.input_from_action_id[ action_id , : ]
+                    
+                    # Compute next state for all inputs
+                    x_next = self.sys.f( x , u ) * self.dt + x
+                    
+                    # validity of the options
+                    x_ok = self.sys.isavalidstate(x_next)
+                    u_ok = self.sys.isavalidinput(x,u)
+                    
+                    self.x_next[ node_id ,  action_id , : ] = x_next
+                    self.action_isok[ node_id , action_id ] = ( u_ok & x_ok )
                         
                         
     
