@@ -16,7 +16,7 @@ class GridDynamicSystem:
     """ Create a discrete gird state-action space for a continous dynamic system """
     
     ############################
-    def __init__(self, sys , x_grid_dim = ( 101 , 101 ), u_grid_dim = ( 11 , 1 ) , dt = 0.05 , lookup = True ):
+    def __init__(self, sys , x_grid_dim = [ 101 , 101 ], u_grid_dim = [ 11 ] , dt = 0.05 , lookup = True ):
         
         # Dynamic system class
         self.sys = sys 
@@ -27,8 +27,16 @@ class GridDynamicSystem:
         self.dt    = dt        
         
         # Grid size
-        self.x_grid_dim = x_grid_dim
-        self.u_grid_dim = u_grid_dim
+        self.x_grid_dim = np.array( x_grid_dim )
+        self.u_grid_dim = np.array( u_grid_dim )
+        
+        # Range
+        self.x_range     = self.sys.x_ub - self.sys.x_lb
+        self.u_range     = self.sys.u_ub - self.sys.u_lb
+        
+        # spatial step size
+        self.x_step_size = self.x_range / ( self.x_grid_dim - 1 )
+        self.u_step_size = self.u_range / ( self.u_grid_dim - 1 )
         
         # Options
         self.uselookuptable = lookup
@@ -52,7 +60,9 @@ class GridDynamicSystem:
         self.generate_actions()
         
         if self.uselookuptable:
-            self.compute_lookuptable()
+            self.compute_xnext_table()
+            self.compute_action_set_table()
+            self.compute_nearest_snext_table()
             
         
     #############################
@@ -217,12 +227,33 @@ class GridDynamicSystem:
             
             
     ##############################
-    def compute_lookuptable(self):
-        """ Compute lookup table for faster evaluation """
+    def compute_action_set_table(self):
+        """ Compute a boolen table describing the action set for each node """
             
         # Evaluation lookup tables      
         self.action_isok   = np.zeros( ( self.nodes_n , self.actions_n ) , dtype = bool )
-        self.x_next        = np.zeros( ( self.nodes_n , self.actions_n , self.sys.n ) , dtype = float ) # lookup table for dynamic
+        
+        # For all state nodes        
+        for node_id in range( self.nodes_n ):  
+            
+                x = self.state_from_node_id[ node_id , : ]
+            
+                # For all control actions
+                for action_id in range( self.actions_n ):
+                    
+                    u = self.input_from_action_id[ action_id , : ]
+
+                    u_ok = self.sys.isavalidinput(x,u)
+
+                    self.action_isok[ node_id , action_id ] = u_ok
+                    
+                    
+    ##############################
+    def compute_xnext_table(self):
+        """ Compute a x_next lookup table for the forward dynamics """
+            
+        # Evaluation lookup tables
+        self.x_next_table = np.zeros( ( self.nodes_n , self.actions_n , self.sys.n ) , dtype = float ) # lookup table for dynamic
         
         # For all state nodes        
         for node_id in range( self.nodes_n ):  
@@ -237,12 +268,37 @@ class GridDynamicSystem:
                     # Compute next state for all inputs
                     x_next = self.sys.f( x , u ) * self.dt + x
                     
-                    # validity of the options
-                    x_ok = self.sys.isavalidstate(x_next)
-                    u_ok = self.sys.isavalidinput(x,u)
+                    self.x_next_table[ node_id ,  action_id , : ] = x_next
                     
-                    self.x_next[ node_id ,  action_id , : ] = x_next
-                    self.action_isok[ node_id , action_id ] = ( u_ok & x_ok )
+    
+    ##############################
+    def compute_nearest_snext_table(self):
+        """ Compute s_next lookup table for the forward dynamics """
+            
+        # Evaluation lookup tables
+        self.s_next_table = np.zeros( ( self.nodes_n , self.actions_n ) , dtype = int ) # lookup table for dynamic
+        
+        # For all state nodes        
+        for node_id in range( self.nodes_n ):  
+            
+                x = self.state_from_node_id[ node_id , : ]
+            
+                # For all control actions
+                for action_id in range( self.actions_n ):
+                    
+                    # Compute the control input
+                    u = self.input_from_action_id[ action_id , : ]
+                    
+                    # Compute next state
+                    x_next = self.sys.f( x , u ) * self.dt + x
+                    
+                    # Compute nearest node
+                    s_next = self.get_nearest_node_id_from_state( x_next )
+                    
+                    # Put in the lookup table
+                    self.s_next_table[ node_id ,  action_id ] = s_next
+                    
+                    
                         
                         
     
@@ -251,51 +307,48 @@ class GridDynamicSystem:
     ##############################
     
     ##############################
-    def x2node(self, x ):
-        """  """
-        raise NotImplementedError
+    def get_index_from_state(self, x ):
+        """  
+        Return state position on the grid in terms of fractionnal indexes 
+        """
         
-        s = 0
+        indexes = np.zeros( self.sys.n , dtype = float )
         
-        return s
-    
-    ##############################
-    def x2index(self, x ):
-        """  """
-        raise NotImplementedError
+        # for all state dimensions
+        for i in range( self.sys.n ):
+            
+            indexes[i] = ( x[i] - self.sys.x_lb[i] ) / self.x_range[i] * ( self.x_grid_dim[i] - 1 )
         
-        i = 0
-        j = 0
-        
-        return (i,j)
-    
-    ##############################
-    def node2x(self, x ):
-        """  """
-        raise NotImplementedError
-        
-        s = 0
-        
-        return s
+        return indexes
     
     
     ##############################
-    def index2x(self, u ):
-        """  """
-        raise NotImplementedError
+    def get_nearest_index_from_state(self, x ):
+        """  
+        Return nearest indexes on the state-space grid from a state
+        """
         
-        a = 0
+        # Round the indexes to the nearest integer
+        nearest_indexes = np.rint( self.get_index_from_state( x ) ).astype(int)
         
-        return a
+        clipped_indexes = np.clip( nearest_indexes , 0 , self.x_grid_dim - 1 )
+        
+        # SHould we return -1 for out of bounds indexes??
+        
+        return clipped_indexes
+    
     
     ##############################
-    def u2index(self, u ):
-        """  """
-        raise NotImplementedError
+    def get_nearest_node_id_from_state(self, x ):
+        """  
+        Return the node id that is the closest on the grid from x
+        """
         
-        k = 0
+        indexes = tuple( self.get_nearest_index_from_state( x ) )
         
-        return k
+        node_id = self.node_id_from_index[ indexes ]
+        
+        return node_id
             
                 
                 
@@ -311,5 +364,18 @@ class GridDynamicSystem:
 
 if __name__ == "__main__":     
     """ MAIN TEST """
+
+    from pyro.dynamic  import pendulum
+
+    sys  = pendulum.SinglePendulum()
     
-    pass
+    G =  GridDynamicSystem( sys )
+    
+    sys.x_ub = np.array([2.0,2.0])
+    sys.x_lb = np.array([-2.0,-2.0])
+    sys.u_ub = np.array([1.0,1.0])
+    sys.u_lb = np.array([0.0,0.0])
+    
+    g = GridDynamicSystem( sys , [ 5, 5] , [2] )
+    
+    
