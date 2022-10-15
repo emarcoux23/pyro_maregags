@@ -6,6 +6,7 @@ Created on Wed Jul 12 10:02:12 2017
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 '''
 ################################################################################
@@ -41,8 +42,18 @@ class GridDynamicSystem:
         # Options
         self.uselookuptable = lookup
         
+        # Plot params
+        self.fontsize             = 5
+        self.figsize              = (4, 3)
+        self.dpi                  = 300
+        
         # Initialize
         self.compute()  
+        
+        
+    ##############################
+    ### Initial Computations
+    ##############################
         
     ##############################
     def compute(self):
@@ -303,7 +314,7 @@ class GridDynamicSystem:
                         
     
     ##############################
-    ### Quick shorcut 
+    ### Quick convertion shorcut 
     ##############################
     
     ##############################
@@ -350,8 +361,115 @@ class GridDynamicSystem:
         
         return node_id
             
+    
+    ##############################
+    ### Tools
+    ##############################
+    
+    ##############################
+    def n_grid_from_array(self, J ):
+        """  
+        convert a scalar value from node_id 1-D array to n-D array (table)
+        """
+        
+        if self.nodes_n != J.size:
+            raise ValueError("Grid size does not match optimal action table size")
+        
+        # n-D grid of values
+        J_grid = np.zeros( self.x_grid_dim , dtype = float )
+        
+        # For all state nodes        
+        for node_id in range( self.nodes_n ): 
+            
+            indexes = tuple( self.index_from_node_id[ node_id , : ] )
+            
+            J_grid[ indexes ] = J [ node_id ]
+            
+        return J_grid
+    
+    
+    ##############################
+    def input_from_policy_array(self, pi , k ):
+        """  
+        from pi array to u[k] array
+        """
+        
+        if self.nodes_n != pi.size:
+            raise ValueError("Grid size does not match optimal action table size")
+            
+        uk_array = np.zeros( self.nodes_n , dtype = float )
+        
+        # For all state nodes        
+        for node_id in range( self.nodes_n ): 
+            
+            a = pi[ node_id ]
+            
+            uk_array[ node_id ] = self.input_from_action_id[ a , k ]
+            
+        return uk_array
+    
+    
+    ##############################
+    def plot_grid_value(self, J , name = 'Value on the grid' , x = 0 , y = 1, jmax =  np.inf , jmin = -1):
+        """  
+        plot a scalar value (array by node-id) on a grid
+        """
+        
+        ##################################
+        # Figure init
+        ##################################
+        
+        fig = plt.figure(figsize= self.figsize, dpi=self.dpi, frameon=True)
+        fig.canvas.manager.set_window_title( name )
+        ax  = fig.add_subplot(1, 1, 1)
+
+        xname = self.sys.state_label[0] + ' ' + self.sys.state_units[0]
+        yname = self.sys.state_label[1] + ' ' + self.sys.state_units[1]
+        
+        plt.ylabel(yname, fontsize=self.fontsize)
+        plt.xlabel(xname, fontsize=self.fontsize)
+
+        plt.axis([self.sys.x_lb[ x ],
+                  self.sys.x_ub[ x ],
+                  self.sys.x_lb[ y ],
+                  self.sys.x_ub[ y ]])
+        
+        x_level = self.x_level[ x ]
+        y_level = self.x_level[ y ]
+        #X, Y    = np.meshgrid( x_level , y_level )
+        
+        
+        ##################################
+        ### Create grid of data and plot
+        #################################
+        
+        J_grid_nd = np.clip( self.n_grid_from_array( J ) , jmin , jmax )
+        
+        J_grid_2d = J_grid_nd # TODO for other dim
+        
+        plt.pcolormesh( x_level, y_level, J_grid_2d.T, shading='gouraud')
+        
+        
+        ##################################
+        # Figure param
+        ##################################
+        
+        ax.tick_params( labelsize = self.fontsize )
+
+        plt.colorbar()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
                 
-                
+        
+    ##############################
+    def plot_control_input_from_policy(self, pi , k ):
+        """  
+        """
+        
+        uk_array = self.input_from_policy_array( pi, k)
+        
+        self.plot_grid_value( uk_array , 'Control input k')
 
 
 

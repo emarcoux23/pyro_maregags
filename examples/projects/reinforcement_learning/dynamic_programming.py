@@ -305,13 +305,19 @@ if __name__ == "__main__":
     # DP algo
     dp = DynamicProgramming( grid_sys, qcf )
     
-    dp.compute_steps(200)
+    dp.compute_steps(1)
     
-    # note validated!!
+    # not validated!!
     
+    grid_sys.plot_grid_value( dp.J_next )
+    grid_sys.plot_control_input_from_policy( dp.pi_list[-1] , 0)
+    
+    """
     a = dp.pi_list[ -1 ]
     
     ctl = tabular_controller( grid_sys , a )
+    
+    ctl.plot_control_law( sys = sys , n = 100)
     
     
     #asign controller
@@ -321,6 +327,8 @@ if __name__ == "__main__":
     
     # Simulation and animation
     cl_sys.x0   = np.array([0,0])
+    cl_sys.compute_trajectory( 10, 10001, 'euler')
     cl_sys.plot_trajectory('xu')
     cl_sys.plot_phase_plane_trajectory()
     cl_sys.animate_simulation()
+    """
