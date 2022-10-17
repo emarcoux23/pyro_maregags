@@ -40,7 +40,7 @@ class LookUpTableController( controller.StaticController ):
         # Grid sys
         self.grid_sys = grid_sys
         
-        # Table of optimal actions
+        # Table of actions
         self.pi = pi
         
         # Label
@@ -48,6 +48,7 @@ class LookUpTableController( controller.StaticController ):
         
         # Interpolation Options
         self.interpol_method = []
+        
         for k in range(self.m):
             self.interpol_method.append('linear') # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
             
@@ -94,9 +95,9 @@ class LookUpTableController( controller.StaticController ):
 class EpsilonGreedyController( LookUpTableController ):
     
     ############################
-    def __init__(self,  grid_sys , a_star ):
+    def __init__(self,  grid_sys , pi_star ):
         """ """
-        super().__init__( grid_sys , a_star )
+        super().__init__( grid_sys , pi_star )
         
 
         self.name = 'Epsilon Greedy Controller'

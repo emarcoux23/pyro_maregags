@@ -34,7 +34,7 @@ dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
 #dp.interpol_method = 'linear'  #18 sec
 #dp.interpol_method =  'linear' #
 
-dp.compute_steps(150)
+dp.compute_steps(250)
 
 
 grid_sys.plot_grid_value( dp.J_next )
