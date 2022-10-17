@@ -8,6 +8,9 @@ Created on Wed Jul 12 10:02:12 2017
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy.interpolate import RectBivariateSpline
+from scipy.interpolate import RegularGridInterpolator
+
 '''
 ################################################################################
 '''
@@ -265,6 +268,7 @@ class GridDynamicSystem:
             
         # Evaluation lookup tables
         self.x_next_table = np.zeros( ( self.nodes_n , self.actions_n , self.sys.n ) , dtype = float ) # lookup table for dynamic
+        self.x_next_isok  = np.zeros( ( self.nodes_n , self.actions_n ) , dtype = bool )
         
         # For all state nodes        
         for node_id in range( self.nodes_n ):  
@@ -278,8 +282,10 @@ class GridDynamicSystem:
                     
                     # Compute next state for all inputs
                     x_next = self.sys.f( x , u ) * self.dt + x
+                    x_ok   = self.sys.isavalidstate( x_next )
                     
-                    self.x_next_table[ node_id ,  action_id , : ] = x_next
+                    self.x_next_table[ node_id , action_id , : ] = x_next
+                    self.x_next_isok[  node_id , action_id ]     = x_ok
                     
     
     ##############################
@@ -386,6 +392,51 @@ class GridDynamicSystem:
             J_grid[ indexes ] = J [ node_id ]
             
         return J_grid
+    
+    ##############################
+    def compute_interpolation_function(self, J , method='linear' ):
+        """  
+        Return interpolation function for value based on x coordinates
+        
+        Methods: "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
+        """
+        
+        if self.nodes_n != J.size:
+            raise ValueError("Grid size does not match data")
+        
+        # n-D grid of values
+        J_grid = self.n_grid_from_array( J )
+        
+        levels = tuple(self.x_level[i] for i in range(self.sys.n))
+        
+        interpol = RegularGridInterpolator( levels , J_grid , method )
+        
+        return interpol
+    
+    
+    ##############################
+    def compute_bivariatespline_2D_interpolation_function(self, J ):
+        """  
+        Return interpolation function for value based on x coordinates
+        
+        Methods: "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
+        """
+        
+        if self.sys.n == 2 : 
+        
+            if self.nodes_n != J.size:
+                raise ValueError("Grid size does not match data")
+            
+            # n-D grid of values
+            J_grid = self.n_grid_from_array( J )
+            
+            interpol = RectBivariateSpline( self.x_level[0] , self.x_level[1] , J_grid , bbox=[None, None, None, None], kx=1, ky=1,)
+            
+        else:
+            
+            raise NotImplementedError
+        
+        return interpol
     
     
     ##############################
