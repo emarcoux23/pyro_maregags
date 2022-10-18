@@ -17,7 +17,7 @@ from pyro.analysis import costfunction
 sys  = pendulum.SinglePendulum()
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [11] )
+grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [3] )
 
 # Cost Function
 qcf = sys.cost_function
@@ -37,11 +37,11 @@ dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
 dp.compute_steps(250)
 
 
-grid_sys.plot_grid_value( dp.J_next )
+#grid_sys.plot_grid_value( dp.J_next )
 
 ctl = dprog.LookUpTableController( grid_sys , dp.pi )
 
-ctl.plot_control_law( sys = sys , n = 100)
+#ctl.plot_control_law( sys = sys , n = 100)
 
 
 #asign controller

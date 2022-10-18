@@ -17,15 +17,67 @@ from scipy.interpolate import RegularGridInterpolator
 
 
 class GridDynamicSystem:
-    """ Create a discrete gird state-action space for a continous dynamic system """
     
     ############################
     def __init__(self, sys , x_grid_dim = [ 101 , 101 ], u_grid_dim = [ 11 ] , dt = 0.05 , lookup = True ):
+        """
+        Class of tools for working with a discretize state space
+
+        Parameters
+        ----------
+        sys : pyro ContinuousDynamicSystem class
+              A dynamic system 
+            
+        x_grid_dim : list of integers
+                     The number of discret level for each dimension of the state space 
+            
+        u_grid_dim : list of integers
+                     The number of discret level for each dimension of the input space 
+            
+        dt : float
+             The time step
+            
+        lookup : bool
+                 option of computing look up table of the foward dynamics
+                 
+        Returns
+        -------
+        self.x_level : list of array
+                        discrete level for each state coordinates on the grid
+                        
+        self.u_level : list of  array
+                        discrete level for each input coordinates on the grid
+                        
+        self.nodes_n    : int
+                          total number of discrete state on the grid
+        
+        self.actions_n  : int
+                          total number of discrete input on the grid
+                          
+        self.node_id_from_index : n-D array of int
+                                  The node ID based on index for each state coordinates
+                                  
+        self.action_id_from_index : n-D array of int
+                                    The action ID based on index for each input coordinates
+                                    
+        self.state_from_node_id : 2-D array of float
+                                  The state value based on node ID 
+        
+        self.index_from_node_id : 2-D array of int
+                                  The indexes based on node ID 
+        
+        self.input_from_action_id : 2-D array of float
+                                    The state value based on action ID 
+        
+        self.index_from_action_id : 2-D array of int
+                                    The indexes based on action ID 
+                                    
+        more ...
+        
+        """
         
         # Dynamic system class
         self.sys = sys 
-        
-        # Discretization Parameters
         
         # time discretization
         self.dt    = dt        
@@ -34,16 +86,8 @@ class GridDynamicSystem:
         self.x_grid_dim = np.array( x_grid_dim )
         self.u_grid_dim = np.array( u_grid_dim )
         
-        # Range
-        self.x_range     = self.sys.x_ub - self.sys.x_lb
-        self.u_range     = self.sys.u_ub - self.sys.u_lb
-        
-        # spatial step size
-        self.x_step_size = self.x_range / ( self.x_grid_dim - 1 )
-        self.u_step_size = self.u_range / ( self.u_grid_dim - 1 )
-        
         # Options
-        self.uselookuptable = lookup
+        self.computelookuptable = lookup
         
         # Plot params
         self.fontsize             = 5
@@ -65,7 +109,8 @@ class GridDynamicSystem:
         self.discretize_state_space()
         self.discretize_input_space() 
         
-        print('\nDiscretization:\n---------------------------------')
+        print('\nGrid dynamics system for:', self.sys.name)
+        print('---------------------------------------------------')
         print('State space dimensions:', self.sys.n , ' Input space dimension:', self.sys.m )
         print('Number of nodes:', self.nodes_n , ' Number of actions:', self.actions_n )
         print('Number of node-action pairs:', self.nodes_n * self.actions_n )
@@ -73,7 +118,7 @@ class GridDynamicSystem:
         self.generate_nodes()
         self.generate_actions()
         
-        if self.uselookuptable:
+        if self.computelookuptable:
             self.compute_xnext_table()
             self.compute_action_set_table()
             self.compute_nearest_snext_table()
@@ -91,10 +136,9 @@ class GridDynamicSystem:
             self.x_level.append(  np.linspace( self.sys.x_lb[i]  , self.sys.x_ub[i]  , self.x_grid_dim[i]  ) )
             self.nodes_n        = self.nodes_n * self.x_grid_dim[i]
         
-        # 1-D List of nodes
-        self.state_from_node_id = np.zeros(( self.nodes_n , self.sys.n ), dtype = float )  # Number of nodes x state dimensions
-        self.index_from_node_id = np.zeros(( self.nodes_n , self.sys.n ), dtype = int   )  # Number of nodes x state dimensions
-        
+        # range and step size for each dim
+        self.x_range     = self.sys.x_ub - self.sys.x_lb
+        self.x_step_size = self.x_range / ( self.x_grid_dim - 1 )
         
     #############################
     def discretize_input_space(self):
@@ -108,17 +152,21 @@ class GridDynamicSystem:
             self.u_level.append(  np.linspace( self.sys.u_lb[i]  , self.sys.u_ub[i]  , self.u_grid_dim[i]  ) )
             self.actions_n       = self.actions_n * self.u_grid_dim[i]
         
-        # 1-D List of actions
-        self.input_from_action_id = np.zeros(( self.actions_n , self.sys.m ), dtype = float )  # Number of actions x inputs dimensions
-        self.index_from_action_id = np.zeros(( self.actions_n , self.sys.m ), dtype = int   )  # Number of actions x inputs dimensions
+        # range and step size for each dim
+        self.u_range     = self.sys.u_ub - self.sys.u_lb
+        self.u_step_size = self.u_range / ( self.u_grid_dim - 1 )
         
         
     ##############################
     def generate_nodes(self):
-        """ Compute 1-D list of nodes """
+        """ Compute 1-D list of nodes based on a regular grid discretization """
         
         # n-D grid of node ID
         self.node_id_from_index = np.zeros( self.x_grid_dim , dtype = int )     # grid of node ID
+        
+        # 1-D List of nodes
+        self.state_from_node_id = np.zeros(( self.nodes_n , self.sys.n ), dtype = float )  # Number of nodes x state dimensions
+        self.index_from_node_id = np.zeros(( self.nodes_n , self.sys.n ), dtype = int   )  # Number of nodes x state dimensions
         
         # For all state nodes
         node_id = 0
@@ -192,10 +240,14 @@ class GridDynamicSystem:
                 
     ##############################
     def generate_actions(self):
-        """ Compute 1-D list of actions """
+        """ Compute 1-D list of actions based on a regular grid discretization"""
         
         # m-D grid of action ID
         self.action_id_from_index = np.zeros( self.u_grid_dim , dtype = int )     # grid of node ID
+        
+        # 1-D List of actions
+        self.input_from_action_id = np.zeros(( self.actions_n , self.sys.m ), dtype = float )  # Number of actions x inputs dimensions
+        self.index_from_action_id = np.zeros(( self.actions_n , self.sys.m ), dtype = int   )  # Number of actions x inputs dimensions
         
         # For all state nodes
         action_id = 0
@@ -373,9 +425,11 @@ class GridDynamicSystem:
     ##############################
     
     ##############################
-    def n_grid_from_array(self, J ):
+    def get_grid_from_array(self, J ):
         """  
         convert a scalar value from node_id 1-D array to n-D array (table)
+        
+        TODO: could replace by J.reshape( self.x_grid_dim ) ??
         """
         
         if self.nodes_n != J.size:
@@ -405,7 +459,7 @@ class GridDynamicSystem:
             raise ValueError("Grid size does not match data")
         
         # n-D grid of values
-        J_grid = self.n_grid_from_array( J )
+        J_grid = self.get_grid_from_array( J )
         
         levels = tuple(self.x_level[i] for i in range(self.sys.n))
         
@@ -428,7 +482,7 @@ class GridDynamicSystem:
                 raise ValueError("Grid size does not match data")
             
             # n-D grid of values
-            J_grid = self.n_grid_from_array( J )
+            J_grid = self.get_grid_from_array( J )
             
             interpol = RectBivariateSpline( self.x_level[0] , self.x_level[1] , J_grid , bbox=[None, None, None, None], kx=1, ky=1,)
             
@@ -440,9 +494,9 @@ class GridDynamicSystem:
     
     
     ##############################
-    def input_from_policy_array(self, pi , k ):
+    def get_input_from_policy(self, pi , k ):
         """  
-        from pi array to u[k] array
+        from pi array to k coordinate value of the control input
         """
         
         if self.nodes_n != pi.size:
@@ -487,19 +541,20 @@ class GridDynamicSystem:
         
         x_level = self.x_level[ x ]
         y_level = self.x_level[ y ]
-        #X, Y    = np.meshgrid( x_level , y_level )
-        
         
         ##################################
         ### Create grid of data and plot
         #################################
         
-        J_grid_nd = np.clip( self.n_grid_from_array( J ) , jmin , jmax )
+        J_grid_nd = np.clip( self.get_grid_from_array( J ) , jmin , jmax )
         
-        J_grid_2d = J_grid_nd # TODO for other dim
+        if self.sys.n == 2:
+            J_grid_2d = J_grid_nd 
+            
+        else:
+            raise NotImplementedError
         
-        plt.pcolormesh( x_level, y_level, J_grid_2d.T, shading='gouraud')
-        
+        pcm = plt.pcolormesh( x_level, y_level, J_grid_2d.T, shading='gouraud')
         
         ##################################
         # Figure param
@@ -511,6 +566,8 @@ class GridDynamicSystem:
         plt.grid(True)
         plt.tight_layout()
         plt.show()
+        
+        return fig, ax, pcm
                 
         
     ##############################
@@ -518,7 +575,7 @@ class GridDynamicSystem:
         """  
         """
         
-        uk_array = self.input_from_policy_array( pi, k)
+        uk_array = self.get_input_from_policy( pi, k)
         
         self.plot_grid_value( uk_array , 'Control input k')
 

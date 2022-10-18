@@ -23,9 +23,15 @@ class LookUpTableController( controller.StaticController ):
 
     ############################
     def __init__(self, grid_sys , pi ):
-        """ 
-        grid_sys : pyro class of discretized continuous system
-        a_star   : list of optimal action id by node id
+        """
+        Pyro controller based on a discretized lookpup table of control inputs
+
+        Parameters
+        ----------
+        grid_sys : pyro GridDynamicSystem class
+            A discretized dynamic system
+        pi : numpy array, dim =  self.grid_sys.nodes_n , dtype = int
+            A list of action index for each node id
         """
         
         if grid_sys.nodes_n != pi.size:
@@ -50,6 +56,7 @@ class LookUpTableController( controller.StaticController ):
         self.interpol_method = []
         
         for k in range(self.m):
+            
             self.interpol_method.append('linear') # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
             
         self.compute_interpol_functions()
@@ -63,7 +70,7 @@ class LookUpTableController( controller.StaticController ):
         
         for k in range(self.m):
             
-            u_k      = self.grid_sys.input_from_policy_array( self.pi, k)
+            u_k      = self.grid_sys.get_input_from_policy( self.pi, k)
             self.u_interpol.append( self.grid_sys.compute_interpolation_function( u_k , self.interpol_method[k] ) )
         
     
@@ -95,14 +102,25 @@ class LookUpTableController( controller.StaticController ):
 class EpsilonGreedyController( LookUpTableController ):
     
     ############################
-    def __init__(self,  grid_sys , pi_star ):
-        """ """
-        super().__init__( grid_sys , pi_star )
+    def __init__(self,  grid_sys , pi_star , epsilon = 0.7 ):
+        """
+        Pyro controller based on a discretized lookpup table of optimal 
+        control inputs where the optimal action is taken with probability
+        espsilon, else a random action is taken.
+
+        Parameters
+        ----------
+        grid_sys : pyro GridDynamicSystem class
+            A discretized dynamic system
+        pi_star : numpy array, dim =  self.grid_sys.nodes_n , dtype = int
+            A list of optimal action index for each node id
+        """
         
+        super().__init__( grid_sys , pi_star )
 
         self.name = 'Epsilon Greedy Controller'
         
-        self.epsilon = 0.7
+        self.epsilon = epsilon
         
         
     #############################
@@ -119,6 +137,7 @@ class EpsilonGreedyController( LookUpTableController ):
         
             # Random exploration
             random_index = int(np.random.uniform( 0 , self.grid_sys.actions_n ))
+            
             u = self.grid_sys.input_from_action_id[ random_index ]
             
             # TODO add domain check for random actions?
@@ -145,9 +164,7 @@ class DynamicProgramming:
         self.tf  = final_time
         
         # Options
-        
         self.interpol_method ='linear' # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
-        
         
         # Memory
         self.t = self.tf
@@ -268,11 +285,40 @@ class DynamicProgramming:
     ################################
     def compute_steps(self, l = 50):
         """ compute number of step """
+        
+        self.plot_cost2go()
                
         for i in range(l):
             self.initialize_backward_step()
             self.compute_backward_step()
             self.finalize_backward_step()
+            self.update_cost2go_plot(i)
+            
+            
+    ################################
+    def plot_cost2go(self):
+               
+        fig, ax, pcm = self.grid_sys.plot_grid_value( self.J_next , 'Cost-to-go')
+        
+        text = ax.text(0.05, 0.05, '', transform=ax.transAxes)
+        
+        self.cost2go_fig = [fig, ax, pcm, text]
+        
+        plt.pause( 0.001 )
+        plt.ion()
+        
+    
+    ################################
+    def update_cost2go_plot(self, step ):
+        
+        #J = np.clip( self.grid_sys.get_grid_from_array( self.J_next ) , 1000 , -1 )
+        
+        J = self.grid_sys.get_grid_from_array( self.J_next )
+               
+        self.cost2go_fig[2].set_array( np.ravel( J.T ) )
+        self.cost2go_fig[3].set_text('Number of steps = %i' % ( step ))
+        
+        plt.pause( 0.001 )
             
 
 
