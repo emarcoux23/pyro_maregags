@@ -23,18 +23,22 @@ grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [3] )
 qcf = sys.cost_function
 
 qcf.xbar = np.array([ -3.14 , 0 ]) # target
-qcf.INF  = 10000
+qcf.INF  = 1000000
+
 
 # DP algo
 #dp = dprog.DynamicProgramming( grid_sys, qcf )
 #dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
 
+
 #dp.interpol_method = 'nearest' #12 sec
 #dp.interpol_method = 'linear'  #18 sec
 #dp.interpol_method =  'linear' #
 
-dp.compute_steps(250)
+#dp.plot_dynamic_cost2go = False
+dp.compute_steps(50)
+dp.save_latest('test2d')
 
 
 #grid_sys.plot_grid_value( dp.J_next )

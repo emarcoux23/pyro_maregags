@@ -7,6 +7,7 @@ Created on Wed Jul 12 10:02:12 2017
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import RegularGridInterpolator
@@ -515,9 +516,59 @@ class GridDynamicSystem:
     
     
     ##############################
-    def plot_grid_value(self, J , name = 'Value on the grid' , x = 0 , y = 1, jmax =  np.inf , jmin = -1):
+    def get_2D_slice_of_grid(self, Z, axis_1 = 0 , axis_2 = 1 ):
+        
+        if self.sys.n == 2:
+            Z_2d = Z
+        
+        elif self.sys.n > 2:
+            
+            axis_1_dim = Z.shape[ axis_1 ]
+            axis_2_dim = Z.shape[ axis_2 ]
+            
+            Z_2d = np.zeros( ( axis_1_dim , axis_2_dim ), dtype = float )
+            
+            # get defaults index for other axis
+            indexes = self.get_nearest_index_from_state( self.sys.xbar )
+            
+            for i in range( axis_1_dim ):
+                for j in range( axis_2_dim):
+                    
+                    indexes[ axis_1 ] = i
+                    indexes[ axis_2 ] = j
+                    
+                    Z_2d[i,j] = Z[ tuple(indexes) ]
+                    
+        else:
+            
+            raise NotImplementedError
+            
+        return Z_2d
+    
+    
+    ##############################
+    def plot_grid_value(self, J , name = 'Value on the grid' , x = 0 , y = 1, jmax =  np.inf , jmin = -1 ):
         """  
         plot a scalar value (array by node-id) on a grid
+        
+        Parameters
+        ----------
+        J : n-D numpy array
+        
+        name : string
+               name of the figure
+        
+        x : int 
+            index of J axis to plot as the x-axis on the graph
+            
+        y : int 
+            index of J axis to plot as the y-axis on the graph
+            
+        jmax : float
+               maximum value to clip the J array on the plot
+            
+        jmin : float
+               minimum value to clip the J array on the plot
         """
         
         ##################################
@@ -528,16 +579,11 @@ class GridDynamicSystem:
         fig.canvas.manager.set_window_title( name )
         ax  = fig.add_subplot(1, 1, 1)
 
-        xname = self.sys.state_label[0] + ' ' + self.sys.state_units[0]
-        yname = self.sys.state_label[1] + ' ' + self.sys.state_units[1]
+        xname = self.sys.state_label[x] + ' ' + self.sys.state_units[x]
+        yname = self.sys.state_label[y] + ' ' + self.sys.state_units[y]
         
-        plt.ylabel(yname, fontsize=self.fontsize)
-        plt.xlabel(xname, fontsize=self.fontsize)
-
-        plt.axis([self.sys.x_lb[ x ],
-                  self.sys.x_ub[ x ],
-                  self.sys.x_lb[ y ],
-                  self.sys.x_ub[ y ]])
+        ax.set_ylabel(yname, fontsize=self.fontsize)
+        ax.set_xlabel(xname, fontsize=self.fontsize)
         
         x_level = self.x_level[ x ]
         y_level = self.x_level[ y ]
@@ -546,28 +592,28 @@ class GridDynamicSystem:
         ### Create grid of data and plot
         #################################
         
-        J_grid_nd = np.clip( self.get_grid_from_array( J ) , jmin , jmax )
+        #J_grid_nd = np.clip( self.get_grid_from_array( J ) , jmin , jmax )
+        J_grid_nd = self.get_grid_from_array( J ) 
         
-        if self.sys.n == 2:
-            J_grid_2d = J_grid_nd 
-            
-        else:
-            raise NotImplementedError
+        J_grid_2d = self.get_2D_slice_of_grid( J_grid_nd , x , y )
         
-        pcm = plt.pcolormesh( x_level, y_level, J_grid_2d.T, shading='gouraud')
+        mesh = ax.pcolormesh( x_level, y_level, J_grid_2d.T, 
+                       shading='gouraud' , cmap = 'cool') #, norm = colors.LogNorm()
+
+        mesh.set_clim(vmin=jmin, vmax=jmax)
         
         ##################################
         # Figure param
         ##################################
         
         ax.tick_params( labelsize = self.fontsize )
-
-        plt.colorbar()
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
+        ax.grid(True)
         
-        return fig, ax, pcm
+        fig.colorbar( mesh )
+        fig.tight_layout()
+        fig.show()
+        
+        return fig, ax, mesh
                 
         
     ##############################

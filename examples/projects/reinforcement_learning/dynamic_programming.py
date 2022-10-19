@@ -164,7 +164,8 @@ class DynamicProgramming:
         self.tf  = final_time
         
         # Options
-        self.interpol_method ='linear' # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
+        self.interpol_method      ='linear' # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
+        self.plot_dynamic_cost2go = True
         
         # Memory
         self.t = self.tf
@@ -189,6 +190,7 @@ class DynamicProgramming:
         """ initialize cost-to-go and policy """
 
         self.J_next  = np.zeros( self.grid_sys.nodes_n , dtype = float )
+        self.pi      = None
 
         # Initial cost-to-go evaluation       
         for s in range( self.grid_sys.nodes_n ):  
@@ -286,39 +288,61 @@ class DynamicProgramming:
     def compute_steps(self, l = 50):
         """ compute number of step """
         
-        self.plot_cost2go()
+        if self.plot_dynamic_cost2go: self.plot_cost2go()
                
         for i in range(l):
             self.initialize_backward_step()
             self.compute_backward_step()
             self.finalize_backward_step()
-            self.update_cost2go_plot(i)
+            if self.plot_dynamic_cost2go: self.update_cost2go_plot()
             
             
     ################################
-    def plot_cost2go(self):
+    def plot_cost2go(self , jmax = 1000 ):
                
-        fig, ax, pcm = self.grid_sys.plot_grid_value( self.J_next , 'Cost-to-go')
+        fig, ax, pcm = self.grid_sys.plot_grid_value( self.J_next , 'Cost-to-go' , 0 , 1 , jmax , 0 )
         
-        text = ax.text(0.05, 0.05, '', transform=ax.transAxes)
+        text = ax.text(0.05, 0.05, '', transform=ax.transAxes, fontsize = 8 )
         
         self.cost2go_fig = [fig, ax, pcm, text]
         
         plt.pause( 0.001 )
         plt.ion()
         
-    
+        
     ################################
-    def update_cost2go_plot(self, step ):
+    def update_cost2go_plot(self):
         
-        #J = np.clip( self.grid_sys.get_grid_from_array( self.J_next ) , 1000 , -1 )
+        J_grid = self.grid_sys.get_grid_from_array( self.J_next )
         
-        J = self.grid_sys.get_grid_from_array( self.J_next )
+        J_2d = self.grid_sys.get_2D_slice_of_grid( J_grid , 0 , 1 )
                
-        self.cost2go_fig[2].set_array( np.ravel( J.T ) )
-        self.cost2go_fig[3].set_text('Number of steps = %i' % ( step ))
+        self.cost2go_fig[2].set_array( np.ravel( J_2d.T ) )
+        self.cost2go_fig[3].set_text('Optimal cost2go at time = %4.2f' % ( self.t ))
         
         plt.pause( 0.001 )
+        
+        
+    ################################
+    def save_latest(self, name = 'test_data'):
+        """ save cost2go and policy of the latest iteration (further back in time) """
+        
+        np.save(name + '_J_inf', self.J_next)
+        np.save(name + '_pi_inf', self.pi.astype(int) )
+        
+    
+    ################################
+    def load_J_next(self, name = 'test_data'):
+        """ Load J_next from file """
+        
+        try:
+
+            self.J_next = np.load( name + '_J_inf'   + '.npy' )
+            #self.pi     = np.load( name + '_pi_inf'  + '.npy' ).astype(int)
+            
+        except:
+            
+            print('Failed to load J_next ' )
             
 
 
