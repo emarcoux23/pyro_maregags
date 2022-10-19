@@ -36,7 +36,7 @@ cf.R    = np.array([[0.1,0],[0,0]])
 # DP algo
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, cf)
 
-dp.compute_steps(1)
+dp.compute_steps(30)
 
 
 ctl = dprog.LookUpTableController( grid_sys , dp.pi )
