@@ -8,6 +8,7 @@ Created on Fri Oct 14 20:48:32 2022
 
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 from scipy.interpolate import RectBivariateSpline as interpol2D
 from scipy.interpolate import RegularGridInterpolator as rgi
@@ -120,24 +121,27 @@ class DynamicProgramming:
         # Options
         self.alpha                = 1.0 # facteur d'oubli exponentiel
         self.interpol_method      ='linear' # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
-        self.plot_dynamic_cost2go = True
+        self.save_time_history    = True
         
         # Memory
         self.t = self.tf
         self.k = 0
-        
-        # Lists of time, cost-to-go and policy
-        self.t_list  = []
-        self.J_list  = []
-        self.pi_list = []
+        self.start_time = time.time()
         
         # Final cost
         self.evaluate_terminal_cost()
         
-        # Final value in lists
-        self.J_list.append( self.J_next  )
-        self.t_list.append( self.tf )
-        self.pi_list.append( None )
+        
+        if self.save_time_history:
+
+            self.t_list  = []
+            self.J_list  = []
+            self.pi_list = []
+            
+            # Final value in lists
+            self.J_list.append( self.J_next  )
+            self.t_list.append( self.tf )
+            self.pi_list.append( None )
         
         
     ##############################
@@ -172,7 +176,7 @@ class DynamicProgramming:
         self.J_interpol = self.grid_sys.compute_interpolation_function( self.J_next               , 
                                                                         self.interpol_method      , 
                                                                         bounds_error = False      , 
-                                                                        fill_value = self.cf.INF  )
+                                                                        fill_value = 0  )
                         
                 
     ###############################
@@ -224,33 +228,39 @@ class DynamicProgramming:
     def finalize_backward_step(self):
         """ One step of value iteration """
         
+        # Computation time
+        elapsed_time = time.time() - self.start_time
+        
         # Convergence check        
         delta = self.J - self.J_next
         j_max     = self.J.max()
         delta_max = delta.max()
         delta_min = delta.min()
-        print(self.k,' t:',self.t,'max:',j_max, 'Deltas:',delta_max,delta_min)
+        
+        #print(self.k,' t:',self.t,'Elasped time:', elapsed_time, 'max:',j_max, 'Deltas:',delta_max,delta_min)
+        print('%d t:%.2f Elasped:%.2f max: %.2f dmax:%.2f dmin:%.2f' % (self.k,self.t,elapsed_time,j_max,delta_max,delta_min) )
         
         # Update J_next
         self.J_next = self.J
         
         # List in memory
-        self.J_list.append( self.J  )
-        self.t_list.append( self.t )
-        self.pi_list.append( self.pi )
+        if self.save_time_history:
+            self.J_list.append( self.J  )
+            self.t_list.append( self.t )
+            self.pi_list.append( self.pi )
 
     
     ################################
-    def compute_steps(self, l = 50):
+    def compute_steps(self, l = 50 , animate_iteration = False ):
         """ compute number of step """
         
-        if self.plot_dynamic_cost2go: self.plot_cost2go()
+        if animate_iteration: self.plot_cost2go()
                
         for i in range(l):
             self.initialize_backward_step()
             self.compute_backward_step()
             self.finalize_backward_step()
-            if self.plot_dynamic_cost2go: self.update_cost2go_plot()
+            if animate_iteration: self.update_cost2go_plot()
             
             
     ################################

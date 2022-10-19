@@ -17,7 +17,7 @@ import costfunction
 sys  = pendulum.SinglePendulum()
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [3] )
+grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [11] )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)

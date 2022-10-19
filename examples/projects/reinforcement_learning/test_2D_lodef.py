@@ -35,7 +35,8 @@ qcf.EPS = 2.0
 # DP algo
 #dp = dprog.DynamicProgramming( grid_sys, qcf )
 #dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
-dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
+#dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
+dp = dprog.DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
 
 
 #dp.interpol_method = 'nearest' #12 sec
