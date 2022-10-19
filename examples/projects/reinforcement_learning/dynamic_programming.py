@@ -98,55 +98,9 @@ class LookUpTableController( controller.StaticController ):
         return u
     
     
-##################################################################
-class EpsilonGreedyController( LookUpTableController ):
-    
-    ############################
-    def __init__(self,  grid_sys , pi_star , epsilon = 0.7 ):
-        """
-        Pyro controller based on a discretized lookpup table of optimal 
-        control inputs where the optimal action is taken with probability
-        espsilon, else a random action is taken.
-
-        Parameters
-        ----------
-        grid_sys : pyro GridDynamicSystem class
-            A discretized dynamic system
-        pi_star : numpy array, dim =  self.grid_sys.nodes_n , dtype = int
-            A list of optimal action index for each node id
-        """
-        
-        super().__init__( grid_sys , pi_star )
-
-        self.name = 'Epsilon Greedy Controller'
-        
-        self.epsilon = epsilon
-        
-        
-    #############################
-    def c( self , y , r , t = 0 ):
-        """  State feedback (y=x) - no reference - time independent """
-        x = y
-        
-        if np.random.uniform(0,1) < self.epsilon:
-    
-            # greedy behavior
-            u = self.lookup_table_selection( x )
-    
-        else:
-        
-            # Random exploration
-            random_index = int(np.random.uniform( 0 , self.grid_sys.actions_n ))
-            
-            u = self.grid_sys.input_from_action_id[ random_index ]
-            
-            # TODO add domain check for random actions?
-        
-        return u
-    
 
 ###############################################################################
-### DP controllers
+### DP Algo
 ###############################################################################
 
 class DynamicProgramming:
@@ -164,6 +118,7 @@ class DynamicProgramming:
         self.tf  = final_time
         
         # Options
+        self.alpha                = 1.0 # facteur d'oubli exponentiel
         self.interpol_method      ='linear' # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
         self.plot_dynamic_cost2go = True
         
@@ -195,10 +150,10 @@ class DynamicProgramming:
         # Initial cost-to-go evaluation       
         for s in range( self.grid_sys.nodes_n ):  
             
-                x = self.grid_sys.state_from_node_id[ s , : ]
+                xf = self.grid_sys.state_from_node_id[ s , : ]
                 
                 # Final Cost
-                self.J_next[ s ] = self.cf.h( x )
+                self.J_next[ s ] = self.cf.h( xf , self.tf )
                 
     
     ###############################
@@ -214,7 +169,10 @@ class DynamicProgramming:
         self.pi = np.zeros( self.grid_sys.nodes_n , dtype = int   )
         
         # Create interpol function
-        self.J_interpol = self.grid_sys.compute_interpolation_function( self.J_next , self.interpol_method )
+        self.J_interpol = self.grid_sys.compute_interpolation_function( self.J_next               , 
+                                                                        self.interpol_method      , 
+                                                                        bounds_error = False      , 
+                                                                        fill_value = self.cf.INF  )
                         
                 
     ###############################
@@ -231,9 +189,7 @@ class DynamicProgramming:
                 # For all control actions
                 for a in range( self.grid_sys.actions_n ):
                     
-                    u = self.grid_sys.input_from_action_id[ a , : ]
-                    
-                    y = self.sys.h(x, u, 0) # TODO remove y from cost                    
+                    u = self.grid_sys.input_from_action_id[ a , : ]                  
                         
                     # If action is in allowable set
                     if self.sys.isavalidinput(x,u):
@@ -245,11 +201,11 @@ class DynamicProgramming:
 
                             # Cost-to-go of a given action
                             J_next = self.J_interpol( x_next )
-                            Q[ a ] = self.cf.g(x, u, y, self.t ) * self.grid_sys.dt + J_next
+                            Q[ a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt + self.alpha * J_next
                             
                         else:
                             
-                            # Out of bound cost
+                            # Out of bound terminal cost
                             Q[ a ] = self.cf.INF # TODO add option to customize this
                         
                     else:
@@ -373,16 +329,14 @@ class DynamicProgrammingWithLookUpTable( DynamicProgramming ):
                         # if the next state is not out-of-bound
                         if self.grid_sys.x_next_isok[s,a]:
                             
-                            u = self.grid_sys.input_from_action_id[ a , : ]
-                            
-                            y = self.sys.h(x, u, 0) # TODO remove y from cost                    
+                            u = self.grid_sys.input_from_action_id[ a , : ]                  
                                 
                             # This is only for time-independents
                             x_next        = self.grid_sys.x_next_table[s,a,:]
 
                             # Cost-to-go of a given action
                             J_next = self.J_interpol( x_next )
-                            Q[ a ] = self.cf.g(x, u, y, self.t ) * self.grid_sys.dt + J_next
+                            Q[ a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt + self.alpha * J_next
                             
                         else:
                             
@@ -400,6 +354,72 @@ class DynamicProgrammingWithLookUpTable( DynamicProgramming ):
                 # Impossible situation ( unaceptable situation for any control actions )
                 if self.J[ s ] > (self.cf.INF-1) :
                     self.pi[ s ] = -1
+                    
+                    
+###############################################################################
+    
+class DynamicProgrammingWithLookUpTable2( DynamicProgramming ):
+    """ Dynamic programming on a grid sys """
+    
+    ############################
+    def __init__(self, grid_sys , cost_function , final_time = 0 ):
+        
+        DynamicProgramming.__init__(self, grid_sys, cost_function, final_time)
+        
+        self.compute_cost_lookuptable()
+    
+    
+    ###############################
+    def compute_cost_lookuptable(self):
+        """ One step of value iteration """
+        
+        self.G = np.zeros( ( self.grid_sys.nodes_n , self.grid_sys.actions_n ) , dtype = float )
+
+        # For all state nodes        
+        for s in range( self.grid_sys.nodes_n ):  
+            
+                x = self.grid_sys.state_from_node_id[ s , : ]
+                
+                # For all control actions
+                for a in range( self.grid_sys.actions_n ):
+                    
+                    # If action is in allowable set
+                    if self.grid_sys.action_isok[s,a]:
+                        
+                        # if the next state is not out-of-bound
+                        if self.grid_sys.x_next_isok[s,a]:
+                            
+                            u = self.grid_sys.input_from_action_id[ a , : ]  
+                            
+                            self.G[ s , a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt
+                        
+                        else:
+                            # Out of bound cost
+                            self.G[ s , a ] = self.cf.INF
+                    
+                    else:
+                        # Not allowable input at this state
+                        self.G[ s , a ] = self.cf.INF
+    
+                
+    ###############################
+    def compute_backward_step(self):
+        """ One step of value iteration """
+        
+        self.Q       = np.zeros( ( self.grid_sys.nodes_n , self.grid_sys.actions_n ) , dtype = float )
+        self.Jx_next = np.zeros( ( self.grid_sys.nodes_n , self.grid_sys.actions_n ) , dtype = float )
+        
+        # Computing the J_next of all x_next in the look-up table
+        self.Jx_next = self.J_interpol( self.grid_sys.x_next_table )
+        
+        # Matrix version of computing all Q values
+        self.Q       = self.G + self.alpha * self.Jx_next
+                        
+        self.J  = self.Q.min( axis = 1 )
+        self.pi = self.Q.argmin( axis = 1 )
+                
+
+                    
                     
 
 ###############################################################################
@@ -444,16 +464,14 @@ class DynamicProgrammingFast2DGrid( DynamicProgramming ):
                         # if the next state is not out-of-bound
                         if self.grid_sys.x_next_isok[s,a]:
                             
-                            u = self.grid_sys.input_from_action_id[ a , : ]
-                            
-                            y = self.sys.h(x, u, 0) # TODO remove y from cost                    
+                            u = self.grid_sys.input_from_action_id[ a , : ]                 
                                 
                             # This is only for time-independents
                             x_next        = self.grid_sys.x_next_table[s,a,:]
 
                             # Cost-to-go of a given action
                             J_next = self.J_interpol( x_next[0] , x_next[1])
-                            Q[ a ] = self.cf.g(x, u, y, self.t ) * self.grid_sys.dt + J_next
+                            Q[ a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt + self.alpha * J_next
                             
                         else:
                             
@@ -494,7 +512,7 @@ if __name__ == "__main__":
 
     from pyro.dynamic  import pendulum
     import discretizer
-    from pyro.analysis import costfunction
+    import costfunction
 
     sys  = pendulum.SinglePendulum()
 
@@ -502,7 +520,7 @@ if __name__ == "__main__":
     grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [3] )
 
     # Cost Function
-    qcf = sys.cost_function
+    qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
     qcf.xbar = np.array([ -3.14 , 0 ]) # target
     qcf.INF  = 10000

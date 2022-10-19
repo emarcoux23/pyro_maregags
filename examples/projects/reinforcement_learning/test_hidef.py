@@ -45,7 +45,7 @@ dp.save_latest('test_hidef')
 
 ctl = dprog.LookUpTableController( grid_sys , dp.pi )
 
-#ctl.plot_control_law( sys = sys , n = 100)
+ctl.plot_control_law( sys = sys , n = 100)
 
 
 #asign controller

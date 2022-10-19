@@ -12,7 +12,7 @@ from pyro.dynamic  import pendulum
 from pyro.control  import controller
 import dynamic_programming as dprog
 import discretizer
-from pyro.analysis import costfunction
+import costfunction
 
 sys  = pendulum.SinglePendulum()
 
@@ -25,7 +25,7 @@ sys.x_ub[1] =  5.0
 grid_sys = discretizer.GridDynamicSystem( sys , [41,21] , [3] , 0.2)
 
 # Cost Function
-qcf = sys.cost_function
+qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
 qcf.xbar = np.array([ -3.14 , 0 ]) # target
 qcf.INF = 10000

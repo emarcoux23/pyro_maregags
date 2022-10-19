@@ -449,7 +449,7 @@ class GridDynamicSystem:
         return J_grid
     
     ##############################
-    def compute_interpolation_function(self, J , method='linear' ):
+    def compute_interpolation_function(self, J , method='linear' , bounds_error = True , fill_value = None ):
         """  
         Return interpolation function for value based on x coordinates
         
@@ -464,7 +464,7 @@ class GridDynamicSystem:
         
         levels = tuple(self.x_level[i] for i in range(self.sys.n))
         
-        interpol = RegularGridInterpolator( levels , J_grid , method )
+        interpol = RegularGridInterpolator( levels , J_grid , method , bounds_error , fill_value )
         
         return interpol
     
