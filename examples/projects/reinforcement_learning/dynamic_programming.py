@@ -72,7 +72,10 @@ class LookUpTableController( controller.StaticController ):
         for k in range(self.m):
             
             u_k      = self.grid_sys.get_input_from_policy( self.pi, k)
-            self.u_interpol.append( self.grid_sys.compute_interpolation_function( u_k , self.interpol_method[k] ) )
+            self.u_interpol.append( self.grid_sys.compute_interpolation_function( u_k , 
+                                                                                 self.interpol_method[k],
+                                                                                 bounds_error = False   , 
+                                                                                 fill_value = 0  ) )
         
     
     #############################
@@ -237,7 +240,6 @@ class DynamicProgramming:
         delta_max = delta.max()
         delta_min = delta.min()
         
-        #print(self.k,' t:',self.t,'Elasped time:', elapsed_time, 'max:',j_max, 'Deltas:',delta_max,delta_min)
         print('%d t:%.2f Elasped:%.2f max: %.2f dmax:%.2f dmin:%.2f' % (self.k,self.t,elapsed_time,j_max,delta_max,delta_min) )
         
         # Update J_next
@@ -264,9 +266,9 @@ class DynamicProgramming:
             
             
     ################################
-    def plot_cost2go(self , jmax = 1000 ):
+    def plot_cost2go(self , jmax = 1000 , i = 0 , j = 1 ):
                
-        fig, ax, pcm = self.grid_sys.plot_grid_value( self.J_next , 'Cost-to-go' , 0 , 1 , jmax , 0 )
+        fig, ax, pcm = self.grid_sys.plot_grid_value( self.J_next , 'Cost-to-go' , i , j , jmax , 0 )
         
         text = ax.text(0.05, 0.05, '', transform=ax.transAxes, fontsize = 8 )
         
@@ -537,35 +539,6 @@ if __name__ == "__main__":
 
     # DP algo
     #dp = DynamicProgramming( grid_sys, qcf )
-    dp = DynamicProgrammingWithLookUpTable( grid_sys, qcf)
-    
-    dp.compute_steps(50)
-    
-    # not validated!!
-    
-    grid_sys.plot_grid_value( dp.J_next )
-    grid_sys.plot_control_input_from_policy( dp.pi , 0)
-    
-    
-    interpol = grid_sys.compute_interpolation_function( dp.J_next ) 
-    
-    
-    a = dp.pi_list[ -1 ]
-    
-    ctl = LookUpTableController( grid_sys , a )
-    
-    ctl.plot_control_law( sys = sys , n = 100)
-    
-    
-    #asign controller
-    cl_sys = controller.ClosedLoopSystem( sys , ctl )
-    
-    ##############################################################################
-    
-    # Simulation and animation
-    cl_sys.x0   = np.array([0,0])
-    cl_sys.compute_trajectory( 10, 10001, 'euler')
-    cl_sys.plot_trajectory('xu')
-    cl_sys.plot_phase_plane_trajectory()
-    cl_sys.animate_simulation()
+    #dp2 = DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
+
     
