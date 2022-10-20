@@ -155,7 +155,7 @@ class DynamicProgramming:
         """ initialize cost-to-go and policy """
 
         self.J_next  = np.zeros( self.grid_sys.nodes_n , dtype = float )
-        self.pi      = None
+        self.pi      = np.zeros( self.grid_sys.nodes_n , dtype = int   )
 
         # Initial cost-to-go evaluation       
         for s in range( self.grid_sys.nodes_n ):  
@@ -256,23 +256,27 @@ class DynamicProgramming:
 
     
     ################################
-    def compute_steps(self, l = 50 , animate_iteration = False ):
+    def compute_steps(self, n = 50 , animate_cost2go = False , animate_policy = False , k = 0 ):
         """ compute number of step """
         
-        if animate_iteration: self.plot_cost2go()
+        if animate_cost2go: self.plot_cost2go()
+        if animate_policy: self.plot_policy( k )
+        
                
-        for i in range(l):
+        for i in range(n):
             self.initialize_backward_step()
             self.compute_backward_step()
             self.finalize_backward_step()
-            if animate_iteration: self.update_cost2go_plot()
+            if animate_cost2go: self.update_cost2go_plot()
+            if animate_policy: self.update_policy_plot( k )
             
     
     ################################
-    def solve_bellman_equation(self, tol = 0.1 , animate_iteration = False ):
+    def solve_bellman_equation(self, tol = 0.1 , animate_cost2go = False , animate_policy = False , k = 0 ):
         """ iterate until changes to estimate J are under the tolerance """
         
-        if animate_iteration: self.plot_cost2go()
+        if animate_cost2go: self.plot_cost2go()
+        if animate_policy: self.plot_policy( k )
         
         delta = self.cf.INF
         
@@ -280,7 +284,8 @@ class DynamicProgramming:
             self.initialize_backward_step()
             self.compute_backward_step()
             delta = self.finalize_backward_step()
-            if animate_iteration: self.update_cost2go_plot()
+            if animate_cost2go: self.update_cost2go_plot()
+            if animate_policy: self.update_policy_plot( k )
             
         print('Bellman equation solved!' )
             
@@ -299,14 +304,40 @@ class DynamicProgramming:
         
         
     ################################
-    def update_cost2go_plot(self):
+    def update_cost2go_plot(self, i = 0 , j = 1 ):
         
         J_grid = self.grid_sys.get_grid_from_array( self.J_next )
         
-        J_2d = self.grid_sys.get_2D_slice_of_grid( J_grid , 0 , 1 )
+        J_2d = self.grid_sys.get_2D_slice_of_grid( J_grid , i , j )
                
         self.cost2go_fig[2].set_array( np.ravel( J_2d.T ) )
         self.cost2go_fig[3].set_text('Optimal cost2go at time = %4.2f' % ( self.t ))
+        
+        plt.pause( 0.001 )
+        
+    
+    ################################
+    def plot_policy(self , k = 0 , i = 0 , j = 1 ):
+               
+        fig, ax, pcm = self.grid_sys.plot_control_input_from_policy( self.pi , k)
+        
+        text = ax.text(0.05, 0.05, '', transform=ax.transAxes, fontsize = 8 )
+        
+        self.policy_fig = [fig, ax, pcm, text]
+        
+        plt.pause( 0.001 )
+        #plt.ion()
+        
+        
+    ################################
+    def update_policy_plot(self, k , i = 0 , j = 1 ):
+        
+        uk    = self.grid_sys.get_input_from_policy( self.pi, k)
+        uk_nd = self.grid_sys.get_grid_from_array( uk ) 
+        uk_2d = self.grid_sys.get_2D_slice_of_grid( uk_nd , i , j )
+               
+        self.policy_fig[2].set_array( np.ravel( uk_2d.T ) )
+        self.policy_fig[3].set_text('Optimal policy at time = %4.2f' % ( self.t ))
         
         plt.pause( 0.001 )
         

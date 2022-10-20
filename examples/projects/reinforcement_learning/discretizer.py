@@ -548,7 +548,7 @@ class GridDynamicSystem:
     
     
     ##############################
-    def plot_grid_value(self, J , name = 'Value on the grid' , x = 0 , y = 1, jmax =  np.inf , jmin = -1 ):
+    def plot_grid_value(self, J , name = 'Value on the grid' , x = 0 , y = 1, jmax =  np.inf , jmin = -1 , cmap = 'cool'):
         """  
         plot a scalar value (array by node-id) on a grid
         
@@ -599,7 +599,7 @@ class GridDynamicSystem:
         J_grid_2d = self.get_2D_slice_of_grid( J_grid_nd , x , y )
         
         mesh = ax.pcolormesh( x_level, y_level, J_grid_2d.T, 
-                       shading='gouraud' , cmap = 'cool') #, norm = colors.LogNorm()
+                       shading='gouraud' , cmap = cmap) #, norm = colors.LogNorm()
 
         mesh.set_clim(vmin=jmin, vmax=jmax)
         
@@ -618,13 +618,15 @@ class GridDynamicSystem:
                 
         
     ##############################
-    def plot_control_input_from_policy(self, pi , k ):
+    def plot_control_input_from_policy(self, pi , k , i = 0 , j = 1 ):
         """  
         """
         
-        uk_array = self.get_input_from_policy( pi, k)
+        uk_array = self.get_input_from_policy( pi , k )
         
-        self.plot_grid_value( uk_array , 'Control input k')
+        fig, ax, mesh = self.plot_grid_value( uk_array , self.sys.input_label[ k ] , i , j , self.sys.u_ub[k] , self.sys.u_lb[k] , cmap = 'bwr')
+        
+        return fig, ax, mesh
 
 
 

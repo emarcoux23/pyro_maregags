@@ -11,7 +11,7 @@ import numpy as np
 from pyro.control  import controller
 import dynamic_programming as dprog
 import discretizer
-from pyro.analysis import costfunction
+import costfunction
 from pyro.dynamic  import vehicle
 
 sys  = vehicle.KinematicCarModelwithObstacles()
@@ -28,7 +28,7 @@ grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 21), (3, 3), 0.1)
 
 # Cost Function
 cf = costfunction.QuadraticCostFunction.from_sys( sys )
-cf.xbar = np.array( [30, 0, 0] ) # target
+cf.xbar = np.array( [0, 0, 0] ) # target
 cf.INF  = 1E8
 cf.EPS  = 0.00
 cf.R    = np.array([[0.1,0],[0,0]])
@@ -36,10 +36,11 @@ cf.R    = np.array([[0.1,0],[0,0]])
 # DP algo
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, cf)
 
-dp.compute_steps(30)
+dp.alpha = 0.99
+dp.solve_bellman_equation()
 
 
-ctl = dprog.LookUpTableController( grid_sys , dp.pi )
+ctl = dp.get_lookup_table_controller()
 
 ctl.plot_control_law( sys = sys , n = 100)
 
@@ -47,7 +48,7 @@ ctl.plot_control_law( sys = sys , n = 100)
 
 # Simulation and animation
 cl_sys = ctl + sys
-cl_sys.x0   = np.array([0,0,0])
+cl_sys.x0   = np.array([30,0,0])
 cl_sys.compute_trajectory( 10, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()

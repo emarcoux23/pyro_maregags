@@ -30,13 +30,16 @@ qcf.INF  = 300
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 #dp = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
 
-dp.solve_bellman_equation()
+#dp.compute_steps(100, True  )
+#dp.plot_policy()
 
+dp.solve_bellman_equation( tol = 1 , animate_policy = True )
 dp.plot_cost2go(150)
+
 
 ctl = dp.get_lookup_table_controller()
 
-ctl.plot_control_law( sys = sys , n = 100)
+#ctl.plot_control_law( sys = sys , n = 100)
 
 
 #asign controller

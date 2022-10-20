@@ -36,28 +36,16 @@ qcf.INF    = 1000000
 
 
 # DP algo
-#dp = dprog.DynamicProgramming( grid_sys, qcf )
-dp = dprog.DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
-#dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
 
+dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 
-#dp.interpol_method = 'nearest' #12 sec
-#dp.interpol_method = 'linear'  #18 sec
-#dp.interpol_method =  'linear' #
-
-#dp.plot_dynamic_cost2go = False
-dp.compute_steps(500)
+dp.solve_bellman_equation( tol = 1 , animate_policy = True )
+dp.plot_cost2go(150)
 dp.save_latest('test_hidef')
 
 
-#grid_sys.plot_grid_value( dp.J_next )
-
-ctl = dprog.LookUpTableController( grid_sys , dp.pi )
-
-ctl.plot_control_law( sys = sys , n = 100)
-
-
 #asign controller
+ctl    = dp.get_lookup_table_controller()
 cl_sys = controller.ClosedLoopSystem( sys , ctl )
 
 ##############################################################################
