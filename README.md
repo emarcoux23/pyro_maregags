@@ -2,6 +2,7 @@
 
 An object-based toolbox for robot dynamic simulation, analysis, control and planning. 
 
+## A library of robots and dynamic systems models
 <table>
   <tr>
     <th>
@@ -20,6 +21,20 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </td> 
   </tr>
 </table>
+
+## A collection of controller synthesis tools:
+<table>
+  <tr>
+    <th>
+    <img src="https://www.alexandregirard.com/IMG/cost2go_animation.gif" alt="cost2go" width="400"/>
+    </th>
+    <th>
+    <img src="https://www.alexandregirard.com/IMG/policy_animation.gif" alt="cost2go" width="400"/>
+    </th> 
+  </tr>
+</table>
+
+
 
 ## Library Architecture ##
 
