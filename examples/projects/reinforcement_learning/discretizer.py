@@ -122,7 +122,7 @@ class GridDynamicSystem:
         if self.computelookuptable:
             self.compute_xnext_table()
             self.compute_action_set_table()
-            self.compute_nearest_snext_table()
+            #self.compute_nearest_snext_table() # Unused so far and long
             
         
     #############################
@@ -429,10 +429,9 @@ class GridDynamicSystem:
     def get_grid_from_array(self, J ):
         """  
         convert a scalar value from node_id 1-D array to n-D array (table)
-        
-        TODO: could replace by J.reshape( self.x_grid_dim ) ??
         """
         
+        """
         if self.nodes_n != J.size:
             raise ValueError("Grid size does not match optimal action table size")
         
@@ -447,6 +446,8 @@ class GridDynamicSystem:
             J_grid[ indexes ] = J [ node_id ]
             
         return J_grid
+        """
+        return J.reshape( self.x_grid_dim )
     
     ##############################
     def compute_interpolation_function(self, J , method='linear' , bounds_error = True , fill_value = None ):

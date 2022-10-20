@@ -22,7 +22,7 @@ sys.x_ub = np.array([  1.0 ,  1.0,  1.0 ,  1.0 ])
 sys.x_lb = np.array([ -1.0 , -1.0, -1.0 , -1.0 ])
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [21,21,21,21] , [3,3] , 0.05 )
+grid_sys = discretizer.GridDynamicSystem( sys , [31,31,31,31] , [3,3] , 0.1 )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
@@ -33,16 +33,8 @@ qcf.EPS  = 1.0
 
 
 # DP algo
-#dp = dprog.DynamicProgramming( grid_sys, qcf )
-dp = dprog.DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
-#dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
+dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 
-
-#dp.interpol_method = 'nearest' #12 sec
-#dp.interpol_method = 'linear'  #18 sec
-#dp.interpol_method =  'linear' #
-
-#dp.plot_dynamic_cost2go = False
 dp.compute_steps(1,True)
 dp.compute_steps(200)
 dp.save_latest('test_double_pendulum')

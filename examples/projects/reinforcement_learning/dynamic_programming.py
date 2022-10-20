@@ -126,22 +126,25 @@ class DynamicProgramming:
         self.interpol_method      ='linear' # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
         self.save_time_history    = True
         
-        # Memory
-        self.t = self.tf
-        self.k = 0
+        # Memory Variables
+        self.t = self.tf   # time of the computed step (useful for time-varying system)
+        self.k = 0         # Number of computed steps
+        
+        
+        # Start time (needed to plot elapsed computation time)
         self.start_time = time.time()
         
         # Final cost
         self.evaluate_terminal_cost()
         
-        
+        # 
         if self.save_time_history:
 
             self.t_list  = []
             self.J_list  = []
             self.pi_list = []
             
-            # Final value in lists
+            # Value at t = t_f
             self.J_list.append( self.J_next  )
             self.t_list.append( self.tf )
             self.pi_list.append( None )
@@ -159,7 +162,7 @@ class DynamicProgramming:
             
                 xf = self.grid_sys.state_from_node_id[ s , : ]
                 
-                # Final Cost
+                # Final Cost of all states
                 self.J_next[ s ] = self.cf.h( xf , self.tf )
                 
     
@@ -199,16 +202,16 @@ class DynamicProgramming:
                     u = self.grid_sys.input_from_action_id[ a , : ]                  
                         
                     # If action is in allowable set
-                    if self.sys.isavalidinput(x,u):
+                    if self.sys.isavalidinput( x , u ):
                         
-                        x_next = self.sys.f(x,u,self.t ) * self.grid_sys.dt + x
+                        x_next = self.sys.f( x , u , self.t ) * self.grid_sys.dt + x
                         
                         # if the next state is not out-of-bound
                         if self.sys.isavalidstate(x_next):
 
                             # Cost-to-go of a given action
                             J_next = self.J_interpol( x_next )
-                            Q[ a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt + self.alpha * J_next
+                            Q[ a ] = self.cf.g( x , u , self.t ) * self.grid_sys.dt + self.alpha * J_next
                             
                         else:
                             
@@ -216,15 +219,12 @@ class DynamicProgramming:
                             Q[ a ] = self.cf.INF # TODO add option to customize this
                         
                     else:
+                        
                         # Invalide control input at this state
                         Q[ a ] = self.cf.INF
                         
                 self.J[ s ]  = Q.min()
                 self.pi[ s ] = Q.argmin()
-                
-                # Impossible situation ( unaceptable situation for any control actions )
-                if self.J[ s ] > (self.cf.INF-1) :
-                    self.pi[ s ] = -1
                     
     
     ###############################
@@ -235,7 +235,7 @@ class DynamicProgramming:
         elapsed_time = time.time() - self.start_time
         
         # Convergence check        
-        delta = self.J - self.J_next
+        delta     = self.J - self.J_next
         j_max     = self.J.max()
         delta_max = delta.max()
         delta_min = delta.min()
@@ -275,7 +275,7 @@ class DynamicProgramming:
         self.cost2go_fig = [fig, ax, pcm, text]
         
         plt.pause( 0.001 )
-        plt.ion()
+        #plt.ion()
         
         
     ################################
@@ -313,64 +313,10 @@ class DynamicProgramming:
             print('Failed to load J_next ' )
             
 
-
+                    
 ###############################################################################
     
 class DynamicProgrammingWithLookUpTable( DynamicProgramming ):
-    """ Dynamic programming on a grid sys """
-    
-                
-    ###############################
-    def compute_backward_step(self):
-        """ One step of value iteration """
-
-        # For all state nodes        
-        for s in range( self.grid_sys.nodes_n ):  
-            
-                x = self.grid_sys.state_from_node_id[ s , : ]
-
-                # One steps costs - Q values
-                Q = np.zeros( self.grid_sys.actions_n  ) 
-                
-                # For all control actions
-                for a in range( self.grid_sys.actions_n ):
-                    
-                    # If action is in allowable set
-                    if self.grid_sys.action_isok[s,a]:
-                        
-                        # if the next state is not out-of-bound
-                        if self.grid_sys.x_next_isok[s,a]:
-                            
-                            u = self.grid_sys.input_from_action_id[ a , : ]                  
-                                
-                            # This is only for time-independents
-                            x_next        = self.grid_sys.x_next_table[s,a,:]
-
-                            # Cost-to-go of a given action
-                            J_next = self.J_interpol( x_next )
-                            Q[ a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt + self.alpha * J_next
-                            
-                        else:
-                            
-                            # Out of bound cost
-                            Q[ a ] = self.cf.INF # TODO add option to customize this
-                        
-                    else:
-                        # Not allowable input at this state
-                        Q[ a ] = self.cf.INF
-                        
-                        
-                self.J[ s ]  = Q.min()
-                self.pi[ s ] = Q.argmin()
-                
-                # Impossible situation ( unaceptable situation for any control actions )
-                if self.J[ s ] > (self.cf.INF-1) :
-                    self.pi[ s ] = -1
-                    
-                    
-###############################################################################
-    
-class DynamicProgrammingWithLookUpTable2( DynamicProgramming ):
     """ Dynamic programming on a grid sys """
     
     ############################
@@ -403,10 +349,10 @@ class DynamicProgrammingWithLookUpTable2( DynamicProgramming ):
                             
                             u = self.grid_sys.input_from_action_id[ a , : ]  
                             
-                            self.G[ s , a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt
+                            self.G[ s , a ] = self.cf.g( x , u , self.t ) * self.grid_sys.dt
                         
                         else:
-                            # Out of bound cost
+                            # Out of bound cost (J_interpol return 0 in this case)
                             self.G[ s , a ] = self.cf.INF
                     
                     else:

@@ -16,14 +16,23 @@ import costfunction
 
 sys  = pendulum.SinglePendulum()
 
+sys.x_ub[0] = +2.1
+sys.x_lb[0] = -3.3
+sys.x_ub[1] = +4.0
+sys.x_lb[1] = -5.0
+
+sys.u_ub[0] = +2.5
+sys.u_lb[0] = -2.5
+
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [501,501] , [21] )
+grid_sys = discretizer.GridDynamicSystem( sys , [401,401] , [31] )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
-qcf.xbar = np.array([ -3.14 , 0 ]) # target
-qcf.INF  = 1000000
+qcf.xbar   = np.array([ -3.14 , 0 ]) # target
+qcf.R[0,0] = 10
+qcf.INF    = 1000000
 
 
 # DP algo
@@ -37,7 +46,7 @@ dp = dprog.DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
 #dp.interpol_method =  'linear' #
 
 #dp.plot_dynamic_cost2go = False
-dp.compute_steps(200)
+dp.compute_steps(500)
 dp.save_latest('test_hidef')
 
 
@@ -55,7 +64,7 @@ cl_sys = controller.ClosedLoopSystem( sys , ctl )
 
 # Simulation and animation
 cl_sys.x0   = np.array([0,0])
-cl_sys.compute_trajectory( 10, 10001, 'euler')
+cl_sys.compute_trajectory( 30, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()
 cl_sys.animate_simulation()

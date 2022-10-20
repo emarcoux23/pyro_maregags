@@ -209,7 +209,7 @@ class StaticController():
         plt.ylabel(yname, fontsize = 5 )
         plt.xlabel(xname, fontsize = 5 )
         
-        im1 = plt.pcolormesh( X , Y , U, shading='gouraud' )
+        im1 = plt.pcolormesh( X , Y , U, shading='gouraud' , cmap = 'bwr')
         
         cbar = plt.colorbar(im1)
         cbar.ax.tick_params(labelsize=5)
