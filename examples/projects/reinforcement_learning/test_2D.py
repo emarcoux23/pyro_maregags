@@ -17,26 +17,26 @@ import costfunction
 sys  = pendulum.SinglePendulum()
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [3] )
+grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [11] )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
 qcf.xbar = np.array([ -3.14 , 0 ]) # target
-qcf.INF  = 1000000
+qcf.INF  = 300
 
 
 # DP algo
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
+#dp = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
 
-dp.compute_steps(250)
+dp.solve_bellman_equation()
 
+dp.plot_cost2go(150)
 
-#grid_sys.plot_grid_value( dp.J_next )
+ctl = dp.get_lookup_table_controller()
 
-ctl = dprog.LookUpTableController( grid_sys , dp.pi )
-
-#ctl.plot_control_law( sys = sys , n = 100)
+ctl.plot_control_law( sys = sys , n = 100)
 
 
 #asign controller

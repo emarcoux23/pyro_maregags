@@ -250,6 +250,9 @@ class DynamicProgramming:
             self.J_list.append( self.J  )
             self.t_list.append( self.t )
             self.pi_list.append( self.pi )
+            
+        # return largest J change for usage as stoping criteria
+        return abs(np.array([delta_max,delta_min])).max() 
 
     
     ################################
@@ -263,6 +266,23 @@ class DynamicProgramming:
             self.compute_backward_step()
             self.finalize_backward_step()
             if animate_iteration: self.update_cost2go_plot()
+            
+    
+    ################################
+    def solve_bellman_equation(self, tol = 0.1 , animate_iteration = False ):
+        """ iterate until changes to estimate J are under the tolerance """
+        
+        if animate_iteration: self.plot_cost2go()
+        
+        delta = self.cf.INF
+        
+        while (delta>tol):
+            self.initialize_backward_step()
+            self.compute_backward_step()
+            delta = self.finalize_backward_step()
+            if animate_iteration: self.update_cost2go_plot()
+            
+        print('Bellman equation solved!' )
             
             
     ################################
@@ -289,6 +309,15 @@ class DynamicProgramming:
         self.cost2go_fig[3].set_text('Optimal cost2go at time = %4.2f' % ( self.t ))
         
         plt.pause( 0.001 )
+        
+    
+    ################################
+    def get_lookup_table_controller(self):
+        """ Create a pyro controller object based on the latest policy """
+        
+        ctl = LookUpTableController( self.grid_sys, self.pi )
+        
+        return ctl
         
         
     ################################
@@ -382,7 +411,7 @@ class DynamicProgrammingWithLookUpTable( DynamicProgramming ):
 
 ###############################################################################
 
-class DynamicProgrammingFast2DGrid( DynamicProgramming ):
+class DynamicProgramming2DRectBivariateSpline( DynamicProgrammingWithLookUpTable ):
     """ Dynamic programming on a grid sys """
     
     ###############################
@@ -398,55 +427,28 @@ class DynamicProgrammingFast2DGrid( DynamicProgramming ):
         self.pi = np.zeros( self.grid_sys.nodes_n , dtype = int   )
         
         # Create interpol function
-        self.J_interpol = self.grid_sys.compute_bivariatespline_2D_interpolation_function( self.J_next )
+        self.J_interpol = self.grid_sys.compute_bivariatespline_2D_interpolation_function( self.J_next , kx=3, ky=3)
     
                 
     ###############################
     def compute_backward_step(self):
         """ One step of value iteration """
-
-        # For all state nodes        
-        for s in range( self.grid_sys.nodes_n ):  
-            
-                x = self.grid_sys.state_from_node_id[ s , : ]
-
-                # One steps costs - Q values
-                Q = np.zeros( self.grid_sys.actions_n  ) 
-                
-                # For all control actions
-                for a in range( self.grid_sys.actions_n ):
-                    
-                    # If action is in allowable set
-                    if self.grid_sys.action_isok[s,a]:
+        
+        self.Q       = np.zeros( ( self.grid_sys.nodes_n , self.grid_sys.actions_n ) , dtype = float )
+        self.Jx_next = np.zeros( ( self.grid_sys.nodes_n , self.grid_sys.actions_n ) , dtype = float )
+        
+        # Computing the J_next of all x_next in the look-up table
+        X            = self.grid_sys.x_next_table
+        Jx_next_flat = self.J_interpol( X[:,:,0].flatten() , X[:,:,1].flatten() , grid = False )
+        Jx_next      = Jx_next_flat.reshape( (self.grid_sys.nodes_n , self.grid_sys.actions_n ) )
+        
+        # Matrix version of computing all Q values
+        self.Q       = self.G + self.alpha * Jx_next
                         
-                        # if the next state is not out-of-bound
-                        if self.grid_sys.x_next_isok[s,a]:
-                            
-                            u = self.grid_sys.input_from_action_id[ a , : ]                 
-                                
-                            # This is only for time-independents
-                            x_next        = self.grid_sys.x_next_table[s,a,:]
-
-                            # Cost-to-go of a given action
-                            J_next = self.J_interpol( x_next[0] , x_next[1])
-                            Q[ a ] = self.cf.g(x, u, self.t ) * self.grid_sys.dt + self.alpha * J_next
-                            
-                        else:
-                            
-                            # Out of bound cost
-                            Q[ a ] = self.cf.INF # TODO add option to customize this
-                        
-                    else:
-                        # Not allowable input at this state
-                        Q[ a ] = self.cf.INF
-                        
-                        
-                self.J[ s ]  = Q.min()
-                self.pi[ s ] = Q.argmin()
-                
-                # Impossible situation ( unaceptable situation for any control actions )
-                if self.J[ s ] > (self.cf.INF-1) :
-                    self.pi[ s ] = -1
+        self.J  = self.Q.min( axis = 1 )
+        self.pi = self.Q.argmin( axis = 1 )
+        
+        
 
         
     
@@ -484,7 +486,6 @@ if __name__ == "__main__":
     qcf.INF  = 10000
 
     # DP algo
-    #dp = DynamicProgramming( grid_sys, qcf )
-    #dp2 = DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
+    dp = DynamicProgramming( grid_sys, qcf )
 
     

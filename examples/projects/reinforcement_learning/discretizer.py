@@ -471,7 +471,7 @@ class GridDynamicSystem:
     
     
     ##############################
-    def compute_bivariatespline_2D_interpolation_function(self, J ):
+    def compute_bivariatespline_2D_interpolation_function(self, J , kx = 1 , ky = 1 ):
         """  
         Return interpolation function for value based on x coordinates
         
@@ -486,7 +486,7 @@ class GridDynamicSystem:
             # n-D grid of values
             J_grid = self.get_grid_from_array( J )
             
-            interpol = RectBivariateSpline( self.x_level[0] , self.x_level[1] , J_grid , bbox=[None, None, None, None], kx=1, ky=1,)
+            interpol = RectBivariateSpline( self.x_level[0] , self.x_level[1] , J_grid , bbox=[None, None, None, None], kx=kx, ky=ky,)
             
         else:
             
