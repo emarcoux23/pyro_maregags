@@ -8,10 +8,14 @@ Created on Fri Oct 14 20:48:32 2022
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 import time
 
 from scipy.interpolate import RectBivariateSpline as interpol2D
 from scipy.interpolate import RegularGridInterpolator as rgi
+
+
 
 from pyro.control  import controller
 
@@ -58,6 +62,7 @@ class LookUpTableController( controller.StaticController ):
         
         for k in range(self.m):
             
+            # options can be changed for each control input axis
             self.interpol_method.append('linear') # "linear”, “nearest”, “slinear”, “cubic”, and “quintic”
             
         self.compute_interpol_functions()
@@ -145,9 +150,9 @@ class DynamicProgramming:
             self.pi_list = []
             
             # Value at t = t_f
-            self.J_list.append( self.J_next  )
-            self.t_list.append( self.tf )
-            self.pi_list.append( None )
+            self.J_list.append(  self.J_next  )
+            self.t_list.append(  self.tf )
+            self.pi_list.append( self.pi )
         
         
     ##############################
@@ -204,13 +209,16 @@ class DynamicProgramming:
                     # If action is in allowable set
                     if self.sys.isavalidinput( x , u ):
                         
+                        # Forward dynamics 
                         x_next = self.sys.f( x , u , self.t ) * self.grid_sys.dt + x
                         
                         # if the next state is not out-of-bound
                         if self.sys.isavalidstate(x_next):
 
-                            # Cost-to-go of a given action
+                            # Estimated (interpolation) cost to go of arrival x_next state
                             J_next = self.J_interpol( x_next )
+                            
+                            # Cost-to-go of a given action
                             Q[ a ] = self.cf.g( x , u , self.t ) * self.grid_sys.dt + self.alpha * J_next
                             
                         else:
@@ -273,7 +281,16 @@ class DynamicProgramming:
     
     ################################
     def solve_bellman_equation(self, tol = 0.1 , animate_cost2go = False , animate_policy = False , k = 0 ):
-        """ iterate until changes to estimate J are under the tolerance """
+        """ 
+        Value iteration algorithm
+        --------------------------
+        
+        Do Dp backward iterations until changes to J are under the tolerance 
+        
+        Note: self.alpha should be smaller then 1 to garantee convergence
+        
+        
+        """
         
         if animate_cost2go: self.plot_cost2go()
         if animate_policy: self.plot_policy( k )
@@ -288,36 +305,63 @@ class DynamicProgramming:
             if animate_policy: self.update_policy_plot( k )
             
         print('Bellman equation solved!' )
+        
+        
+    ################################
+    ### Data tools
+    ################################
+    
+    ################################
+    def clean_infeasible_set(self , tol = 1):
+        """
+        Set default policy and cost2go to cf.INF for state for  which it is unavoidable
+        that they will reach unallowable regions
+
+        """
+        
+        default_action = self.grid_sys.get_nearest_action_id_from_input( self.sys.ubar )
+        
+        infeasible_node_IDs = self.J > ( self.cf.INF - tol )
+        
+        self.J[  infeasible_node_IDs ] = self.cf.INF
+        self.pi[ infeasible_node_IDs ] = default_action
+        
+        
+    ################################
+    ### Print quick shorcuts
+    ################################
             
             
     ################################
-    def plot_cost2go(self , jmax = 1000 , i = 0 , j = 1 ):
+    def plot_cost2go(self , jmax = None , i = 0 , j = 1 , show = True ):
+        
+        if jmax == None: jmax = self.cf.INF
                
-        fig, ax, pcm = self.grid_sys.plot_grid_value( self.J_next , 'Cost-to-go' , i , j , jmax , 0 )
+        fig, ax, pcm = self.grid_sys.plot_grid_value( self.J , 'Cost-to-go' , i , j , jmax , 0 )
         
         text = ax.text(0.05, 0.05, '', transform=ax.transAxes, fontsize = 8 )
         
         self.cost2go_fig = [fig, ax, pcm, text]
         
-        plt.pause( 0.001 )
+        if show: plt.pause( 0.001 )
         #plt.ion()
         
         
     ################################
-    def update_cost2go_plot(self, i = 0 , j = 1 ):
+    def update_cost2go_plot(self, i = 0 , j = 1 , show = True ):
         
-        J_grid = self.grid_sys.get_grid_from_array( self.J_next )
+        J_grid = self.grid_sys.get_grid_from_array( self.J )
         
         J_2d = self.grid_sys.get_2D_slice_of_grid( J_grid , i , j )
                
         self.cost2go_fig[2].set_array( np.ravel( J_2d.T ) )
         self.cost2go_fig[3].set_text('Optimal cost2go at time = %4.2f' % ( self.t ))
         
-        plt.pause( 0.001 )
+        if show: plt.pause( 0.001 )
         
     
     ################################
-    def plot_policy(self , k = 0 , i = 0 , j = 1 ):
+    def plot_policy(self , k = 0 , i = 0 , j = 1 , show = True ):
                
         fig, ax, pcm = self.grid_sys.plot_control_input_from_policy( self.pi , k)
         
@@ -325,12 +369,12 @@ class DynamicProgramming:
         
         self.policy_fig = [fig, ax, pcm, text]
         
-        plt.pause( 0.001 )
+        if show: plt.pause( 0.001 )
         #plt.ion()
         
         
     ################################
-    def update_policy_plot(self, k , i = 0 , j = 1 ):
+    def update_policy_plot(self, k , i = 0 , j = 1 , show = True  ):
         
         uk    = self.grid_sys.get_input_from_policy( self.pi, k)
         uk_nd = self.grid_sys.get_grid_from_array( uk ) 
@@ -339,8 +383,66 @@ class DynamicProgramming:
         self.policy_fig[2].set_array( np.ravel( uk_2d.T ) )
         self.policy_fig[3].set_text('Optimal policy at time = %4.2f' % ( self.t ))
         
-        plt.pause( 0.001 )
+        if show: plt.pause( 0.001 )
         
+        
+    ################################
+    def animate_cost2go(self , show = True , save = False , file_name = 'cost2go_animation'):
+        
+        self.J  = self.J_list[0]
+        self.pi = self.pi_list[0]
+        self.t  = self.t_list[0]
+        self.clean_infeasible_set()
+        self.plot_cost2go( show = False  )
+
+        self.ani = animation.FuncAnimation( self.cost2go_fig[0], self.__animate_cost2go, 
+                                                len(self.J_list), interval = 20 )
+        
+        if save: self.ani.save( file_name + '.gif', writer='imagemagick', fps=30)
+        
+        if show: self.cost2go_fig[0].show()
+        
+    
+    ################################
+    def __animate_cost2go(self , i ):
+        
+        self.J  = self.J_list[i]
+        self.pi = self.pi_list[i]
+        self.t  = self.t_list[i]
+        self.clean_infeasible_set()
+        self.update_cost2go_plot( show = False )
+        
+        
+    ################################
+    def animate_policy(self , show = True , save = False , file_name = 'policy_animation'):
+        
+        self.J  = self.J_list[1]
+        self.pi = self.pi_list[1]
+        self.t  = self.t_list[1]
+        self.clean_infeasible_set()
+        self.plot_policy( k = 0 , show = False )
+
+        self.ani = animation.FuncAnimation( self.policy_fig[0], self.__animate_policy, 
+                                                len(self.pi_list)-1, interval = 20 )
+        
+        if save: self.ani.save( file_name + '.gif', writer='imagemagick', fps=30)
+        
+        if show: self.policy_fig[0].show()
+        
+    
+    ################################
+    def __animate_policy(self , i ):
+        
+        self.J  = self.J_list[i+1]
+        self.pi = self.pi_list[i+1]
+        self.t  = self.t_list[i+1]
+        self.clean_infeasible_set()
+        self.update_policy_plot( k = 0 , show = False )
+        
+    
+    ################################
+    ### Quick utility shorcuts
+    ################################
     
     ################################
     def get_lookup_table_controller(self):

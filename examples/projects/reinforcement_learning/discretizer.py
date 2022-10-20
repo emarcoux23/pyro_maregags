@@ -419,6 +419,49 @@ class GridDynamicSystem:
         node_id = self.node_id_from_index[ indexes ]
         
         return node_id
+    
+    
+    ##############################
+    def get_index_from_input(self, u ):
+        """  
+        Return sinput position on the grid in terms of fractionnal indexes 
+        """
+        
+        indexes = np.zeros( self.sys.m , dtype = float )
+        
+        # for all state dimensions
+        for i in range( self.sys.m ):
+            
+            indexes[i] = ( u[i] - self.sys.u_lb[i] ) / self.u_range[i] * ( self.u_grid_dim[i] - 1 )
+        
+        return indexes
+    
+    
+    ##############################
+    def get_nearest_index_from_input(self, u ):
+        """  
+        Return nearest indexes on the state-space grid from a state
+        """
+        
+        # Round the indexes to the nearest integer
+        nearest_indexes = np.rint( self.get_index_from_input( u ) ).astype(int)
+        
+        clipped_indexes = np.clip( nearest_indexes , 0 , self.u_grid_dim - 1 )
+        
+        return clipped_indexes
+    
+    
+    ##############################
+    def get_nearest_action_id_from_input(self, u ):
+        """  
+        Return the action id that is the closest on the grid from u
+        """
+        
+        indexes   = tuple( self.get_nearest_index_from_input( u ) )
+        
+        action_id = self.action_id_from_index[ indexes ]
+        
+        return action_id
             
     
     ##############################
@@ -548,7 +591,7 @@ class GridDynamicSystem:
     
     
     ##############################
-    def plot_grid_value(self, J , name = 'Value on the grid' , x = 0 , y = 1, jmax =  np.inf , jmin = -1 , cmap = 'cool'):
+    def plot_grid_value(self, J , name = 'Value on the grid' , x = 0 , y = 1, jmax =  np.inf , jmin = -1 , cmap = 'YlOrRd'):
         """  
         plot a scalar value (array by node-id) on a grid
         

@@ -30,26 +30,27 @@ qcf.INF  = 300
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 #dp = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
 
-#dp.compute_steps(100, True  )
-#dp.plot_policy()
+#dp.solve_bellman_equation()
 
-dp.solve_bellman_equation( tol = 1 , animate_policy = True )
-dp.plot_cost2go(150)
+dp.compute_steps(200)
+# dp.plot_policy()
+
+# dp.solve_bellman_equation( tol = 1 , animate_policy = True )
+#dp.plot_cost2go(150)
+
+dp.animate_cost2go( show = False , save = True )
+dp.animate_policy( show = False , save = True )
 
 
-ctl = dp.get_lookup_table_controller()
+# ctl = dp.get_lookup_table_controller()
 
 #ctl.plot_control_law( sys = sys , n = 100)
 
 
 #asign controller
-cl_sys = controller.ClosedLoopSystem( sys , ctl )
-
-##############################################################################
-
-# Simulation and animation
-cl_sys.x0   = np.array([0,0])
-cl_sys.compute_trajectory( 10, 10001, 'euler')
-cl_sys.plot_trajectory('xu')
-cl_sys.plot_phase_plane_trajectory()
-cl_sys.animate_simulation()
+# cl_sys = controller.ClosedLoopSystem( sys , ctl )
+# cl_sys.x0   = np.array([0,0])
+# cl_sys.compute_trajectory( 10, 10001, 'euler')
+# cl_sys.plot_trajectory('xu')
+# cl_sys.plot_phase_plane_trajectory()
+# cl_sys.animate_simulation()

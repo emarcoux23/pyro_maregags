@@ -39,7 +39,7 @@ qcf.INF    = 1000000
 
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 
-dp.solve_bellman_equation( tol = 1 , animate_policy = True )
+dp.solve_bellman_equation( tol = 0.01 , animate_policy = True )
 dp.plot_cost2go(150)
 dp.save_latest('test_hidef')
 
