@@ -16,31 +16,43 @@ import costfunction
 
 sys  = pendulum.DoublePendulum()
 
+dx = 0.1
 
-sys.x_ub = np.array([  0.5 ,  0.5,  0.5 ,  0.5 ])
-sys.x_lb = np.array([ -0.5 , -0.5, -0.5 , -0.5 ])
+sys.x_ub = np.array([  dx ,  dx,  dx ,  dx ])
+sys.x_lb = np.array([ -dx , -dx, -dx , -dx ])
+
+sys.u_ub = np.array([  20.0 ,  10.0 ])
+sys.u_lb = np.array([ -20.0 , -10.0 ])
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [31,31,31,31] , [3,3] , 0.05 )
+grid_sys = discretizer.GridDynamicSystem( sys , [21,21,21,21] , [3,3] , 0.02 )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
 qcf.xbar = np.array([ 0 , 0, 0 , 0 ]) # target
 qcf.INF  = 1000
-qcf.EPS  = 1.0
+qcf.EPS  = 0.05
+
+qcf.Q[0,0] = 0.1
+qcf.Q[1,1] = 0.1
+qcf.Q[2,2] = 0.1
+qcf.Q[3,3] = 0.1
+
+qcf.S[0,0] = 10000
+qcf.S[1,1] = 10000
+qcf.S[2,2] = 10000
+qcf.S[3,3] = 10000
 
 
 # DP algo
-dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
-
-dp.compute_steps(1,True)
-dp.compute_steps(400)
-dp.save_latest('test_double_pendulum')
+dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf )
 
 
-grid_sys.plot_grid_value( dp.J_next )
+dp.compute_steps( 10 , animate_cost2go=True )
 
+
+"""
 ctl = dprog.LookUpTableController( grid_sys , dp.pi )
 
 ctl.plot_control_law( sys = sys , n = 100)
@@ -57,3 +69,4 @@ cl_sys.compute_trajectory( 10, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()
 cl_sys.animate_simulation()
+"""

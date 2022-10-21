@@ -31,7 +31,7 @@ qcf.INF  = 1000000
 #dp1.compute_steps(10)
 
 dp2 = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
-dp2.compute_steps(100)
+#dp2.compute_steps(100)
 
 dp4 = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
-dp4.compute_steps(100)
+#dp4.compute_steps(100)

@@ -265,9 +265,11 @@ class DynamicProgramming:
     def compute_steps(self, n = 50 , animate_cost2go = False , animate_policy = False , k = 0 ):
         """ compute number of step """
         
+        print('\nComputing %d backward DP iterations:'%n)
+        print('-----------------------------------------')
+        
         if animate_cost2go: self.plot_cost2go()
         if animate_policy: self.plot_policy( k )
-        
                
         for i in range(n):
             self.initialize_backward_step()
@@ -289,6 +291,9 @@ class DynamicProgramming:
         
         
         """
+        
+        print('\nComputing backward DP iterations until dJ<%2.2f:'%tol)
+        print('---------------------------------------------------------')
         
         if animate_cost2go: self.plot_cost2go()
         if animate_policy: self.plot_policy( k )
@@ -491,6 +496,9 @@ class DynamicProgrammingWithLookUpTable( DynamicProgramming ):
     def compute_cost_lookuptable(self):
         """ One step of value iteration """
         
+        start_time = time.time()
+        print('Computing g(x,u,t) look-up table..  ', end = '')
+        
         self.G = np.zeros( ( self.grid_sys.nodes_n , self.grid_sys.actions_n ) , dtype = float )
 
         # For all state nodes        
@@ -518,6 +526,10 @@ class DynamicProgrammingWithLookUpTable( DynamicProgramming ):
                     else:
                         # Not allowable input at this state
                         self.G[ s , a ] = self.cf.INF
+        
+        # Print update
+        computation_time = time.time() - start_time
+        print('completed in %4.2f sec'%computation_time)
     
                 
     ###############################

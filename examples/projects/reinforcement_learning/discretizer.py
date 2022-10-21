@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
+import time
+
 from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import RegularGridInterpolator
 
@@ -110,11 +112,12 @@ class GridDynamicSystem:
         self.discretize_state_space()
         self.discretize_input_space() 
         
-        print('\nGrid dynamics system for:', self.sys.name)
+        print('\nGenerating a mesh for:', self.sys.name)
         print('---------------------------------------------------')
         print('State space dimensions:', self.sys.n , ' Input space dimension:', self.sys.m )
         print('Number of nodes:', self.nodes_n , ' Number of actions:', self.actions_n )
         print('Number of node-action pairs:', self.nodes_n * self.actions_n )
+        print('\n')
         
         self.generate_nodes()
         self.generate_actions()
@@ -161,6 +164,9 @@ class GridDynamicSystem:
     ##############################
     def generate_nodes(self):
         """ Compute 1-D list of nodes based on a regular grid discretization """
+        
+        start_time = time.time()
+        print('Computing nodes..  ', end = '')
         
         # n-D grid of node ID
         self.node_id_from_index = np.zeros( self.x_grid_dim , dtype = int )     # grid of node ID
@@ -238,10 +244,17 @@ class GridDynamicSystem:
             
             raise NotImplementedError
             
+        # Print update
+        computation_time = time.time() - start_time
+        print('completed in %4.2f sec'%computation_time)
+            
                 
     ##############################
     def generate_actions(self):
         """ Compute 1-D list of actions based on a regular grid discretization"""
+        
+        start_time = time.time()
+        print('Computing actions..  ', end = '')
         
         # m-D grid of action ID
         self.action_id_from_index = np.zeros( self.u_grid_dim , dtype = int )     # grid of node ID
@@ -292,10 +305,17 @@ class GridDynamicSystem:
             
             raise NotImplementedError
             
+        # Print update
+        computation_time = time.time() - start_time
+        print('completed in %4.2f sec'%computation_time)
+            
             
     ##############################
     def compute_action_set_table(self):
         """ Compute a boolen table describing the action set for each node """
+        
+        start_time = time.time()
+        print('Computing action sets..  ', end = '')
             
         # Evaluation lookup tables      
         self.action_isok   = np.zeros( ( self.nodes_n , self.actions_n ) , dtype = bool )
@@ -314,10 +334,16 @@ class GridDynamicSystem:
 
                     self.action_isok[ node_id , action_id ] = u_ok
                     
+        computation_time = time.time() - start_time
+        print('completed in %4.2f sec'%computation_time)
+                    
                     
     ##############################
     def compute_xnext_table(self):
         """ Compute a x_next lookup table for the forward dynamics """
+        
+        start_time = time.time()
+        print('Computing x_next array.. ', end = '')
             
         # Evaluation lookup tables
         self.x_next_table = np.zeros( ( self.nodes_n , self.actions_n , self.sys.n ) , dtype = float ) # lookup table for dynamic
@@ -339,6 +365,15 @@ class GridDynamicSystem:
                     
                     self.x_next_table[ node_id , action_id , : ] = x_next
                     self.x_next_isok[  node_id , action_id ]     = x_ok
+                
+                
+                if (node_id % 10000) == 9999:
+                    computation_time = time.time() - start_time
+                    print('\rComputing x_next array.. %d nodes computed in %4.2f sec'%((node_id+1), computation_time ) )
+                
+        
+        computation_time = time.time() - start_time
+        print('\rComputing x_next array.. completed in %4.2f sec'%computation_time)
                     
     
     ##############################
