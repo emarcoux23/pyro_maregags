@@ -9,28 +9,23 @@ Created on Sun Oct 16 22:27:47 2022
 import numpy as np
 
 from pyro.dynamic  import pendulum
-from pyro.control  import controller
+
 import dynamic_programming as dprog
 import discretizer
 import costfunction
 
 sys  = pendulum.SinglePendulum()
 
+sys.xbar = np.array([ -3.14 , 0 ]) 
+
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [11] )
+grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [3] )
 
 # Cost Function
-qcf = costfunction.QuadraticCostFunction.from_sys(sys)
-
-qcf.xbar = np.array([ -3.14 , 0 ]) # target
-qcf.INF  = 300
-
-qcf.S[0,0] = 10.0
-qcf.S[1,1] = 10.0
-
+cf = costfunction.Reachability( sys.isavalidstate , sys.xbar )
 
 # DP algo
-dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
+dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, cf)
 #dp = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
 
 dp.solve_bellman_equation( animate_cost2go = True )

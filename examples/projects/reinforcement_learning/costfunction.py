@@ -119,18 +119,21 @@ class QuadraticCostFunction( CostFunction ):
     def __init__(self, n, m):
         
         CostFunction.__init__(self)
-
+        
+        # dimensions
         self.n = n
         self.m = m
-
+        
+        # nominal values
         self.xbar = np.zeros(self.n)
         self.ubar = np.zeros(self.m)
 
         # Quadratic cost weights
         self.Q = np.diag( np.ones(n)  )
         self.R = np.diag( np.ones(m)  )
+        self.S = np.diag( np.zeros(n) )
         
-        # Optionnal zone of zero cost if ||dx|| < EPS 
+        # Optionnal zone of zero cost if ||x - xbar || < EPS 
         self.ontarget_check = True
         
     
@@ -151,7 +154,18 @@ class QuadraticCostFunction( CostFunction ):
     def h(self, x , t = 0):
         """ Final cost function with zero value """
         
-        return 0
+        # Delta values with respect to nominal values
+        dx = x - self.xbar
+        
+        # Quadratic terminal cost
+        J_f = np.dot( dx.T , np.dot(  self.S , dx ) )
+                     
+        # Set cost to zero if on target
+        if self.ontarget_check:
+            if ( np.linalg.norm( dx ) < self.EPS ):
+                J_f = 0
+        
+        return J_f
     
     
     #############################
@@ -177,7 +191,7 @@ class QuadraticCostFunction( CostFunction ):
             )
         """
             
-        # Delta values with respect to bar values
+        # Delta values with respect to nominal values
         dx = x - self.xbar
         du = u - self.ubar
         
@@ -242,6 +256,74 @@ class TimeCostFunction( CostFunction ):
                 dJ = 0
                 
         return dJ
+    
+    
+    
+##############################################################################
+
+class Reachability( CostFunction ):
+    
+    ############################
+    def __init__(self, isavalidestate , xbar = None , isontarget = None ):
+
+        CostFunction.__init__(self)
+        
+        self.INF = 1E4
+        self.EPS = 0.2
+        
+        self.isavalidestate = isavalidestate
+        
+        if isontarget == None:
+            # default on target test is a quadratic norm check with xbar
+            self.isontarget = self.norm_test 
+            self.xbar       = xbar
+            
+        else:
+            # Custom function returning bool from state
+            self.isontarget = isontarget 
+            
+        
+    #############################
+    def norm_test(self, x , t = 0):
+        """ Final cost function with zero value """
+        
+        dx = x - self.xbar
+        
+        isontarget = np.linalg.norm( dx ) < self.EPS
+        
+        return isontarget
+    
+        
+    #############################
+    def h(self, x , t = 0):
+        """ Final cost """
+        
+        if self.isontarget( x , t ):
+            
+            J_f = 0 # Finish in the target set is very good
+            
+        else:
+            
+            J_f = self.INF # Finish not in the target set is very bad
+        
+        return J_f
+    
+    
+    #############################
+    def g(self, x , u , t = 0 ):
+        """ Unity """
+        
+        if self.isavalidestate( x ):
+            
+            g = 0 
+            
+        else:
+            
+            g = self.INF # The system went on of bounds
+        
+        return g
+    
+    
 
 '''
 #################################################################

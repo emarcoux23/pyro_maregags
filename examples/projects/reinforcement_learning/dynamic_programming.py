@@ -150,7 +150,7 @@ class DynamicProgramming:
             self.pi_list = []
             
             # Value at t = t_f
-            self.J_list.append(  self.J_next  )
+            self.J_list.append(  self.J  )
             self.t_list.append(  self.tf )
             self.pi_list.append( self.pi )
         
@@ -159,8 +159,8 @@ class DynamicProgramming:
     def evaluate_terminal_cost(self):
         """ initialize cost-to-go and policy """
 
-        self.J_next  = np.zeros( self.grid_sys.nodes_n , dtype = float )
-        self.pi      = np.zeros( self.grid_sys.nodes_n , dtype = int   )
+        self.J  = np.zeros( self.grid_sys.nodes_n , dtype = float )
+        self.pi = np.zeros( self.grid_sys.nodes_n , dtype = int   )
 
         # Initial cost-to-go evaluation       
         for s in range( self.grid_sys.nodes_n ):  
@@ -168,7 +168,7 @@ class DynamicProgramming:
                 xf = self.grid_sys.state_from_node_id[ s , : ]
                 
                 # Final Cost of all states
-                self.J_next[ s ] = self.cf.h( xf , self.tf )
+                self.J[ s ] = self.cf.h( xf , self.tf )
                 
     
     ###############################
@@ -176,8 +176,9 @@ class DynamicProgramming:
         """ One step of value iteration """
         
         # Update values
-        self.k = self.k + 1                  # index backward in time
-        self.t = self.t - self.grid_sys.dt   # time
+        self.k      = self.k + 1                  # index backward in time
+        self.t      = self.t - self.grid_sys.dt   # time
+        self.J_next = self.J
         
         # New Cost-to-go and policy array to be computed
         self.J  = np.zeros( self.grid_sys.nodes_n , dtype = float )
@@ -249,9 +250,6 @@ class DynamicProgramming:
         delta_min = delta.min()
         
         print('%d t:%.2f Elasped:%.2f max: %.2f dmax:%.2f dmin:%.2f' % (self.k,self.t,elapsed_time,j_max,delta_max,delta_min) )
-        
-        # Update J_next
-        self.J_next = self.J
         
         # List in memory
         if self.save_time_history:
@@ -552,8 +550,9 @@ class DynamicProgramming2DRectBivariateSpline( DynamicProgrammingWithLookUpTable
         """ One step of value iteration """
         
         # Update values
-        self.k = self.k + 1                  # index backward in time
-        self.t = self.t - self.grid_sys.dt   # time
+        self.k      = self.k + 1                  # index backward in time
+        self.t      = self.t - self.grid_sys.dt   # time
+        self.J_next = self.J
         
         # New Cost-to-go and policy array to be computed
         self.J  = np.zeros( self.grid_sys.nodes_n , dtype = float )

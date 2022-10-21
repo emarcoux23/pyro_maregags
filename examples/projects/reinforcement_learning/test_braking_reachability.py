@@ -9,24 +9,36 @@ Created on Sun Oct 16 22:27:47 2022
 import numpy as np
 
 from pyro.dynamic  import pendulum
-from pyro.control  import controller
+from pyro.dynamic  import longitudinal_vehicule
+
 import dynamic_programming as dprog
 import discretizer
 import costfunction
 
-sys  = pendulum.SinglePendulum()
+# sys  = pendulum.SinglePendulum()
+
+sys  = longitudinal_vehicule.LongitudinalFrontWheelDriveCarWithWheelSlipInput()
+
+sys.x_ub[0] = 60
+sys.x_lb[0] = 0
+sys.x_ub[1] = 20
+sys.x_lb[1] = 0
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [11] )
+grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [3] )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
-qcf.xbar = np.array([ -3.14 , 0 ]) # target
-qcf.INF  = 300
+qcf.xbar = np.array([ 0, 0 ]) # target
+qcf.INF  = 1000
 
-qcf.S[0,0] = 10.0
-qcf.S[1,1] = 10.0
+qcf.Q[0,0] = 0.0
+qcf.Q[1,1] = 0.0
+qcf.R[0,0] = 0.0
+
+qcf.S[0,0] = 0.0
+qcf.S[1,1] = 10000.0
 
 
 # DP algo
