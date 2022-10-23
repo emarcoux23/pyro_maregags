@@ -118,7 +118,7 @@ The core of the library is a mother "dynamic system" class defined by a differen
 - Bode plot
 - Reachability
 
-## How to use ##
+# How to use #
 
 To learn how to use pyro, see the following notebook tutorials hosted on colab:
 
@@ -132,7 +132,7 @@ To learn how to use pyro, see the following notebook tutorials hosted on colab:
 Also see exemples scripts in pyro/examples/ 
 
 
-## Installation ##
+# Installation #
 
 ### Dependencies ####
 Pyro is built only using core python librairies: 
