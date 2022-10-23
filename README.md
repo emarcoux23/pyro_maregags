@@ -25,6 +25,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 ### A collection of controller synthesis tools:
 <table>
   <tr>
+    Dynamic programming on a discretized grid:
     <th>
     <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
     </th>
