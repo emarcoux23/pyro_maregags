@@ -38,12 +38,12 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 ### A collection of analysis tools:
 <table>
 <tr>
-  Phase plane
+  Computing time trajectory and phase plane
     <th>
-    <img src="https://www.alexandregirard.com/IMG/cost2go_animation.gif" alt="cost2go" width="400"/>
+    <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="cost2go" width="400"/>
     </th>
     <th>
-    <img src="https://www.alexandregirard.com/IMG/policy_animation.gif" alt="cost2go" width="400"/>
+    <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="cost2go" width="400"/>
     </th> 
   </tr>
   <tr>
