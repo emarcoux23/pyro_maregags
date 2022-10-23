@@ -62,7 +62,7 @@ The concept of this toolbox is a hierachy of "dynamic system" objects, from the 
 
 <img width="900" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg" class="center">
 
-The core of the library is a mother "dyanmic system" class defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = fwd_kinematic(x,u,t)$ that is used for generating animations:
+The core of the library is a mother "dynamic system" class defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = f_{kinematic}(x,u,t)$ that is used for generating animations:
 
 <img width="900" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg" class="center">
 
