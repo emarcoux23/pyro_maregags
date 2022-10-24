@@ -22,18 +22,6 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   </tr>
 </table>
 
-### A collection of controller synthesis tools:
-<table>
-  <tr>
-    Dynamic programming on a discretized grid
-    <th>
-    <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
-    </th>
-    <th>
-      <img src="https://user-images.githubusercontent.com/16725496/197412247-ddd810b1-b533-4675-9b49-ceb67608e47c.gif" alt="policy" width="400"/>
-    </th> 
-  </tr>
-</table>
 
 ### A collection of analysis tools:
 <table>
@@ -54,6 +42,40 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
 
+    </th> 
+  </tr>
+</table>
+
+
+### A collection of controller synthesis and planning tools:
+<table>
+  <tr>
+    Dynamic programming on a discretized grid
+    <th>
+    <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
+    </th>
+    <th>
+      <img src="https://user-images.githubusercontent.com/16725496/197412247-ddd810b1-b533-4675-9b49-ceb67608e47c.gif" alt="policy" width="400"/>
+    </th> 
+  </tr>
+  <tr>
+    <th>
+      RRT Trajectory Planning
+      <img src="https://user-images.githubusercontent.com/16725496/197430609-1d31a083-7337-410a-8b58-b81cd1075ed0.png" alt="cost2go" width="400"/>
+    </th>
+      Direct Collocation trajectory Optimisation
+    <th>
+      <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="400"/>
+    </th> 
+  </tr>
+  <tr>
+    <th>
+      Computed Torque Controller
+      <img src="https://user-images.githubusercontent.com/16725496/197431073-9c3d874b-1766-4ee5-9267-756d89c98278.png" alt="cost2go" width="400"/>
+    </th>
+    <th>
+      Sliding Mode Controller
+      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="400"/>
     </th> 
   </tr>
 </table>
