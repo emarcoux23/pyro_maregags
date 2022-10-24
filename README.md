@@ -22,37 +22,12 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   </tr>
 </table>
 
-
-### A collection of analysis tools:
-<table>
-<tr>
-    <th>
-     Computing time trajectory
-    <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="400"/>
-    </th>
-    <th>
-      Phase plane analysis
-    <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="phase-plane" width="400"/>
-    </th> 
-  </tr>
-  <tr>
-    <th>
-      Generating animated simulations
-    <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="400"/>
-    </th>
-    <th>
-
-    </th> 
-  </tr>
-</table>
-
-
 ### A collection of controller synthesis and planning tools:
 <table>
   <tr>
-    Dynamic programming on a discretized grid
     <th>
-    <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
+       Dynamic programming
+       <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
     </th>
     <th>
       <img src="https://user-images.githubusercontent.com/16725496/197412247-ddd810b1-b533-4675-9b49-ceb67608e47c.gif" alt="policy" width="400"/>
@@ -63,8 +38,8 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
       RRT Trajectory Planning
       <img src="https://user-images.githubusercontent.com/16725496/197430609-1d31a083-7337-410a-8b58-b81cd1075ed0.png" alt="cost2go" width="400"/>
     </th>
-      Direct Collocation trajectory Optimisation
     <th>
+      Direct Collocation trajectory Optimisation
       <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="400"/>
     </th> 
   </tr>
@@ -77,6 +52,29 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
       Sliding Mode Controller
       <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="400"/>
     </th> 
+  </tr>
+</table>
+
+### A collection of analysis tools:
+<table>
+  <tr>
+    <th>
+      Computing time trajectory
+      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="370"/>
+    </th>
+    <th>
+      Phase plane analysis
+      <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="phase-plane" width="400"/>
+    </th> 
+  </tr>
+  <tr>
+    <th>
+      Generating animated simulations
+      <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="400"/>
+    </th>
+    <th>
+      Manipulator Eanipulability Ellipsoid
+      <img src="https://user-images.githubusercontent.com/16725496/197432396-250badab-1b45-4d52-ac2e-1f92f49cd7ef.png" alt="ani" width="400"/>
   </tr>
 </table>
 
