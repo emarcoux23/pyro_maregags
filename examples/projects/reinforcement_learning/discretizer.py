@@ -117,7 +117,7 @@ class GridDynamicSystem:
         print('State space dimensions:', self.sys.n , ' Input space dimension:', self.sys.m )
         print('Number of nodes:', self.nodes_n , ' Number of actions:', self.actions_n )
         print('Number of node-action pairs:', self.nodes_n * self.actions_n )
-        print('\n')
+        print('---------------------------------------------------')
         
         self.generate_nodes()
         self.generate_actions()
@@ -369,7 +369,7 @@ class GridDynamicSystem:
                 
                 if (node_id % 10000) == 9999:
                     computation_time = time.time() - start_time
-                    print('\rComputing x_next array.. %d nodes computed in %4.2f sec'%((node_id+1), computation_time ) )
+                    print('\rComputing x_next array.. %d/%d nodes computed in %4.2f sec'%((node_id+1), self.nodes_n ,  computation_time ) )
                 
         
         computation_time = time.time() - start_time

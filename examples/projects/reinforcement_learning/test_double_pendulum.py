@@ -16,46 +16,50 @@ import costfunction
 
 sys  = pendulum.DoublePendulum()
 
-dx = 0.1
+sys.I1 = 5
+sys.I2 = 5
 
-sys.x_ub = np.array([  dx ,  dx,  dx ,  dx ])
-sys.x_lb = np.array([ -dx , -dx, -dx , -dx ])
+dx1 =  2.0
+dx2 =  2.0
+ddx1 = 3.0
+ddx2 = 6.0
 
-sys.u_ub = np.array([  20.0 ,  10.0 ])
-sys.u_lb = np.array([ -20.0 , -10.0 ])
+sys.x_ub = np.array([  dx1 ,  dx2,  ddx1 ,  ddx2 ])
+sys.x_lb = np.array([ -dx1 , -dx2, -ddx1 , -ddx2 ])
+
+sys.u_ub = np.array([  10.0 ,  5.0 ])
+sys.u_lb = np.array([ -10.0 , -5.0 ])
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [21,21,21,21] , [3,3] , 0.02 )
+grid_sys = discretizer.GridDynamicSystem( sys , [31,31,31,31] , [3,3] , 0.05 )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
 qcf.xbar = np.array([ 0 , 0, 0 , 0 ]) # target
 qcf.INF  = 1000
-qcf.EPS  = 0.05
+qcf.EPS  = 0.2
 
 qcf.Q[0,0] = 0.1
 qcf.Q[1,1] = 0.1
 qcf.Q[2,2] = 0.1
 qcf.Q[3,3] = 0.1
 
-qcf.S[0,0] = 10000
-qcf.S[1,1] = 10000
-qcf.S[2,2] = 10000
-qcf.S[3,3] = 10000
+qcf.S[0,0] = 100
+qcf.S[1,1] = 100
+qcf.S[2,2] = 100
+qcf.S[3,3] = 100
 
 
 # DP algo
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf )
 
+dp.plot_cost2go()
+dp.compute_steps( 10 , animate_policy = True )
 
-dp.compute_steps( 10 , animate_cost2go=True )
 
+ctl = dp.get_lookup_table_controller()
 
-"""
-ctl = dprog.LookUpTableController( grid_sys , dp.pi )
-
-ctl.plot_control_law( sys = sys , n = 100)
 
 
 #asign controller
@@ -64,9 +68,8 @@ cl_sys = controller.ClosedLoopSystem( sys , ctl )
 ##############################################################################
 
 # Simulation and animation
-cl_sys.x0   = np.array([0,0.1,0,0.1])
+cl_sys.x0   = np.array([0,0.1,0,0.0])
 cl_sys.compute_trajectory( 10, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()
 cl_sys.animate_simulation()
-"""

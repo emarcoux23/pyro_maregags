@@ -51,7 +51,7 @@ cl_sys = controller.ClosedLoopSystem( sys , ctl )
 ##############################################################################
 
 # Simulation and animation
-cl_sys.x0   = np.array([0,0])
+cl_sys.x0   = np.array([0,0,0,0])
 cl_sys.compute_trajectory( 30, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()
