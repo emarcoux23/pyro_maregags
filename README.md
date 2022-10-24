@@ -93,12 +93,12 @@ The core of the library is a mother "dynamic system" class defined by a differen
 
 ### Dynamic objects ###
 
-- Continuous Dynamic system - $\dot{x} = f(x,u)$
-- Linear System - $\dot{x} = A x + B u $
+- Continuous Dynamic system : $\dot{x} = f(x,u)$
+- Linear System : $\dot{x} = A x + B u $
   - Transfer function 
   - Exemples: mass-spring-damper
-- Mechanical System  - $H(q)\ddot{q} + C(\dot{q},q)\dot{q} = \sum F $
-  - Manipulator Robot  - $\dot{r} = J(q) \dot{q}$
+- Mechanical System : $H(q)\ddot{q} + C(\dot{q},q)\dot{q} = \sum F $
+  - Manipulator Robot : $\dot{r} = J(q) \dot{q}$
     - Exemples: two link plananr robot
     - Exemples: five link plannar robot
     - Exemples: three link robot
