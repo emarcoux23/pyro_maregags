@@ -68,7 +68,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
       <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="phase-plane" width="360"/>
     </th> 
   </tr>
-  <tr>
+    <tr>
     <th>
       Generating animated simulations
       <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="320"/>
@@ -76,6 +76,24 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     <th>
       Robot arm manipulability ellipsoid
       <img src="https://user-images.githubusercontent.com/16725496/197432396-250badab-1b45-4d52-ac2e-1f92f49cd7ef.png" alt="ani" width="360"/>
+  </tr>
+  <tr>
+    <th>
+      Bode plot or output/input
+      <img src="https://user-images.githubusercontent.com/16725496/197540975-18d0ecf1-08bc-4f7e-b1a1-ee5b26ec1101.png" alt="ani" width="320"/>
+    </th>
+    <th>
+      Pole zero map of output/input
+      <img src="https://user-images.githubusercontent.com/16725496/197540988-418f03d4-f977-4791-b0da-2f576c87fed2.png" alt="ani" width="360"/>
+  </tr>
+  <tr>
+    <th>
+      Modal analysis (mode 1)
+      <img src="https://user-images.githubusercontent.com/16725496/197541123-7c56a0c6-9968-412d-9f78-5d942c3562b3.gif" alt="ani" width="320"/>
+    </th>
+    <th>
+      Modal analysis (mode 2)
+      <img src="https://user-images.githubusercontent.com/16725496/197541057-ca2dae4a-8790-42ac-b244-7c1d677873f5.gif" alt="ani" width="360"/>
   </tr>
 </table>
 
