@@ -51,7 +51,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
       Direct collocation trajectory optimisation
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/double_pendulum_swing_up" alt="policy" width="320"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/double_pendulum_swing_up.gif" alt="policy" width="320"/>
     </th> 
   </tr>
 </table>
