@@ -6,7 +6,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-    <img src="https://user-images.githubusercontent.com/16725496/162986261-b3f6950b-e417-403b-8e81-81b30a542d6c.gif" alt="rocket" width="360"/>
+    <img src="https://www.alexandregirard.com/IMG/compressed_gif/rocket.gif" alt="rocket" width="360"/>
     </th>
     <th>
     <img src="https://user-images.githubusercontent.com/16725496/163005905-ad2205b0-150d-44de-bd43-a3b31a0bf10e.gif" alt="cartpole" width="360"/>
@@ -14,10 +14,10 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   </tr>
   <tr>
     <td>
-      <img src="https://user-images.githubusercontent.com/16725496/163005883-5ec9b6f8-d8ab-44b1-bc9d-ac5ca2d6b4a9.gif" alt="drone" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/drone.gif" alt="drone" width="360"/>
     </td>
     <td>
-    <img src="https://user-images.githubusercontent.com/16725496/163005950-665132ae-c1d5-486c-8bf1-3c3fa9aa4140.gif" alt="mass-spring" width="360"/>
+    <img src="https://www.alexandregirard.com/IMG/compressed_gif/two_mass_spring_pid.gif" alt="mass-spring" width="360"/>
     </td> 
   </tr>
 </table>
@@ -37,11 +37,11 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Dynamic programming
-      <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/cost2go_animation-2.gif" alt="cost2go" width="360"/>
     </th>
     <th>
       Optimal torque policy
-      <img src="https://user-images.githubusercontent.com/16725496/197412247-ddd810b1-b533-4675-9b49-ceb67608e47c.gif" alt="policy" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/policy_animation-2.gif" alt="policy" width="360"/>
     </th> 
   </tr>
   <tr>
@@ -51,7 +51,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
       Direct collocation trajectory optimisation
-      <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="320"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/double_pendulum_swing_up" alt="policy" width="320"/>
     </th> 
   </tr>
 </table>
@@ -71,7 +71,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     <tr>
     <th>
       Generating animated simulations
-      <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/Animation.gif" alt="ani" width="360"/>
     </th>
     <th>
       Robot arm manipulability ellipsoid
@@ -89,11 +89,11 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Modal analysis (mode 1)
-      <img src="https://user-images.githubusercontent.com/16725496/197541123-7c56a0c6-9968-412d-9f78-5d942c3562b3.gif" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/mode1.gif" alt="ani" width="360"/>
     </th>
     <th>
       Modal analysis (mode 2)
-      <img src="https://user-images.githubusercontent.com/16725496/197541057-ca2dae4a-8790-42ac-b244-7c1d677873f5.gif" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/mode2.gif" alt="ani" width="360"/>
   </tr>
 </table>
 
