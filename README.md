@@ -2,7 +2,7 @@
 
 An object-based toolbox for robot dynamic simulation, analysis, control and planning. 
 
-### A collection of dynamic systems 
+### A collection of dynamic systems:
 <table>
   <tr>
     <th>
