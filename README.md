@@ -26,30 +26,31 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-       Dynamic programming
-       <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
+      Dynamic programming
+      <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
     </th>
     <th>
+      Value iteration
       <img src="https://user-images.githubusercontent.com/16725496/197412247-ddd810b1-b533-4675-9b49-ceb67608e47c.gif" alt="policy" width="400"/>
     </th> 
   </tr>
   <tr>
     <th>
-      RRT Trajectory Planning
+      RRT trajectory planning
       <img src="https://user-images.githubusercontent.com/16725496/197430609-1d31a083-7337-410a-8b58-b81cd1075ed0.png" alt="cost2go" width="400"/>
     </th>
     <th>
-      Direct Collocation trajectory Optimisation
+      Direct collocation trajectory optimisation
       <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="400"/>
     </th> 
   </tr>
   <tr>
     <th>
-      Computed Torque Controller
+      Computed torque controller
       <img src="https://user-images.githubusercontent.com/16725496/197431073-9c3d874b-1766-4ee5-9267-756d89c98278.png" alt="cost2go" width="400"/>
     </th>
     <th>
-      Sliding Mode Controller
+      Sliding mode controller
       <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="400"/>
     </th> 
   </tr>
@@ -59,7 +60,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-      Computing time trajectory
+      Simulation
       <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="370"/>
     </th>
     <th>
@@ -73,7 +74,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
       <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="400"/>
     </th>
     <th>
-      Manipulator Eanipulability Ellipsoid
+      Manipulator ellipsoid
       <img src="https://user-images.githubusercontent.com/16725496/197432396-250badab-1b45-4d52-ac2e-1f92f49cd7ef.png" alt="ani" width="400"/>
   </tr>
 </table>
