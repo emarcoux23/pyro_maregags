@@ -6,18 +6,18 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-    <img src="https://user-images.githubusercontent.com/16725496/162986261-b3f6950b-e417-403b-8e81-81b30a542d6c.gif" alt="rocket" width="400"/>
+    <img src="https://user-images.githubusercontent.com/16725496/162986261-b3f6950b-e417-403b-8e81-81b30a542d6c.gif" alt="rocket" width="360"/>
     </th>
     <th>
-    <img src="https://user-images.githubusercontent.com/16725496/163005905-ad2205b0-150d-44de-bd43-a3b31a0bf10e.gif" alt="cartpole" width="400"/>
+    <img src="https://user-images.githubusercontent.com/16725496/163005905-ad2205b0-150d-44de-bd43-a3b31a0bf10e.gif" alt="cartpole" width="360"/>
     </th> 
   </tr>
   <tr>
     <td>
-      <img src="https://user-images.githubusercontent.com/16725496/163005883-5ec9b6f8-d8ab-44b1-bc9d-ac5ca2d6b4a9.gif" alt="drone" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/163005883-5ec9b6f8-d8ab-44b1-bc9d-ac5ca2d6b4a9.gif" alt="drone" width="360"/>
     </td>
     <td>
-    <img src="https://user-images.githubusercontent.com/16725496/163005950-665132ae-c1d5-486c-8bf1-3c3fa9aa4140.gif" alt="mass-spring" width="400"/>
+    <img src="https://user-images.githubusercontent.com/16725496/163005950-665132ae-c1d5-486c-8bf1-3c3fa9aa4140.gif" alt="mass-spring" width="360"/>
     </td> 
   </tr>
 </table>
@@ -27,31 +27,31 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Dynamic programming
-      <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197412634-9104f98d-d78b-4c77-a55f-ce175002f26f.gif" alt="cost2go" width="360"/>
     </th>
     <th>
       Value iteration
-      <img src="https://user-images.githubusercontent.com/16725496/197412247-ddd810b1-b533-4675-9b49-ceb67608e47c.gif" alt="policy" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197412247-ddd810b1-b533-4675-9b49-ceb67608e47c.gif" alt="policy" width="360"/>
     </th> 
   </tr>
   <tr>
     <th>
       RRT trajectory planning
-      <img src="https://user-images.githubusercontent.com/16725496/197430609-1d31a083-7337-410a-8b58-b81cd1075ed0.png" alt="cost2go" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197430609-1d31a083-7337-410a-8b58-b81cd1075ed0.png" alt="cost2go" width="360"/>
     </th>
     <th>
       Direct collocation trajectory optimisation
-      <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="350"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="320"/>
     </th> 
   </tr>
   <tr>
     <th>
       Computed torque controller
-      <img src="https://user-images.githubusercontent.com/16725496/197431073-9c3d874b-1766-4ee5-9267-756d89c98278.png" alt="cost2go" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197431073-9c3d874b-1766-4ee5-9267-756d89c98278.png" alt="cost2go" width="360"/>
     </th>
     <th>
       Sliding mode controller
-      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="350"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="320"/>
     </th> 
   </tr>
 </table>
@@ -61,21 +61,21 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Simulation
-      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="350"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="320"/>
     </th>
     <th>
       Phase plane analysis
-      <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="phase-plane" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="phase-plane" width="360"/>
     </th> 
   </tr>
   <tr>
     <th>
       Generating animated simulations
-      <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="350"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="320"/>
     </th>
     <th>
       Manipulator ellipsoid
-      <img src="https://user-images.githubusercontent.com/16725496/197432396-250badab-1b45-4d52-ac2e-1f92f49cd7ef.png" alt="ani" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197432396-250badab-1b45-4d52-ac2e-1f92f49cd7ef.png" alt="ani" width="360"/>
   </tr>
 </table>
 
@@ -89,7 +89,52 @@ The core of the library is a mother "dynamic system" class defined by a differen
 
 <img width="500" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg" class="center">
 
-## Pyro tools list ##
+
+# How to use #
+
+To learn how to use pyro, see the following notebook tutorials hosted on colab:
+
+1.   [The Dynamic System class and basic functionnality](https://colab.research.google.com/drive/18eEL-n-dv9JZz732nFCMtqMThDcfD2Pr?usp=sharing)
+2.   [Creating a custom dynamic class](https://colab.research.google.com/drive/1ILfRpL1zgiQZBOxwtbbpe0nl2znvzdWl?usp=sharing)
+3.   [Closed-loop system and controllers objects](https://colab.research.google.com/drive/1mog1HAFN2NFEdw6sPudzW2OaTk_li0Vx?usp=sharing)
+4.   The Linear System class (comin soon..)
+4.   The Mechanical System class (coming soon..)
+5.   [The Manipulator Robot class](https://colab.research.google.com/drive/1OILAhXRxM1r5PEB1BWaYtbR147Ff3gr1?usp=sharing)
+
+Also see exemples scripts in pyro/examples/ 
+
+
+# Installation #
+
+### Dependencies ####
+Pyro is built only using core python librairies: 
+* numpy
+* scipy
+* matplotlib
+
+### Using in Colab ###
+
+```
+!git clone https://github.com/SherbyRobotics/pyro
+import sys
+sys.path.append('/content/pyro')
+import pyro
+```
+
+### Using with Anaconda and Spyder IDE ###
+1. Download anaconda distribution (including spyder IDE) available here: https://www.anaconda.com/products/individual
+
+2. Dowload pyro source code. 
+A simple option for development is simply to clone the repo:
+```bash
+git clone https://github.com/SherbyRobotics/pyro.git
+```
+then add the pyro folder to the pythonpath variable of your environment. In spyder this option is found in the menu at python/PYTHONPATH manager.
+
+3. Change the graphical backend in Spyder for enabling animation
+If graphical animations are not working, try changing the graphics backend in the menu at python/Preferences/IPython console/Backend. Inline does not allow animations, it is best to use Automatic (for Windows and Ubuntu) or OS X (for Mac).
+
+# Pyro tools list #
 
 ### Dynamic objects ###
 
@@ -140,50 +185,6 @@ The core of the library is a mother "dynamic system" class defined by a differen
 - Pole/zero computation
 - Bode plot
 - Reachability
-
-# How to use #
-
-To learn how to use pyro, see the following notebook tutorials hosted on colab:
-
-1.   [The Dynamic System class and basic functionnality](https://colab.research.google.com/drive/18eEL-n-dv9JZz732nFCMtqMThDcfD2Pr?usp=sharing)
-2.   [Creating a custom dynamic class](https://colab.research.google.com/drive/1ILfRpL1zgiQZBOxwtbbpe0nl2znvzdWl?usp=sharing)
-3.   [Closed-loop system and controllers objects](https://colab.research.google.com/drive/1mog1HAFN2NFEdw6sPudzW2OaTk_li0Vx?usp=sharing)
-4.   The Linear System class (comin soon..)
-4.   The Mechanical System class (coming soon..)
-5.   [The Manipulator Robot class](https://colab.research.google.com/drive/1OILAhXRxM1r5PEB1BWaYtbR147Ff3gr1?usp=sharing)
-
-Also see exemples scripts in pyro/examples/ 
-
-
-# Installation #
-
-### Dependencies ####
-Pyro is built only using core python librairies: 
-* numpy
-* scipy
-* matplotlib
-
-### Using in Colab ###
-
-```
-!git clone https://github.com/SherbyRobotics/pyro
-import sys
-sys.path.append('/content/pyro')
-import pyro
-```
-
-### Using with Anaconda and Spyder IDE ###
-1. Download anaconda distribution (including spyder IDE) available here: https://www.anaconda.com/products/individual
-
-2. Dowload pyro source code. 
-A simple option for development is simply to clone the repo:
-```bash
-git clone https://github.com/SherbyRobotics/pyro.git
-```
-then add the pyro folder to the pythonpath variable of your environment. In spyder this option is found in the menu at python/PYTHONPATH manager.
-
-3. Change the graphical backend in Spyder for enabling animation
-If graphical animations are not working, try changing the graphics backend in the menu at python/Preferences/IPython console/Backend. Inline does not allow animations, it is best to use Automatic (for Windows and Ubuntu) or OS X (for Mac).
 
 
 
