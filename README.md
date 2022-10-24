@@ -41,7 +41,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
       Direct collocation trajectory optimisation
-      <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197430822-3aefb6f2-85a4-4602-964d-f9907200dcd8.gif" alt="policy" width="350"/>
     </th> 
   </tr>
   <tr>
@@ -51,7 +51,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
       Sliding mode controller
-      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="350"/>
     </th> 
   </tr>
 </table>
@@ -61,7 +61,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Simulation
-      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="370"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="350"/>
     </th>
     <th>
       Phase plane analysis
@@ -71,7 +71,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Generating animated simulations
-      <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="400"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197414497-1eb6af93-fa28-4c63-bb5f-da661a98ac55.gif" alt="ani" width="350"/>
     </th>
     <th>
       Manipulator ellipsoid
