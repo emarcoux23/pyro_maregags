@@ -60,7 +60,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-      Simulation
+      Simulation (computing trajectories)
       <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="320"/>
     </th>
     <th>
