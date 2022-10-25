@@ -23,8 +23,8 @@ sys.k    = 10.0
 sys.vx = 1.0
 
 # Set domain
-sys.x_ub = np.array([+2, +2, +20])
-sys.x_lb = np.array([-2, -2, +10])
+sys.x_ub = np.array([+3, +2, +20])
+sys.x_lb = np.array([-3, -2, +10])
 
 sys.u_ub = np.array([+20])
 sys.u_lb = np.array([-20])
@@ -40,7 +40,7 @@ qcf.INF  = 100000
 qcf.EPS  = 0.5
 
 qcf.Q[0,0] = 2.0
-qcf.Q[1,1] = 500.0
+qcf.Q[1,1] = 50.0
 qcf.Q[2,2] = 0.0
 
 qcf.R[0,0] = 0.1
@@ -65,5 +65,4 @@ cl_sys = ctl + sys
 cl_sys.x0   = np.array([0,0,10])
 cl_sys.compute_trajectory( 10, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
-cl_sys.plot_phase_plane_trajectory()
 cl_sys.animate_simulation()
