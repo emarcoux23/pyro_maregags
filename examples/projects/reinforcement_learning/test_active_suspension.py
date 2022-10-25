@@ -16,31 +16,37 @@ import costfunction
 
 sys  = suspension.QuarterCarOnRoughTerrain()
 
+sys.mass = 1.0
+sys.b    = 2.0
+sys.k    = 10.0
+
 sys.vx = 1.0
 
 # Set domain
-sys.x_ub = np.array([+1, +2, +10])
-sys.x_lb = np.array([-1, -2, -0])
+sys.x_ub = np.array([+2, +2, +20])
+sys.x_lb = np.array([-2, -2, +10])
 
-sys.u_ub = np.array([+100])
-sys.u_lb = np.array([-100])
+sys.u_ub = np.array([+20])
+sys.u_lb = np.array([-20])
 
 # Discrete world
-grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 51), [21], 0.05)
+grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 51), [11], 0.05)
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
-qcf.xbar = np.array([ 0 , 1.0, 10 ]) # target
-qcf.INF  = 1000
+qcf.xbar = np.array([ 0 , 1.0, 20 ]) # target
+qcf.INF  = 100000
 qcf.EPS  = 0.5
 
-qcf.Q[0,0] = 1.0
-qcf.Q[1,1] = 50.0
+qcf.Q[0,0] = 2.0
+qcf.Q[1,1] = 500.0
 qcf.Q[2,2] = 0.0
 
-qcf.S[0,0] = 100
-qcf.S[1,1] = 500
+qcf.R[0,0] = 0.1
+
+qcf.S[0,0] = 0.0
+qcf.S[1,1] = 0.0
 qcf.S[2,2] = 0.0
 
 # DP algo
@@ -56,7 +62,7 @@ cl_sys = ctl + sys
 
 # Simulation and animation
 cl_sys = ctl + sys
-cl_sys.x0   = np.array([0,0,0])
+cl_sys.x0   = np.array([0,0,10])
 cl_sys.compute_trajectory( 10, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()
