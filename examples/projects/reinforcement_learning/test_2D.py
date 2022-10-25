@@ -16,8 +16,11 @@ import costfunction
 
 sys  = pendulum.SinglePendulum()
 
+sys.x_ub = np.array([+6, +6])
+sys.x_lb = np.array([-9,  -6])
+
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [101,31] , [3] )
+grid_sys = discretizer.GridDynamicSystem( sys , [201,201] , [11] )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
@@ -33,12 +36,12 @@ qcf.S[1,1] = 10.0
 dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 #dp = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
 
-dp.solve_bellman_equation( animate_cost2go = True )
+#dp.solve_bellman_equation( animate_cost2go = True )
 
 #dp.compute_steps(200)
 # dp.plot_policy()
 
-# dp.solve_bellman_equation( tol = 1 , animate_policy = True )
+dp.solve_bellman_equation( tol = 1 , animate_policy = True )
 #dp.plot_cost2go(150)
 
 #dp.animate_cost2go( show = False , save = True )

@@ -17,7 +17,7 @@ import costfunction
 sys  = pendulum.SinglePendulum()
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [201,201] , [21] )
+grid_sys = discretizer.GridDynamicSystem( sys , [51,51] , [11] )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
@@ -27,11 +27,11 @@ qcf.INF  = 1000000
 
 
 # DP algo
-#dp1 = dprog.DynamicProgramming( grid_sys, qcf )
-#dp1.compute_steps(10)
+dp1 = dprog.DynamicProgramming( grid_sys, qcf )
+dp1.compute_steps(10)
 
 dp2 = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
-#dp2.compute_steps(100)
+dp2.compute_steps(10)
 
 dp4 = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
-#dp4.compute_steps(100)
+dp4.compute_steps(10)
