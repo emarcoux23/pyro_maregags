@@ -258,6 +258,86 @@ class TimeCostFunction( CostFunction ):
         return dJ
     
     
+##############################################################################
+class QuadraticCostFunctionWithDomainCheck( CostFunction ):
+    """ 
+    Quadratic cost functions of continuous dynamical systems
+    ----------------------------------------------
+    n : number of states
+    m : number of control inputs
+    ---------------------------------------
+    J = int( g(x,u,t) * dt ) + h( x(T) , T )
+    
+    g = xQx + uRu  if x and u are allowable state and actions
+    h = 0          if x and u are allowable state and actions
+    
+    """
+    
+    ############################
+    def __init__(self, n, m, isavalidstate ):
+        
+        QuadraticCostFunction.__init__(self, n , m )
+        
+        self.isavalidstate = isavalidstate
+    
+    ############################
+    @classmethod
+    def from_sys(cls, sys):
+        """ From ContinuousDynamicSystem instance """
+        
+        instance = cls( sys.n , sys.m , sys.isavalidstate )
+        
+        instance.xbar = sys.xbar
+        instance.ubar = sys.ubar
+        
+        return instance
+    
+
+    #############################
+    def h(self, x , t = 0):
+        """ Final cost function with zero value """
+        
+        # Delta values with respect to nominal values
+        dx = x - self.xbar
+        
+        # Quadratic terminal cost
+        J_f = np.dot( dx.T , np.dot(  self.S , dx ) )
+                
+        # Set cost to INF if not an allowable state
+        if not self.isavalidstate( x ):
+            J_f = self.INF
+            
+        # Set cost to zero if on target
+        if self.ontarget_check:
+            if ( np.linalg.norm( dx ) < self.EPS ):
+                J_f = 0
+        
+        return J_f
+    
+    
+    #############################
+    def g(self, x, u, t):
+        """ Quadratic additive cost """
+            
+        # Delta values with respect to nominal values
+        dx = x - self.xbar
+        du = u - self.ubar
+        
+        dJ = ( np.dot( dx.T , np.dot(  self.Q , dx ) ) +
+               np.dot( du.T , np.dot(  self.R , du ) ) )
+                
+        # Set cost to INF if not an allowable state
+        if not self.isavalidstate( x ):
+            dJ = self.INF
+            
+        # Set cost to zero if on target
+        if self.ontarget_check:
+            if ( np.linalg.norm( dx ) < self.EPS ):
+                dJ = 0
+        
+        return dJ
+    
+    
     
 ##############################################################################
 

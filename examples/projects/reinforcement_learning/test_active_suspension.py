@@ -16,31 +16,30 @@ import costfunction
 
 sys  = suspension.QuarterCarOnRoughTerrain()
 
-sys.mass = 1.0
-sys.b    = 2.0
-sys.k    = 10.0
-
-sys.vx = 1.0
+sys.mass = 0.5
+sys.b    = 0.5
+sys.k    = 8.0
+sys.vx   = 10.0
 
 # Set domain
-sys.x_ub = np.array([+3, +2, +20])
-sys.x_lb = np.array([-3, -2, +10])
+sys.x_ub = np.array([+12, +1, +40])
+sys.x_lb = np.array([-12, -1, +0])
 
-sys.u_ub = np.array([+20])
-sys.u_lb = np.array([-20])
+sys.u_ub = np.array([+40])
+sys.u_lb = np.array([-40])
 
 # Discrete world
-grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 51), [11], 0.05)
+grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 101), [11], 0.05)
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
-qcf.xbar = np.array([ 0 , 1.0, 20 ]) # target
+qcf.xbar = np.array([ 0.0 , 0.0, 20 ]) # target
 qcf.INF  = 100000
 qcf.EPS  = 0.5
 
 qcf.Q[0,0] = 2.0
-qcf.Q[1,1] = 50.0
+qcf.Q[1,1] = 5.0
 qcf.Q[2,2] = 0.0
 
 qcf.R[0,0] = 0.1
@@ -61,8 +60,7 @@ ctl = dp.get_lookup_table_controller()
 cl_sys = ctl + sys
 
 # Simulation and animation
-cl_sys = ctl + sys
-cl_sys.x0   = np.array([0,0,10])
-cl_sys.compute_trajectory( 10, 10001, 'euler')
+cl_sys.x0   = np.array([0,0,-5])
+cl_sys.compute_trajectory( 20, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.animate_simulation()
