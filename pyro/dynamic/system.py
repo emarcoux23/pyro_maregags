@@ -432,7 +432,7 @@ class ContinuousDynamicSystem:
             self.compute_trajectory()
         
         plotter = self.get_plotter()
-        plotter.plot( self.traj, plot, **kwargs)
+        return plotter.plot( self.traj, plot, **kwargs)
 
 
     #############################
