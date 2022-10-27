@@ -362,10 +362,10 @@ class ConstantSpeedHelicopterTunnel( system.ContinuousDynamicSystem ):
             ans = ans or ( x[i] > self.x_ub[i] )
 
         for obs in self.obstacles:
-            on_obs = (( x[2] > obs[0][0]) and
-                      ( x[1] > obs[0][1]) and
-                      ( x[2] < obs[1][0]) and
-                      ( x[1] < obs[1][1]) )
+            on_obs = (( ( x[2] + self.width ) > obs[0][0]) and
+                      ( ( x[1] + self.width ) > obs[0][1]) and
+                      ( ( x[2] - self.width ) < obs[1][0]) and
+                      ( ( x[1] - self.width ) < obs[1][1]) )
 
             ans = ans or on_obs
 

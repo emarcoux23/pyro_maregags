@@ -42,20 +42,20 @@ sys.animate_simulation()
 
 
 # Discrete world
-grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 51), [3], 0.05)
+grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 51), [11], 0.05)
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunctionWithDomainCheck.from_sys( sys )
 
-qcf.xbar = np.array([ 0.0 , 8.0, 20 ]) # target
+qcf.xbar = np.array([ 0.0 , 2.0, 20 ]) # target
 qcf.INF  = 100000
 qcf.EPS  = 0.2
 
 qcf.Q[0,0] = 2.0
-qcf.Q[1,1] = 20.0
+qcf.Q[1,1] = 200.0
 qcf.Q[2,2] = 0.0
 
-qcf.R[0,0] = 1.0
+qcf.R[0,0] = 5.0
 
 qcf.S[0,0] = 20.0
 qcf.S[1,1] = 50.0
@@ -79,6 +79,6 @@ cl_sys = ctl + sys
 
 # Simulation and animation
 cl_sys.x0   = np.array([0,8,-10])
-cl_sys.compute_trajectory( 10, 10001, 'euler')
+cl_sys.compute_trajectory( 6, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.animate_simulation()
