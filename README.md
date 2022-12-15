@@ -205,9 +205,6 @@ If graphical animations are not working, try changing the graphics backend in th
 - Reachability
 
 
-
-
-
 ## Development ##
 
 ### Installing for development ###
