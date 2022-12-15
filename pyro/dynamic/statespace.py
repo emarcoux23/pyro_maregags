@@ -33,7 +33,7 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         m = B.shape[1]
         p = C.shape[0]
         
-        super().__init__(n, m, p)
+        ContinuousDynamicSystem.__init__( self, n, m, p)
         
     ############################################
     def _check_dimensions(self):
@@ -88,10 +88,13 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         
         #Time scaling for the mode
         norm = np.sqrt(self.poles[i].real**2 + self.poles[i].imag**2)
-        if norm<0.0001:
-            tf = 10
+        
+        if norm > 0.001:
+            tf = 2. / norm * 2 * np.pi + 1
+            tf = np.clip(tf , 1 , 30)
         else:
-            tf = max( 1. / norm * 2 * np.pi + 1,100)
+            tf = 5
+            
         n  = 2001
 
         sim = simulation.Simulator(self, tf, n)

@@ -1,92 +1,211 @@
-# Python Robotics
+# Pyro 
 
-A object-based toolbox for robot dynamic simulation, analysis, control and planning. 
+An object-based toolbox for robot dynamic simulation, analysis, control and planning. 
 
-## Installation ##
+### A collection of dynamic systems:
+<table>
+  <tr>
+    <th>
+    <img src="https://www.alexandregirard.com/IMG/compressed_gif/rocket.gif" alt="rocket" width="360"/>
+    </th>
+    <th>
+    <img src="https://user-images.githubusercontent.com/16725496/163005905-ad2205b0-150d-44de-bd43-a3b31a0bf10e.gif" alt="cartpole" width="360"/>
+    </th> 
+  </tr>
+  <tr>
+    <td>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/drone.gif" alt="drone" width="360"/>
+    </td>
+    <td>
+    <img src="https://www.alexandregirard.com/IMG/compressed_gif/two_mass_spring_pid.gif" alt="mass-spring" width="360"/>
+    </td> 
+  </tr>
+</table>
+
+### A collection of controller synthesis and planning tools:
+<table>
+  <tr>
+    <th>
+      Computed torque controller
+      <img src="https://user-images.githubusercontent.com/16725496/197431073-9c3d874b-1766-4ee5-9267-756d89c98278.png" alt="cost2go" width="360"/>
+    </th>
+    <th>
+      Sliding mode controller
+      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="320"/>
+    </th> 
+  </tr>
+  <tr>
+    <th>
+      Dynamic programming
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/cost2go_animation-2.gif" alt="cost2go" width="360"/>
+    </th>
+    <th>
+      Optimal torque policy
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/policy_animation-2.gif" alt="policy" width="360"/>
+    </th> 
+  </tr>
+  <tr>
+    <th>
+      Rapidly-exploring random tree planning
+      <img src="https://user-images.githubusercontent.com/16725496/197430609-1d31a083-7337-410a-8b58-b81cd1075ed0.png" alt="cost2go" width="360"/>
+    </th>
+    <th>
+      Direct collocation trajectory optimisation
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/double_pendulum_swing_up.gif" alt="policy" width="320"/>
+    </th> 
+  </tr>
+</table>
+
+### A collection of analysis tools:
+<table>
+  <tr>
+    <th>
+      Simulation (computing trajectories)
+      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="320"/>
+    </th>
+    <th>
+      Phase plane analysis
+      <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="phase-plane" width="360"/>
+    </th> 
+  </tr>
+    <tr>
+    <th>
+      Generating animated simulations
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/Animation.gif" alt="ani" width="360"/>
+    </th>
+    <th>
+      Robot arm manipulability ellipsoid
+      <img src="https://user-images.githubusercontent.com/16725496/197432396-250badab-1b45-4d52-ac2e-1f92f49cd7ef.png" alt="ani" width="360"/>
+  </tr>
+  <tr>
+    <th>
+      Bode plot or output/input
+      <img src="https://user-images.githubusercontent.com/16725496/197540975-18d0ecf1-08bc-4f7e-b1a1-ee5b26ec1101.png" alt="ani" width="360"/>
+    </th>
+    <th>
+      Pole zero map of output/input
+      <img src="https://user-images.githubusercontent.com/16725496/197540988-418f03d4-f977-4791-b0da-2f576c87fed2.png" alt="ani" width="360"/>
+  </tr>
+  <tr>
+    <th>
+      Modal analysis (mode 1)
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/mode1.gif" alt="ani" width="360"/>
+    </th>
+    <th>
+      Modal analysis (mode 2)
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/mode2.gif" alt="ani" width="360"/>
+  </tr>
+</table>
+
+### Unified by a standardized "dynamic system" and "controller" class hierarchy
+
+The concept of this toolbox is a hierachy of "dynamic system" objects, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order equations), linear state space, manipulator equations, etc. This structure is then leveraged by analysis tools, from generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, to system-specific tools that leverage specific system propreties such as modal analysis for linear sub-class:
+
+<img width="800" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg" class="center">
+
+The core of the library is a mother "dynamic system" class defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = f_{kinematic}(x,u,t)$ that is used for generating animations:
+
+<img width="500" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg" class="center">
+
+
+# How to use #
+
+To learn how to use pyro, see the following notebook tutorials hosted on colab:
+
+1.   [The Dynamic System class and basic functionnality](https://colab.research.google.com/drive/18eEL-n-dv9JZz732nFCMtqMThDcfD2Pr?usp=sharing)
+2.   [Creating a custom dynamic class](https://colab.research.google.com/drive/1ILfRpL1zgiQZBOxwtbbpe0nl2znvzdWl?usp=sharing)
+3.   [Closed-loop system and controllers objects](https://colab.research.google.com/drive/1mog1HAFN2NFEdw6sPudzW2OaTk_li0Vx?usp=sharing)
+4.   The Linear System class (comin soon..)
+4.   The Mechanical System class (coming soon..)
+5.   [The Manipulator Robot class](https://colab.research.google.com/drive/1OILAhXRxM1r5PEB1BWaYtbR147Ff3gr1?usp=sharing)
+
+Also see exemples scripts in pyro/examples/ 
+
+
+# Installation #
 
 ### Dependencies ####
+Pyro is built only using core python librairies: 
 * numpy
 * scipy
 * matplotlib
 
-### Recommended environment ###
-Anaconda distribution + spyder IDE available here: https://www.anaconda.com/products/individual
+### Using in Colab ###
 
-Note: If graphical animations are not working, try changing the graphics backend. In spyder this option is found in the menu at python/Preferences/IPython console/Backend. Inline does not allow animations, it is best to use Automatic (for Windows and Ubuntu) or OS X (for Mac).
+```
+!git clone https://github.com/SherbyRobotics/pyro
+import sys
+sys.path.append('/content/pyro')
+import pyro
+```
 
-### Clone repo and add to python path ###
+### Using with Anaconda and Spyder IDE ###
+1. Download anaconda distribution (including spyder IDE) available here: https://www.anaconda.com/products/individual
 
+2. Dowload pyro source code. 
 A simple option for development is simply to clone the repo:
 ```bash
 git clone https://github.com/SherbyRobotics/pyro.git
 ```
 then add the pyro folder to the pythonpath variable of your environment. In spyder this option is found in the menu at python/PYTHONPATH manager.
 
-## Library Architecture ##
+3. Change the graphical backend in Spyder for enabling animation
+If graphical animations are not working, try changing the graphics backend in the menu at python/Preferences/IPython console/Backend. Inline does not allow animations, it is best to use Automatic (for Windows and Ubuntu) or OS X (for Mac).
+
+# Pyro tools list #
 
 ### Dynamic objects ###
 
-At the core of pyro is a mother-class representing generic non-linear dynamic systems, with the following nomemclature:
-
-<img width="929" alt="Screen Shot 2021-05-02 at 15 57 47" src="https://user-images.githubusercontent.com/16725496/116826021-fd9b7a80-ab5f-11eb-8e50-d7361094cbee.png">
-
-Other more specific mother-class are 
--Linear System
--Mechanical System
--Manipulator Robot
-
-<img width="763" alt="Screen Shot 2021-05-02 at 16 13 51" src="https://user-images.githubusercontent.com/16725496/116826418-dc3b8e00-ab61-11eb-9372-09ae08f0b15a.png">
+- Continuous Dynamic system : $\dot{x} = f(x,u)$
+- Linear System : $\dot{x} = A x + B u $
+  - Transfer function 
+  - Exemples: mass-spring-damper
+- Mechanical System : $H(q)\ddot{q} + C(\dot{q},q)\dot{q} = \sum F $
+  - Manipulator Robot : $\dot{r} = J(q) \dot{q}$
+    - Exemples: two link plananr robot
+    - Exemples: five link plannar robot
+    - Exemples: three link robot
+  - Exemples: single pendulum
+  - Exemples: double pendulum
+  - Exemples: cart-pole
+  - Exemples: planar drone
+  - Exemples: rocket
+- Exemples: bicycle model (planar vehicle)
 
 
 ### Controller objects ###
 
-Controller objects can be used to closed the loop with an operation generating a closed-loop dynamic system:
-
-closed-loop system = controller + open-loop system
-
-For "memoryless" controller, this operation is
-
-<img width="760" alt="Screen Shot 2021-05-02 at 16 17 34" src="https://user-images.githubusercontent.com/16725496/116826519-59ff9980-ab62-11eb-8256-6a9f4a3f4f0f.png">
-
-Available control algorithms: PID, LQR, Computed-Torque, End-point Impedance, Value-Iteration, Sliding-mode controller, etc.
-
-### Trajectory planner objects ###
-
-Cooming soon..
+- Linear
+- PID
+- LQR
+- Computed-Torque
+- Sliding-mode controller
+- End-point impedance controller for robot arms
+- End-point trajectory controller for robot arms
+- Tabular look-up table controller (generated by the value-iteration algorithm)
 
 
-## How to use ##
+### Planner objects ###
 
-See exemples scripts in pyro/examples.
-
-Coming soon..
-
-## Gallery of exemples ##
-
-### Phase-plane Analysis ###
-
-<img width="887" alt="Screen Shot 2021-05-02 at 16 41 44" src="https://user-images.githubusercontent.com/16725496/116827083-59b4cd80-ab65-11eb-9be9-b02586a89d7f.png">
-
-### Optimal controller computation with Value-Iteration ###
-
-<img width="1131" alt="Screen Shot 2021-05-02 at 16 42 34" src="https://user-images.githubusercontent.com/16725496/116827109-6c2f0700-ab65-11eb-95e7-5290e4b50b32.png">
+1. RRT tree search
+2. Direct collocation trajectory optimisation
+3. Dynamic programming and value-iteration 
 
 
-### Car parallel parking solved with RRT, Value-Iteration, etc.. ###
+### Analysis tool ###
 
-<img width="889" alt="Screen Shot 2021-05-02 at 16 38 59" src="https://user-images.githubusercontent.com/16725496/116827009-ef9c2880-ab64-11eb-8d81-12a2d6453eac.png">
+- Copmuting simulation
+- Phase-plane analysis
+- Graphical animated output of the simulations
+- Cost function computation
+- Linearisation (from any dynamic class to the state-space class)
+- Modal analysis
+- Pole/zero computation
+- Bode plot
+- Reachability
 
-<img width="1167" alt="Screen Shot 2021-05-02 at 16 39 42" src="https://user-images.githubusercontent.com/16725496/116827025-0773ac80-ab65-11eb-8a1b-9b50086d86cb.png">
 
-### Redondant Manipulator Controller ###
 
-<img width="1154" alt="Screen Shot 2021-05-02 at 16 26 47" src="https://user-images.githubusercontent.com/16725496/116826685-46a0fe00-ab63-11eb-9f9f-f269aa0e63b5.png">
-
-### Pendulums Swing-up solved with Computed-Torque, RRT, Value-Iteration, etc.. ###
-
-<img width="1163" alt="Screen Shot 2021-05-02 at 16 34 04" src="https://user-images.githubusercontent.com/16725496/116826866-3c333400-ab64-11eb-9c99-e87742d273f7.png">
-
-<img width="1148" alt="Screen Shot 2021-05-02 at 16 32 13" src="https://user-images.githubusercontent.com/16725496/116826821-ff673d00-ab63-11eb-969c-72c0d0711076.png">
 
 
 

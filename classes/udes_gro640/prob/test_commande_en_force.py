@@ -42,6 +42,12 @@ dq_traj  = clsys.traj.x[:,3:6]  # Trajectoire des vitesses du robot
 tau_traj = clsys.traj.u         # Trajectoire des couples du robot
 
 # Force de contact
+##########################################################################################
+# NOTE: les impacts de sont pas modèlisés dans la simulation, le comportement 
+# transitoire obtenu n'est pas représentatif de ce que serait le vrai comportement.
+# Le comportement quasi-statique (lorsque les accélérations sont faibles) est fiable.
+##########################################################################################
+
 f_traj   = np.zeros((n,3))
 for i in range(n):
     f_traj[i,:] = sys.f_ext( q_traj[i,:] , dq_traj[i,:] )

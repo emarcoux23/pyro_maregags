@@ -131,7 +131,9 @@ class LaserRobot( SpeedControlledManipulator ):
         
         """
         
-        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_pts   = [] # list of array (n_pts x 3) for each lines
+        lines_style = [] # list of array (n_pts x 3) for each lines
+        lines_color = [] # list of array (n_pts x 3) for each lines
         
         ###############################
         # ground line
@@ -142,6 +144,8 @@ class LaserRobot( SpeedControlledManipulator ):
         pts[1,:] = np.array([+10,0,0])
         
         lines_pts.append( pts )
+        lines_style.append('--')
+        lines_color.append('k')
         
         ###########################
         # robot kinematic
@@ -163,8 +167,10 @@ class LaserRobot( SpeedControlledManipulator ):
 
         
         lines_pts.append( pts )
+        lines_style.append('o-')
+        lines_color.append('b')
                 
-        return lines_pts
+        return lines_pts , lines_style , lines_color
 
 
 
@@ -439,7 +445,9 @@ class DrillingRobot( ThreeLinkManipulator3D ):
         
         """
         
-        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_pts   = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
         
         ###############################
         # ground line
@@ -456,6 +464,8 @@ class DrillingRobot( ThreeLinkManipulator3D ):
         pts[4,:] = np.array([-1,-1,z])
         
         lines_pts.append( pts )
+        lines_style.append('--')
+        lines_color.append('k')
         
         ###########################
         # robot kinematic
@@ -483,10 +493,13 @@ class DrillingRobot( ThreeLinkManipulator3D ):
         pts[3,0] = c1 * ( l3 * c23 + l2 * c2)
         pts[3,1] = s1 * ( l3 * c23 + l2 * c2)
         pts[3,2] = l1 + l3 * s23 + l2 * s2
-        
-        lines_pts.append( pts )
                 
-        return lines_pts
+        lines_pts.append( pts )
+        lines_style.append('o-')
+        lines_color.append('b')
+                
+        return lines_pts , lines_style , lines_color
+    
     
     
 class DrillingRobotOnJig( DrillingRobot ):
@@ -570,7 +583,7 @@ class DrillingRobotOnJig( DrillingRobot ):
         # Base graphic
         ###########################
         
-        lines_pts = DrillingRobot.forward_kinematic_lines(self, q)
+        lines_pts, lines_style, lines_color = DrillingRobot.forward_kinematic_lines(self, q)
         
         ###########################
         # Drill
@@ -592,7 +605,9 @@ class DrillingRobotOnJig( DrillingRobot ):
         pts[1,1] = s1*(l3*c23 + l2*c2) 
         pts[1,2] = l1 + l3*s23 + l2*s2 - 0.2
         
-        lines_pts.append(pts)
+        lines_pts.append( pts )
+        lines_style.append('-')
+        lines_color.append('r')
         
         ###########################
         # Hole
@@ -608,9 +623,10 @@ class DrillingRobotOnJig( DrillingRobot ):
         pts[1,:] = np.array([x,y,z-0.2 - self.hole_depth])
         
         lines_pts.append( pts )
-        
-        
-        return lines_pts
+        lines_style.append('--')
+        lines_color.append('k')
+                
+        return lines_pts , lines_style , lines_color
     
     
     
