@@ -16,7 +16,7 @@ class GridDynamicSystem:
     """ Create a discrete gird state-action space for a continous dynamic system """
     
     ############################
-    def __init__(self, sys , xgriddim = ( 101 , 101 ), ugriddim = ( 11 , 1 ) , dt = 0.05 ):
+    def __init__(self, sys , xgriddim = ( 101 , 101 ), ugriddim = ( 11 , 1 ) , dt = 0.05 , lookup = True ):
         
         self.sys = sys # Dynamic system class
         
@@ -29,7 +29,7 @@ class GridDynamicSystem:
         self.ugriddim = ugriddim
         
         # Options
-        self.uselookuptable = True
+        self.uselookuptable = lookup
         
         self.compute()  
         
@@ -232,6 +232,60 @@ class GridDynamicSystem:
                         
                         self.x_next[ node,  action, : ] = x_next
                         self.action_isok[ node, action] = ( u_ok & x_ok )
+                        
+                        
+    
+    ##############################
+    ### Quick shorcut 
+    ##############################
+    
+    ##############################
+    def x2node(self, x ):
+        """  """
+        raise NotImplementedError
+        
+        s = 0
+        
+        return s
+    
+    ##############################
+    def x2index(self, x ):
+        """  """
+        raise NotImplementedError
+        
+        i = 0
+        j = 0
+        
+        return (i,j)
+    
+    ##############################
+    def node2x(self, x ):
+        """  """
+        raise NotImplementedError
+        
+        s = 0
+        
+        return s
+    
+    
+    ##############################
+    def index2x(self, u ):
+        """  """
+        raise NotImplementedError
+        
+        a = 0
+        
+        return a
+    
+    ##############################
+    def u2index(self, u ):
+        """  """
+        raise NotImplementedError
+        
+        k = 0
+        
+        return k
+            
                 
                 
 
