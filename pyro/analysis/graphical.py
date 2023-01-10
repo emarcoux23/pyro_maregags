@@ -159,6 +159,7 @@ class TrajectoryPlotter:
         self.fig   = simfig
         self.plots = plots
         
+        return (simfig, plots)
     
     ##########################################################################
     def phase_plane_trajectory(self, traj, x_axis=0, y_axis=1):

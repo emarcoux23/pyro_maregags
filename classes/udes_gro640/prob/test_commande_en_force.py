@@ -29,8 +29,8 @@ clsys.x0 =  np.array([0,1.4,-1.3,0,0,0]) #
 
 # Simulation
 tf = 6
-n = 10001
-clsys.compute_trajectory( tf, n)
+n = 100001
+clsys.compute_trajectory( tf, n, 'euler')
 clsys.plot_trajectory('x')
 clsys.plot_trajectory('u')
 

@@ -205,12 +205,31 @@ If graphical animations are not working, try changing the graphics backend in th
 - Reachability
 
 
+## Development ##
 
+### Installing for development ###
 
+From the root of a clone of this repository, run:
 
+```bash
+python -m pip install -e .
+```
 
+This will install pyro in "editable" mode, so any changes made in the working
+directory will be taken into account when importing the pyro module.
 
+### Running tests ###
 
+Note: most tests are currently broken.
 
+Running the test suite requires installing [pytest](https://docs.pytest.org/).
+To run all tests:
+
+```bash
+pytest examples/projects/tests
+```
+
+By running this command from the top level of the pyro repository, `pyro` will
+be imported directly from the local folder.
 
 
