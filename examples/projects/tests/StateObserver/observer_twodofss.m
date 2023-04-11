@@ -22,6 +22,7 @@ N = zeros(2, 1);
 
 [kalmf,L,P] = kalman(sys, Q, R, N);
 L
+P
 
 %% Simulation
 
@@ -56,5 +57,7 @@ x_est_q = interp1(t, x_est, tq);
 plot(tq, x_est_q, 'o');
 
 writematrix(x_est_q, 'x_est.csv')
+
+save("matlab_data.mat", "x_est", "tOut", "stateOut", "-v7")
 
 
