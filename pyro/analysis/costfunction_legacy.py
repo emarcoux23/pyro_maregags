@@ -22,8 +22,9 @@ class CostFunction():
     ----------------------------------------------
     n : number of states
     m : number of control inputs
+    p : number of outputs
     ---------------------------------------
-    J = int( g(x,u,t) * dt ) + h( x(T) , T )
+    J = int( g(x,u,y,t) * dt ) + h( x(T) , y(T) , T )
 
     """
 
@@ -37,13 +38,13 @@ class CostFunction():
     ###########################################################################
 
     #############################
-    def h(self, x, t ):
+    def h(self, x, t = 0):
         """ Final cost function """
 
         raise NotImplementedError
 
     #############################
-    def g(self, x, u, t ):
+    def g(self, x, u, y, t):
         """ step cost function """
 
         raise NotImplementedError
@@ -82,8 +83,9 @@ class CostFunction():
         for i in range(traj.time_steps):
             x = traj.x[i, :]
             u = traj.u[i, :]
+            y = traj.y[i, :]
             t = traj.t[i]
-            dJ[i] = self.g( x, u, t)
+            dJ[i] = self.g( x, u, y, t)
 
         J = cumtrapz(y=dJ, x=traj.t, initial=0)
 
@@ -107,45 +109,46 @@ class QuadraticCostFunction( CostFunction ):
     ----------------------------------------------
     n : number of states
     m : number of control inputs
+    p : number of outputs
     ---------------------------------------
-    J = int( g(x,u,t) * dt ) + h( x(T) , T )
+    J = int( g(x,u,y,t) * dt ) + h( x(T) , y(T) , T )
     
-    g = xQx + uRu 
-    h = xSx
+    g = xQx + uRu + yVy
+    h = 0
     
     """
     
     ############################
-    def __init__(self, n, m):
+    def __init__(self, n, m, p):
         
         CostFunction.__init__(self)
-        
-        # dimensions
+
         self.n = n
         self.m = m
-        
-        # nominal values
+        self.p = p
+
         self.xbar = np.zeros(self.n)
         self.ubar = np.zeros(self.m)
+        self.ybar = np.zeros(self.p)
 
         # Quadratic cost weights
         self.Q = np.diag( np.ones(n)  )
         self.R = np.diag( np.ones(m)  )
-        self.S = np.diag( np.zeros(n) )
+        self.V = np.diag( np.zeros(p) )
         
-        # Optionnal zone of zero cost if ||x - xbar || < EPS 
+        # Optionnal zone of zero cost if ||dx|| < EPS 
         self.ontarget_check = True
-        
     
     ############################
     @classmethod
     def from_sys(cls, sys):
         """ From ContinuousDynamicSystem instance """
         
-        instance = cls( sys.n , sys.m )
+        instance = cls( sys.n , sys.m , sys.p )
         
         instance.xbar = sys.xbar
         instance.ubar = sys.ubar
+        instance.ybar = np.zeros( sys.p )
         
         return instance
     
@@ -154,26 +157,13 @@ class QuadraticCostFunction( CostFunction ):
     def h(self, x , t = 0):
         """ Final cost function with zero value """
         
-        # Delta values with respect to nominal values
-        dx = x - self.xbar
-        
-        # Quadratic terminal cost
-        J_f = np.dot( dx.T , np.dot(  self.S , dx ) )
-                     
-        # Set cost to zero if on target
-        if self.ontarget_check:
-            if ( np.linalg.norm( dx ) < self.EPS ):
-                J_f = 0
-        
-        return J_f
+        return 0
     
     
     #############################
-    def g(self, x, u, t):
+    def g(self, x, u, y, t):
         """ Quadratic additive cost """
-        
-        """
-        TODO: Add check in init
+
         # Check dimensions
         if not x.shape[0] == self.Q.shape[0]:
             raise ValueError(
@@ -190,14 +180,15 @@ class QuadraticCostFunction( CostFunction ):
             "Array y of shape %s does not match weights V with %d components" \
             % (y.shape, self.V.shape[0])
             )
-        """
             
-        # Delta values with respect to nominal values
+        # Delta values with respect to bar values
         dx = x - self.xbar
         du = u - self.ubar
+        dy = y - self.ybar
         
         dJ = ( np.dot( dx.T , np.dot(  self.Q , dx ) ) +
-               np.dot( du.T , np.dot(  self.R , du ) ) )
+               np.dot( du.T , np.dot(  self.R , du ) ) +
+               np.dot( dy.T , np.dot(  self.V , dy ) ) )
         
         # Set cost to zero if on target
         if self.ontarget_check:
@@ -215,8 +206,9 @@ class TimeCostFunction( CostFunction ):
     ----------------------------------------------
     n : number of states
     m : number of control inputs
+    p : number of outputs
     ---------------------------------------
-    J = int( g(x,u,t) * dt ) + h( x(T) , T ) = T
+    J = int( g(x,u,y,t) * dt ) + h( x(T) , y(T) , T ) = T
     
     g = 1
     h = 0
@@ -240,14 +232,12 @@ class TimeCostFunction( CostFunction ):
     
     
     #############################
-    def g(self, x , u , t = 0 ):
+    def g(self, x , u , y, t = 0 ):
         """ Unity """
-        
-        """
+
         if (x.shape[0] != self.xbar.shape[0]):
             raise ValueError("Got x with %d values, but xbar has %d values" %
                              (x.shape[1], self.xbar.shape[0]))
-        """
 
         dJ = 1
         
@@ -257,155 +247,6 @@ class TimeCostFunction( CostFunction ):
                 dJ = 0
                 
         return dJ
-    
-
-
-##############################################################################
-class QuadraticCostFunctionWithDomainCheck( CostFunction ):
-    """ 
-    Quadratic cost functions of continuous dynamical systems
-    ----------------------------------------------
-    n : number of states
-    m : number of control inputs
-    ---------------------------------------
-    J = int( g(x,u,t) * dt ) + h( x(T) , T )
-    
-    g = xQx + uRu  if x and u are allowable state and actions
-    h = 0          if x and u are allowable state and actions
-    
-    """
-    
-    ############################
-    def __init__(self, n, m, isavalidstate ):
-        
-        QuadraticCostFunction.__init__(self, n , m )
-        
-        self.isavalidstate = isavalidstate
-    
-    ############################
-    @classmethod
-    def from_sys(cls, sys):
-        """ From ContinuousDynamicSystem instance """
-        
-        instance = cls( sys.n , sys.m , sys.isavalidstate )
-        
-        instance.xbar = sys.xbar
-        instance.ubar = sys.ubar
-        
-        return instance
-    
-
-    #############################
-    def h(self, x , t = 0):
-        """ Final cost function with zero value """
-        
-        # Delta values with respect to nominal values
-        dx = x - self.xbar
-        
-        # Quadratic terminal cost
-        J_f = np.dot( dx.T , np.dot(  self.S , dx ) )
-                
-        # Set cost to INF if not an allowable state
-        if not self.isavalidstate( x ):
-            J_f = self.INF
-            
-        # Set cost to zero if on target
-        if self.ontarget_check:
-            if ( np.linalg.norm( dx ) < self.EPS ):
-                J_f = 0
-        
-        return J_f
-    
-    
-    #############################
-    def g(self, x, u, t):
-        """ Quadratic additive cost """
-            
-        # Delta values with respect to nominal values
-        dx = x - self.xbar
-        du = u - self.ubar
-        
-        dJ = ( np.dot( dx.T , np.dot(  self.Q , dx ) ) +
-               np.dot( du.T , np.dot(  self.R , du ) ) )
-                
-        # Set cost to INF if not an allowable state
-        if not self.isavalidstate( x ):
-            dJ = self.INF
-            
-        # Set cost to zero if on target
-        if self.ontarget_check:
-            if ( np.linalg.norm( dx ) < self.EPS ):
-                dJ = 0
-        
-        return dJ
-    
-    
-    
-##############################################################################
-
-class Reachability( CostFunction ):
-    
-    ############################
-    def __init__(self, isavalidestate , xbar = None , isontarget = None ):
-
-        CostFunction.__init__(self)
-        
-        self.INF = 1E4
-        self.EPS = 0.2
-        
-        self.isavalidestate = isavalidestate
-        
-        if isontarget == None:
-            # default on target test is a quadratic norm check with xbar
-            self.isontarget = self.norm_test 
-            self.xbar       = xbar
-            
-        else:
-            # Custom function returning bool from state
-            self.isontarget = isontarget 
-            
-        
-    #############################
-    def norm_test(self, x , t = 0):
-        """ Final cost function with zero value """
-        
-        dx = x - self.xbar
-        
-        isontarget = np.linalg.norm( dx ) < self.EPS
-        
-        return isontarget
-    
-        
-    #############################
-    def h(self, x , t = 0):
-        """ Final cost """
-        
-        if self.isontarget( x , t ):
-            
-            J_f = 0 # Finishing in the target set is very good
-            
-        else:
-            
-            J_f = self.INF # Finishing not in the target set is very bad
-        
-        return J_f
-    
-    
-    #############################
-    def g(self, x , u , t = 0 ):
-        """ Unity """
-        
-        if self.isavalidestate( x ):
-            
-            g = 0 
-            
-        else:
-            
-            g = self.INF # The system went on of bounds
-        
-        return g
-    
-    
 
 '''
 #################################################################
