@@ -13,9 +13,25 @@ import mpl_toolkits.mplot3d.axes3d as p3
 
 from pyro.analysis import phaseanalysis
 
-# Embed font type in PDF
-matplotlib.rcParams['pdf.fonttype'] = 42
-matplotlib.rcParams['ps.fonttype']  = 42
+
+###############################################################################
+def pyro_matplotlib_settings():
+    
+    # Embed font type in PDF
+    matplotlib.rcParams['pdf.fonttype'] = 42
+    matplotlib.rcParams['ps.fonttype']  = 42
+    
+    # Use interactive backend
+    try:
+        matplotlib.use('Qt5Agg')
+    except:
+        pass
+    
+    # Set interactive mode
+    plt.ion()
+    
+    
+    
 
 ###############################################################################
 class TrajectoryPlotter:
@@ -29,6 +45,8 @@ class TrajectoryPlotter:
         self.fontsize = 5
         self.figsize  = (4, 3)
         self.dpi      = 300
+        
+        pyro_matplotlib_settings()
 
 
     ##########################################################################
@@ -293,6 +311,8 @@ class Animator:
         
         # Label
         self.top_right_label = None
+        
+        pyro_matplotlib_settings()
         
 
     ###########################################################################
@@ -603,8 +623,9 @@ class Animator:
         
         
         if is_3d:
-            self.ani_ax = p3.Axes3D(self.ani_fig) #TODO
+            #self.ani_ax = p3.Axes3D(self.ani_fig) #TODO
             #self.ani_fig.add_axes(self.ani_ax)
+            self.ani_ax = self.ani_fig.add_subplot(projection='3d')
             self.ani_ax.set_xlim3d(self.ani_domains[0][0])
             self.ani_ax.set_xlabel('X')
             self.ani_ax.set_ylim3d(self.ani_domains[0][1])
@@ -724,10 +745,13 @@ class Animator:
 
         # self.ani_fig.show()
         if show:
-            plt.ioff()
+            #plt.ioff()
             plt.show()
+            
         else:
             plt.close(self.ani_fig)
+            
+        return self.ani
         
 
     #####################################    
