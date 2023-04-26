@@ -5,30 +5,44 @@ Created on Thu Nov  8 21:05:55 2018
 @author: Alexandre
 """
 
+import sys as python_system
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import mpl_toolkits.mplot3d.axes3d as p3
+
 
 from pyro.analysis import phaseanalysis
 
 
 ###############################################################################
-def pyro_matplotlib_settings():
+#  Note: Modify here matplolib setting to fit your environment
+###############################################################################
+
+# Use interactive backend
+try:
+    matplotlib.use('Qt5Agg')
+    plt.ion() # Set interactive mode
     
-    # Embed font type in PDF
-    matplotlib.rcParams['pdf.fonttype'] = 42
-    matplotlib.rcParams['ps.fonttype']  = 42
-    
-    # Use interactive backend
-    try:
-        matplotlib.use('Qt5Agg')
-    except:
-        pass
-    
-    # Set interactive mode
-    plt.ion()
+except:
+    pass
+
+# Default figure settings
+default_figsize   = (4, 3)
+default_dpi       = 300
+default_linestyle = '-'
+default_fontsize  = 5
+
+# True if running in IPython, False if running the file in terminal
+if hasattr(python_system, 'ps1'): 
+    figure_blocking  = False   # Set to not block the code when showing a figure
+else:
+    # We want to block figure to prevent the script from terminating
+    figure_blocking  = True   # Set to block the code when showing a figure
+        
+# Embed font type in PDF when exporting
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype']  = 42
     
     
     
@@ -45,8 +59,6 @@ class TrajectoryPlotter:
         self.fontsize = 5
         self.figsize  = (4, 3)
         self.dpi      = 300
-        
-        pyro_matplotlib_settings()
 
 
     ##########################################################################
@@ -172,7 +184,7 @@ class TrajectoryPlotter:
 
         simfig.canvas.draw()
         plt.draw()
-        plt.show()
+        plt.show( block = figure_blocking )
 
         self.fig   = simfig
         self.plots = plots
@@ -194,7 +206,7 @@ class TrajectoryPlotter:
         pp.phasefig.tight_layout()
         
         plt.draw()
-        plt.show()
+        plt.show( block = figure_blocking )
         
 
     ###########################################################################
@@ -229,7 +241,7 @@ class TrajectoryPlotter:
         pp.phasefig.tight_layout()
         
         plt.draw()
-        plt.show()
+        plt.show( block = figure_blocking )
 
 
     ###########################################################################
@@ -264,7 +276,7 @@ class TrajectoryPlotter:
         plt.tight_layout()
         
         plt.draw()
-        plt.show()
+        plt.show( block = figure_blocking )
         
         
         
@@ -311,8 +323,6 @@ class Animator:
         
         # Label
         self.top_right_label = None
-        
-        pyro_matplotlib_settings()
         
 
     ###########################################################################
@@ -367,7 +377,7 @@ class Animator:
             
             self.showlines.append( line )
 
-        plt.show()
+        plt.show( block = figure_blocking )
     
     
     ###########################################################################
@@ -416,7 +426,7 @@ class Animator:
         self.show3ax.set_zlabel('Z')
         self.show3ax.tick_params(axis='both', which='both', labelsize=self.fontsize)
         
-        plt.show()
+        plt.show( block = figure_blocking )
         
     ###########################################################################
     def show_plus(self, x , u , t , x_axis = 0 , y_axis = 1 ):
@@ -479,7 +489,7 @@ class Animator:
                     
                 self.showlines_plus.append( line )
 
-        plt.show()
+        plt.show( block = figure_blocking )
         
     ###########################################################################
     def show_plus_update(self, x , u , t ):
@@ -518,7 +528,7 @@ class Animator:
         
         self.showfig.canvas.draw()
 
-        plt.show()
+        plt.show( block = figure_blocking )
         
         
     ###########################################################################
@@ -743,10 +753,10 @@ class Animator:
         if save:
             self.ani.save( file_name + '.gif', writer='imagemagick', fps=30)
 
-        # self.ani_fig.show()
+        # self.ani_fig.show( block = figure_blocking )
         if show:
             #plt.ioff()
-            plt.show()
+            plt.show( block = figure_blocking )
             
         else:
             plt.close(self.ani_fig)
