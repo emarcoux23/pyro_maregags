@@ -13,7 +13,14 @@ from pyro.control  import controller
 
 ###############################################################################
 class OpenLoopController( controller.StaticController ) :
-    """  Open-loop controller based on trajectory solution  """
+    """  
+    Open-loop controller based on trajectory solution  
+    ----------------------------------------------------
+    u = c( x , r, ,t ) = u(t)
+    
+    """
+    
+    
     ############################
     def __init__(self, trajectory ):
         """ """
@@ -52,3 +59,73 @@ class OpenLoopController( controller.StaticController ) :
     @property
     def time_final(self):
         return self.trajectory.time_final
+    
+    
+
+
+###############################################################################
+class Planner:
+    """  
+    Open-loop controller based on trajectory solution  
+    ----------------------------------------------------
+    u = c( x , r, ,t ) = u(t)
+    
+    """
+    
+    
+    ############################
+    def __init__(self, sys ):
+        """ """
+        
+        # Dynamic system model and constraints
+        self.sys = sys
+        
+        # Cost function
+        self.cost_function = sys.cost_function # default is quadratic cost
+        
+        # Start and goal state
+        self.x_start = sys.x0
+        self.x_goal  = sys.xbar
+        
+        # Output variable
+        self.traj = None
+        
+        
+    ##############################
+    def compute_solution(self):
+        
+        ################################################
+        # Place holder: override this method in child classes
+        raise NotImplementedError
+        ################################################
+        
+        
+    ##############################
+    def show_solution(self, plot='xu', **kwargs):
+        """ Plot computed trajectory solution """
+        
+        plotter = self.sys.get_plotter()
+        
+        return plotter.plot( self.traj, plot, **kwargs)
+    
+        
+    ##############################
+    def animate_solution(self, **kwargs):
+        
+        animator = self.sys.get_animator()
+        animator.animate_simulation( self.traj, **kwargs)
+        
+    ##############################
+    def animate_solution_to_html(self, **kwargs):
+        
+        animator = self.sys.get_animator()
+        animator.animate_simulation( self.traj, show = False , **kwargs)
+        
+        return animator.ani.to_html5_video()
+    
+        
+    ##############################
+    def save_solution(self, name = 'planner_trajectory_solution.npy' ):
+        
+        self.traj.save( name )
+        
