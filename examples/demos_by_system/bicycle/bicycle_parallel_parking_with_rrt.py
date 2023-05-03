@@ -13,12 +13,13 @@ from pyro.planning import randomtree
 
 sys  = vehicle.KinematicBicyleModel()
 
+sys.dynamic_domain = False
 ###############################################################################
 
-x_start = np.array([0,0,0])
-x_goal  = np.array([0,1,0])
+planner = randomtree.RRT( sys )
 
-planner = randomtree.RRT( sys , x_start )
+planner.x_start = np.array([0,0,0])
+planner.x_goal  = np.array([0,1,0])
 
 speed    = 2
 steering = 0.2
@@ -37,14 +38,9 @@ planner.dt                = 0.1
 planner.steps             = 3
 planner.max_solution_time = 8.0
 
-planner.find_path_to_goal( x_goal )
+planner.compute_solution()
 
 planner.plot_tree()
 planner.plot_tree_3d()
-planner.plot_open_loop_solution()
-
-###############################################################################
-
-sys.dynamic_domain = False
-sys.traj = planner.trajectory
-sys.animate_simulation()
+planner.show_solution()
+planner.animate_solution()

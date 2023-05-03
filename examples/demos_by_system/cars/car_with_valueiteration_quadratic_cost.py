@@ -5,7 +5,6 @@ Created on Tue Nov 13 11:05:07 2018
 @author: Alexandre
 """
 
-
 ###############################################################################
 import numpy as np
 ###############################################################################
@@ -28,16 +27,17 @@ sys.u_lb = np.array([-3, -1])
 grid_sys = discretizer.GridDynamicSystem(sys, (51, 51, 21), (3, 3), 0.1)
 
 # Cost Function
-xbar    = np.array( [ 0, 0, 0] ) 
-cf      = costfunction.TimeCostFunction( xbar )
-cf.INF  = 50
-cf.EPS  = 0.5
+cf = costfunction.QuadraticCostFunction.from_sys( sys )
+cf.xbar = np.array( [0, 0, 0] ) # target
+cf.INF  = 1E8
+cf.EPS  = 0.2
+cf.R    = np.array([[0.1,0],[0,0]])
 
 # DP algo
 dp = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys, cf )
 
-dp.alpha = 1.0
-dp.solve_bellman_equation( tol = 0.1 )
+dp.alpha = 0.99
+dp.solve_bellman_equation( tol = 0.5 )
 
 ctl = dp.get_lookup_table_controller()
 

@@ -17,16 +17,16 @@ sys  = vehicle.KinematicCarModelwithObstacles()
 ###############################################################################
 
 # Planning
+planner = randomtree.RRT( sys )
+
+planner.x_start = np.array([0,0,0])
+planner.x_goal  = np.array([30,0,0])
 
 # Set domain
 sys.x_ub = np.array([+35,+3.5,+3])
 sys.x_lb = np.array([-5,-2,-3])
 
-x_start = np.array([0,0,0])
-x_goal  = np.array([30,0,0])
-
-planner = randomtree.RRT( sys , x_start )
-
+# Control actions
 speed    = 2
 steering = 0.3
 
@@ -43,14 +43,11 @@ planner.steps       = 5
 planner.max_nodes   = 10000
 planner.max_distance_compute = 50000
 
-planner.find_path_to_goal( x_goal )
+planner.compute_solution()
 
 planner.plot_tree()
 planner.plot_tree_3d()
-planner.plot_open_loop_solution()
+planner.show_solution()
+planner.animate_solution()
 
-###############################################################################
 
-sys.dynamic_domain = True
-sys.traj = planner.trajectory
-sys.animate_simulation()

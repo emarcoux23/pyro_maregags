@@ -17,16 +17,18 @@ sys  = vehicle.KinematicBicyleModel()
 ###############################################################################
 
 # Planning
+planner = randomtree.RRT( sys )
 
 # Set domain
 sys.x_ub = np.array([+10,+10,+6.28])
 sys.x_lb = np.array([-10,-10,-6.284])
 
-x_start = np.array([0,0,0])
-x_goal  = np.array([5,5,0])
+# Planning Problem
+planner.x_start = np.array([0,0,0])
+planner.x_goal  = np.array([5,5,0])
 
-planner = randomtree.RRT( sys , x_start )
 
+# Control actions
 speed    = 1
 steering = 0.5
 
@@ -41,14 +43,9 @@ planner.goal_radius = 1.0
 planner.dt          = 0.1
 planner.steps       = 5
 
-planner.find_path_to_goal( x_goal )
+planner.compute_solution()
 
 planner.plot_tree()
 planner.plot_tree_3d()
-planner.plot_open_loop_solution()
-
-###############################################################################
-
-sys.dynamic_domain = False
-sys.traj = planner.trajectory
-sys.animate_simulation()
+planner.show_solution()
+planner.animate_solution()
