@@ -33,7 +33,7 @@ dq2 = dq[1,:]
 dq3 = dq[2,:]
 
 ###################################################
-# Direct joint trajectory testing
+# Direct joint trajectory test
 #q1 = np.linspace(0,1, n)     # q1(t)
 #q2 = np.linspace(1.4,2, n)   # q2(t)
 #q3 = np.linspace(-1.3,2, n)  # q3(t)
@@ -44,7 +44,7 @@ dq3 = dq[2,:]
 # Visualisation of the trajectory
 
 sys = DrillingRobot()
-sys.compute_trajectory(t_f,n) # little hack to use the plotting tool without simulations
+sys.compute_trajectory( t_f , n ) # little hack to use the plotting tool without simulations
 
 sys.traj.t       = t
 sys.traj.x[:,0]  = q1

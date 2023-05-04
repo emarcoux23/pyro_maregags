@@ -39,5 +39,5 @@ planner.goal_radius = 0.01
 planner.find_path_to_goal( x_goal )
 
 planner.plot_tree()
-planner.plot_open_loop_solution()
+planner.show_solution()
 planner.animate_solution()

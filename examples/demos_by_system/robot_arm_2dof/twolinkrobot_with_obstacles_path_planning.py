@@ -20,7 +20,7 @@ q_goal  = np.array([1.57,0])
 
 planner = randomtree.RRT( speed_controlled_robot , q_start )
 
-t = 0.1
+t = 0.5
     
 planner.u_options = [
         np.array([ +t, -t]),
@@ -36,9 +36,7 @@ planner.max_nodes   = 20000
 
 planner.find_path_to_goal( q_goal )
 
-planner.save_solution('twolinkplan.npy')
+#planner.save_solution('twolinkplan.npy')
 planner.plot_tree()
-planner.plot_open_loop_solution()
-
-speed_controlled_robot.traj = planner.trajectory
-speed_controlled_robot.animate_simulation()
+planner.show_solution()
+planner.animate_solution()

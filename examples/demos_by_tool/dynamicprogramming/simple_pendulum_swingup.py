@@ -15,17 +15,17 @@ from pyro.planning import discretizer
 
 sys  = pendulum.SinglePendulum()
 
-sys.x_ub = np.array([+6, +6])
-sys.x_lb = np.array([-9,  -6])
+sys.x_ub = np.array([+10, +10])
+sys.x_lb = np.array([-10,  -10])
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [301,301] , [21] )
+grid_sys = discretizer.GridDynamicSystem( sys , [501,501] , [21] )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
 qcf.xbar = np.array([ -3.14 , 0 ]) # target
-qcf.INF  = 300
+qcf.INF  = 500
 
 qcf.R[0,0] = 1.0
 
@@ -42,16 +42,20 @@ dp = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 #dp.compute_steps(200)
 # dp.plot_policy()
 
-dp.solve_bellman_equation( tol = 1)
-#dp.solve_bellman_equation( tol = 1 , animate_cost2go = True )
+#dp.solve_bellman_equation( tol = 1)
+dp.solve_bellman_equation( tol = 0.1 , animate_cost2go = True )
 #dp.solve_bellman_equation( tol = 1 , animate_policy = True )
 #dp.plot_cost2go(150)
 
 #dp.animate_cost2go( show = False , save = True )
 #dp.animate_policy( show = False , save = True )
 
+dp.clean_infeasible_set()
+dp.plot_cost2go_3D()
+dp.plot_policy()
 
 ctl = dp.get_lookup_table_controller()
+
 
 #ctl.plot_control_law( sys = sys , n = 100)
 

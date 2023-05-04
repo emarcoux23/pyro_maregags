@@ -420,7 +420,7 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
     
     #############################
     def compute_trajectory(
-        self, tf=10, n=10001, solver='ode'):
+        self, tf=10, n=10001, solver='solve_ivt'):
         """ 
         Simulation of time evolution of the system
         ------------------------------------------------
@@ -875,7 +875,7 @@ class DynamicClosedLoopSystem( ClosedLoopSystem ):
     
     #############################
     def compute_trajectory(
-        self, tf=10, n=10001, solver='ode'):
+        self, tf=10, n=10001, solver='solve_ivt'):
         """ 
         Simulation of time evolution of the system
         ------------------------------------------------

@@ -47,8 +47,10 @@ robot_with_effector_PD = effector_PD + torque_controlled_robot
 x0 = np.array([0,0,0,0])
 tf = 5
 
+anims = []
+
 for robot in (robot_with_joint_PD, robot_with_effector_PD):
     robot.x0 = x0
     robot.compute_trajectory(tf)
-    robot.animate_simulation()
+    anims.append( robot.animate_simulation() )
     robot.plot_trajectory('xu')
