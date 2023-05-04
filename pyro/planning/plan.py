@@ -113,7 +113,10 @@ class Planner:
     def animate_solution(self, **kwargs):
         
         animator = self.sys.get_animator()
-        animator.animate_simulation( self.traj, **kwargs)
+        self.ani = animator.animate_simulation( self.traj, **kwargs)
+        
+        return self.ani
+    
         
     ##############################
     def animate_solution_to_html(self, **kwargs):

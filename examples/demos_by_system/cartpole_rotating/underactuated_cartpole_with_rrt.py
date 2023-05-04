@@ -38,5 +38,6 @@ planner.dyna_plot            = False
 planner.find_path_to_goal( x_goal )
 
 planner.plot_tree()
-planner.plot_open_loop_solution()
-planner.animate_solution()
+planner.show_solution()
+
+anim = planner.animate_solution( is_3d = True )

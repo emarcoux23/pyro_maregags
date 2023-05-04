@@ -12,7 +12,7 @@ import numpy as np
 from pyro.dynamic  import longitudinal_vehicule
 from pyro.planning import discretizer
 from pyro.analysis import costfunction
-from pyro.planning import valueiteration
+from pyro.planning import dynamicprogramming
 from pyro.control  import controller
 ###############################################################################
 
@@ -41,25 +41,17 @@ cf.Q[0,0] = 0
 cf.Q[1,1] = 0.01
 
 # VI algo
-vi = valueiteration.ValueIteration_ND( grid_sys , cf )
+vi = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys , cf )
 
-vi.uselookuptable = True
-vi.initialize()
-
-vi.load_data('car_braking_test')
-#vi.compute_steps(60,True)
-#vi.save_data('car_braking_test')
-
-###############################################################################
+vi.solve_bellman_equation()
 
 # Closed-loop Law
 
-vi.assign_interpol_controller()
+vi.plot_cost2go_3D()
 
-vi.plot_policy(0)
-vi.plot_3D_cost()
+ctl = vi.get_lookup_table_controller()
 
-cl_sys = controller.ClosedLoopSystem( sys , vi.ctl )
+cl_sys = ctl + sys
 
 ###############################################################################
 

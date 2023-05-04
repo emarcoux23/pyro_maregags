@@ -433,6 +433,7 @@ class ContinuousDynamicSystem:
             self.compute_trajectory()
         
         plotter = self.get_plotter()
+        
         return plotter.plot( self.traj, plot, **kwargs)
 
 
@@ -450,7 +451,8 @@ class ContinuousDynamicSystem:
             self.compute_trajectory()
         
         plotter = self.get_plotter()
-        plotter.phase_plane_trajectory( self.traj, x_axis , y_axis)
+        
+        return plotter.phase_plane_trajectory( self.traj, x_axis , y_axis)
 
 
     #############################
@@ -467,7 +469,8 @@ class ContinuousDynamicSystem:
             self.compute_trajectory()
         
         plotter = self.get_plotter()
-        plotter.phase_plane_trajectory_3d( 
+        
+        return plotter.phase_plane_trajectory_3d( 
                 self.traj, x_axis , y_axis, z_axis)
 
 
@@ -508,6 +511,8 @@ class ContinuousDynamicSystem:
             
         ani = self.get_animator()
         ani.animate_simulation( self.traj, **kwargs)
+        
+        return ani.animate_simulation( self.traj, **kwargs)
         
     
     ##############################
@@ -619,10 +624,14 @@ class ContinuousDynamicSystem:
         
         linearized_sys = linearize( self )
         
-        for i in range(self.n):
-            linearized_sys.animate_eigen_mode( i , self.is_3d )
+        animations = []
         
-        return linearized_sys
+        for i in range(self.n):
+            ani = linearized_sys.animate_eigen_mode( i , self.is_3d )
+            
+            animations.append( ani )
+        
+        return linearized_sys , animations
 
 
 

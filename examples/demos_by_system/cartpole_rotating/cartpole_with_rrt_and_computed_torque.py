@@ -43,22 +43,9 @@ planner.find_path_to_goal( x_goal )
 
 planner.plot_tree()
 
-###############################################################################
-
-planner.save_solution('fullyactuatedcartpole_rrt')
-
-#planner.plot_open_loop_solution()
-sys.get_animator().animate_simulation(planner.trajectory,
-                                      time_factor_video=1.0,
-                                      is_3d=True)
-
-###############################################################################
-
 # Controller
 
-traj = planner.trajectory
-
-ctl  = nonlinear.ComputedTorqueController( sys , traj )
+ctl  = nonlinear.ComputedTorqueController( sys , planner.traj )
 
 ctl.w0   = 1.0
 ctl.zeta = 0.7

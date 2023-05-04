@@ -44,7 +44,7 @@ planner = trajectoryoptimisation.DirectCollocationTrajectoryOptimisation( sys , 
 planner.x_start = x_start
 planner.x_goal  = x_goal
 
-planner.set_initial_trajectory_guest( rrt.trajectory )
+planner.set_initial_trajectory_guest( rrt.traj )
 
 planner.maxiter = 500
 planner.compute_optimal_trajectory()

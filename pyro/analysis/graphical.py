@@ -21,6 +21,7 @@ from pyro.analysis import phaseanalysis
 
 # Use interactive backend
 try:
+    # Default usage for interactive mode
     matplotlib.use('Qt5Agg')
     plt.ion() # Set interactive mode
     
