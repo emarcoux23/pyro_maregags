@@ -7,7 +7,7 @@ Created on Fri Aug 07 11:51:55 2015
 
 import numpy as np
 
-from scipy.integrate import solve_ivp
+from scipy.integrate import solve_ivp, odeint
 from scipy.interpolate import interp1d
 
 ##########################################################################
@@ -223,7 +223,7 @@ class Simulator:
 
     ############################
     def __init__(
-        self, ContinuousDynamicSystem, tf=10, n=10001, solver='ode'):
+        self, ContinuousDynamicSystem, tf=10, n=10001, solver='solve_ivt' ):
 
         self.cds    = ContinuousDynamicSystem
         self.t0     = 0
@@ -241,19 +241,24 @@ class Simulator:
 
 
     ##############################
-    def compute(self, **solver_args):
-        """Integrate trough time
+    def compute(self, **solver_args ):
+        """
+        Integrate trough time the equation of motion
 
         Parameters
         -----------
         kwargs: Keyword arguments passed through to the solver (e.g. solve_ivp)
+        
         """
-
-        if self.solver == 'ode':
-            t_eval = None
+        
+        ##############################
+        if self.solver == 'solve_ivt':
+            
             if self.n is not None:
                 t_eval = np.linspace(self.t0 , self.tf , int(self.n))
-
+            else:
+                t_eval = None
+                
             # solve_ivp takes arguments in reverse order of fsim
             def solverfun(t, y):
                 dy = self.cds.fsim(y, t)
@@ -261,9 +266,9 @@ class Simulator:
 
             sol = solve_ivp(
                 solverfun,
-                t_span=[self.t0, self.tf],
-                y0=self.x0,
-                t_eval=t_eval,
+                t_span    = [self.t0, self.tf],
+                y0        = self.x0,
+                t_eval    = t_eval,
                 **solver_args
             )
 
@@ -283,11 +288,14 @@ class Simulator:
                 dx_sol[i,:] = self.cds.f( xi , ui , ti )
                 y_sol[i,:]  = self.cds.h( xi , ui , ti )
                 u_sol[i,:]  = ui
-
+                
+        
+        ##############################
         elif self.solver == 'euler':
+            
             npts = 10001 if self.n is None else int(self.n)
-            t_sol = np.linspace(self.t0 , self.tf , npts)
-
+            
+            t_sol  = np.linspace(self.t0 , self.tf , npts)
             x_sol  = np.zeros((npts, self.cds.n))
             dx_sol = np.zeros((npts, self.cds.n))
             u_sol  = np.zeros((npts, self.cds.m))
@@ -295,7 +303,9 @@ class Simulator:
 
             # Initial State
             x_sol[0,:] = self.x0
+            
             dt = ( self.tf + 0.0 - self.t0 ) / ( npts - 1 )
+            
             for i in range(npts):
 
                 ti = t_sol[i]
@@ -308,6 +318,36 @@ class Simulator:
 
                 y_sol[i,:] = self.cds.h( xi , ui , ti )
                 u_sol[i,:] = ui
+                
+        ##############################
+        elif self.solver == 'odeint':
+            
+            npts = 10001 if self.n is None else int(self.n)
+            
+            t_sol = np.linspace(self.t0 , self.tf , npts)
+            x_sol = odeint( self.cds.fsim , self.x0 , t_sol)
+
+            # Compute inputs-output values
+            y_sol  = np.zeros(( self.n , self.cds.p ))
+            u_sol  = np.zeros((self.n,self.cds.m))
+            dx_sol = np.zeros((self.n,self.cds.n))
+
+            for i in range(self.n):
+                ti = t_sol[i]
+                xi = x_sol[i,:]
+                ui = self.cds.t2u( ti )
+
+                dx_sol[i,:] = self.cds.f( xi , ui , ti )
+                y_sol[i,:]  = self.cds.h( xi , ui , ti )
+                u_sol[i,:]  = ui
+                
+        ##############################
+        else :
+            
+            # self.solver == ???
+            print('Check the solver argument: self.solver ==???')
+            raise NotImplementedError
+            
                 
         #########################
         traj = Trajectory(

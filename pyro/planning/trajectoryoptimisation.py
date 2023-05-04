@@ -10,48 +10,54 @@ import numpy as np
 from scipy.optimize import minimize
 
 from pyro.analysis import simulation
-
+from pyro.planning import plan
 
 
 ###############################################################################
-class DirectCollocationTrajectoryOptimisation:
+class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     """ 
     Trajectory optimisation based on fixed-time-steps direct collocation
     ---------------------------------------------------------------------
     sys  : dynamical system class
     dt   : time step size
     grid : number of time step (discretization number)
+    cf   : cost function class
     
     
     """
     
     ############################
-    def __init__(self, sys , dt = 0.2 , grid = 20):
+    def __init__(self, sys , dt = 0.2 , grid = 20 , cost_function = None ):
         
-        self.sys = sys          # Dynamic system class
         
-        self.cost_function = sys.cost_function # default is quadratic cost
+        # Set sys, default cost function x_start and x_goal
+        plan.Planner.__init__(self, sys , cost_function )
         
-        self.x_start = sys.x0
-        self.x_goal  = sys.xbar
-        
+        # Discretization parameters
         self.dt    = dt
         self.grid  = grid
         
-        
-        #Parameters
+        # Parameters
         self.EPS     = 0.01
         self.maxiter = 100
         
+        # Initial computation
         self.compute_bounds()
+        self.dec_init   = np.zeros( grid * ( sys.n + sys.m ) )
         
-        #Init
-        self.dec_init   = np.zeros(grid*(sys.n+sys.m))
+        # Memory variable
         self.iter_count = 0
+        
+        
+    ############################
+    def set_initial_trajectory_guest(self, traj):
+        
+        new_traj      = traj.re_sample( self.grid )
+        self.dec_init = self.traj2decisionvariables( new_traj )
         
     
     ############################
-    def decisionvariables2xu(self, dec):
+    def decisionvariables2xu(self, dec ):
         """ 
         Unpack decision variable vector into x and u trajectory matrices 
         --------------------------
@@ -74,12 +80,14 @@ class DirectCollocationTrajectoryOptimisation:
         m    = self.sys.m   # number of inputs
         grid = self.grid    # number of time steps
     
-        x = np.zeros((n,grid)) 
-        u = np.zeros((m,grid))
+        x = np.zeros( ( n , grid ) ) 
+        u = np.zeros( ( m , grid ) )
         
+        # Extract states variables
         for i in range(self.sys.n):
             x[i,:] = dec[ i * grid : (i+1) * grid ]
             
+        # Extract input variables
         for j in range(self.sys.m):
             k = n + j
             u[j,:] = dec[ k * grid : (k+1) * grid ]
@@ -120,12 +128,6 @@ class DirectCollocationTrajectoryOptimisation:
             dec = np.append(dec,arr_to_add,axis=0)
         
         return dec
-    
-    ############################
-    def set_initial_trajectory_guest(self, traj):
-        
-        new_traj      = traj.re_sample( self.grid )
-        self.dec_init = self.traj2decisionvariables( new_traj )
     
     
     ############################
@@ -170,8 +172,7 @@ class DirectCollocationTrajectoryOptimisation:
             u[i,:]  = uT[:,i]
             t[i]    = i*self.dt
             dx[i,:] = self.sys.f(x[i,:],u[i,:],t[i])
-            y[i,:]  = self.sys.h(x[i,:],u[i,:],t[i])
-            dJ[i]   = self.cost_function.g(x[i,:],u[i,:],y[i,:],t[i])
+            dJ[i]   = self.cost_function.g(x[i,:],u[i,:],t[i])
             
             J_sum = J_sum + dJ[i]
             J[i]  = J_sum
@@ -205,15 +206,13 @@ class DirectCollocationTrajectoryOptimisation:
             x_i = x[:,i]
             u_i = u[:,i]
             t_i = i*self.dt
-            y_i = self.sys.h(x_i,u_i,t_i)
-            dJi = self.cost_function.g( x_i , u_i,  y_i, t_i )
+            dJi = self.cost_function.g( x_i , u_i, t_i )
             
             #i+1
             x_i1 = x[:,i+1]
             u_i1 = u[:,i+1]
             t_i1 = (i+1)*self.dt
-            y_i1 = self.sys.h(x_i1,u_i1,t_i1)
-            dJi1 = self.cost_function.g( x_i1 , u_i1,  y_i1, t_i1 )
+            dJi1 = self.cost_function.g( x_i1 , u_i1, t_i1 )
             
             #trapez
             dJ = 0.5 * ( dJi + dJi1 )
@@ -228,7 +227,7 @@ class DirectCollocationTrajectoryOptimisation:
     def dynamic_constraints(self, dec):
         """ Compute residues of dynamic constraints """
     
-        x,u = self.decisionvariables2xu( dec )
+        x , u = self.decisionvariables2xu( dec )
         
         residues_vec = np.zeros( (self.grid-1) * self.sys.n )
         
@@ -263,7 +262,7 @@ class DirectCollocationTrajectoryOptimisation:
     
     ##############################
     def compute_bounds(self):
-        """ Compute lower and upper bound vector for all decision variables"""
+        """ Compute lower and upper bound vector for all decision variables """
     
         bounds = []
         
@@ -317,34 +316,14 @@ class DirectCollocationTrajectoryOptimisation:
         self.res  = res
         self.traj = self.decisionvariables2traj( self.res.x )
         
+        
+    ##############################
+    def compute_solution(self):
+        
+        self.compute_optimal_trajectory()
+        
+        return self.traj
     
-    ##############################
-    def show_solution(self):
-        
-        self.sys.traj = self.traj
-        self.sys.plot_trajectory('xu')
-        
-    ##############################
-    def animate_solution(self, **kwargs):
-        
-        animator = self.sys.get_animator()
-        animator.animate_simulation( self.traj, **kwargs)
-        
-    ##############################
-    def animate_solution_to_html(self, **kwargs):
-        
-        animator = self.sys.get_animator()
-        animator.animate_simulation( self.traj, show = False , **kwargs)
-        
-        return animator.ani.to_html5_video()
-    
-        
-    ##############################
-    def save_solution(self, name = 'optimized_trajectory.npy' ):
-        
-        self.sys.traj.save( name )
-    
-
 
 
 '''
@@ -367,5 +346,5 @@ if __name__ == "__main__":
     planner.x_start = np.array([0.1,0])
     planner.x_goal  = np.array([-3.14,0])
     
-    planner.compute_optimal_trajectory()
+    planner.compute_solution()
     planner.show_solution()

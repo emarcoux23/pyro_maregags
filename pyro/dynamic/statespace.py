@@ -54,14 +54,14 @@ class StateSpaceSystem(ContinuousDynamicSystem):
             raise ValueError("Number of rows in C does not match D")
     
     #############################################
-    def f(self, x, u, t):
+    def f(self, x, u, t = 0 ):
 
         dx = np.dot(self.A, x) + np.dot(self.B, u)
 
         return dx
     
     #############################################
-    def h(self, x, u, t):
+    def h(self, x, u, t = 0 ):
         
         y = np.dot(self.C, x) + np.dot(self.D, u)
         
@@ -105,6 +105,7 @@ class StateSpaceSystem(ContinuousDynamicSystem):
 
         return traj
     
+    
     ############################################
     def animate_eigen_mode(self, i = 0 , is_3d = False):
         """ 
@@ -126,7 +127,10 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         label    = template % (i, self.poles[i].real, self.poles[i].imag)
         
         animator.top_right_label = label
-        animator.animate_simulation( traj, 3.0, is_3d)
+        
+        return animator.animate_simulation( traj, 3.0, is_3d)
+        
+        
 
     
     
@@ -408,7 +412,9 @@ class StateObserver(StateSpaceSystem):
         Returns
         ----------
 
-        Instance of `StateObserver` with L, the Kalman gain matrix.
+        Instance of `StateObserver` with L, the Kalman gain matrix. A special
+        property `P` is set which corresponds to the state estimation
+        covariance matrix.
 
         """
         Q = np.array(Q, ndmin=2, dtype=np.float64)
@@ -442,6 +448,7 @@ class StateObserver(StateSpaceSystem):
         assert L_kalm.shape == obs.L.shape
 
         obs.L = L_kalm
+        obs.P = P # estimate covariance matrix
         return obs
 
 
@@ -455,12 +462,16 @@ class StateObserver(StateSpaceSystem):
         Returns
         ----------
 
-        Instance of `StateObserver` with L, the Kalman gain matrix.
+        Instance of `StateObserver` with L, the Kalman gain matrix. A special
+        property `P` is set which corresponds to the state estimation
+        covariance matrix.
 
         """
 
-        L = cls.kalman(ss.A, ss.B, ss.C, ss.D, Q, R, G).L
-        return cls.from_ss(ss, L)
+        kalm_obs = cls.kalman(ss.A, ss.B, ss.C, ss.D, Q, R, G)
+        result = cls.from_ss(ss, kalm_obs.L)
+        result.P = kalm_obs.P
+        return result
 
 
     def h(self, x, u, t):
