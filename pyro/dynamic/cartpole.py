@@ -338,6 +338,14 @@ class CartPole(mechanical.MechanicalSystem):
         
         self.name = 'Cart Pole'
         
+        self.state_label[0] = 'x'
+        self.state_label[2] = 'dx'
+        self.state_units[0] = '[m]'
+        self.state_units[2] = '[m/s]'
+        
+        self.input_label[0] = 'F'
+        self.input_units[0] = '[N]'
+        
         # kinematic
         self.l = 3
         self.lcg = 0.5
