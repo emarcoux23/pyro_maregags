@@ -16,8 +16,8 @@ sys  = pendulum.SinglePendulum()
 
 ctl  = nonlinear.SlidingModeController( sys )
 
-ctl.lam  = 4.0
-ctl.gain = 25.0
+ctl.lam  = 3.0
+ctl.gain = 20.0
 
 # Set Point
 q_target = np.array([3.14])

@@ -74,14 +74,17 @@ class Planner:
     
     
     ############################
-    def __init__(self, sys ):
+    def __init__(self, sys , cost_function = None ):
         """ """
         
         # Dynamic system model and constraints
         self.sys = sys
         
         # Cost function
-        self.cost_function = sys.cost_function # default is quadratic cost
+        if cost_function is None:
+            self.cost_function = sys.cost_function # default is quadratic cost
+        else:
+            self.cost_function = cost_function
         
         # Start and goal state
         self.x_start = sys.x0

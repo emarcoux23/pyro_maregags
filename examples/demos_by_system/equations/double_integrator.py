@@ -39,7 +39,7 @@ sys.plot_phase_plane_trajectory()
 
 # Cost computing
 
-qcf           = costfunction.QuadraticCostFunction(2, 1, 1)
+qcf           = costfunction.QuadraticCostFunction(2, 1)
 traj_with_qcf = qcf.trajectory_evaluation( traj )
 sys.traj      = traj_with_qcf
 sys.plot_trajectory('xuj')

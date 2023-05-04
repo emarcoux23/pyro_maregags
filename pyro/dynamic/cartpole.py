@@ -346,6 +346,9 @@ class CartPole(mechanical.MechanicalSystem):
         self.input_label[0] = 'F'
         self.input_units[0] = '[N]'
         
+        self.u_lb[0] = -10
+        self.u_ub[0] = +10
+        
         # kinematic
         self.l = 3
         self.lcg = 0.5
@@ -509,11 +512,11 @@ class CartPole(mechanical.MechanicalSystem):
         # Force
         f = u[0]  # Force amplitude
         f_pos = (f > 0)
-        max_amplitude = 2 / self.u_ub[0]
+        max_amplitude = 10.0 / self.u_ub[0]
         cart_length = 2.5
         cart_heigth = 1.5
 
-        if abs(f) > (self.u_ub[0] * 0.05):
+        if abs(f) > (self.u_ub[0] * 0.02):
             pts = np.zeros((2, 3))
             if f_pos:
                 # Draw line

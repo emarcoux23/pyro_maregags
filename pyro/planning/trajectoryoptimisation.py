@@ -21,16 +21,17 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     sys  : dynamical system class
     dt   : time step size
     grid : number of time step (discretization number)
+    cf   : cost function class
     
     
     """
     
     ############################
-    def __init__(self, sys , dt = 0.2 , grid = 20):
+    def __init__(self, sys , dt = 0.2 , grid = 20 , cost_function = None ):
         
         
         # Set sys, default cost function x_start and x_goal
-        plan.Planner.__init__(self, sys)
+        plan.Planner.__init__(self, sys , cost_function )
         
         # Discretization parameters
         self.dt    = dt

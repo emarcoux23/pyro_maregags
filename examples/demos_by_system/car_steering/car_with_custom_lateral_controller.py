@@ -73,6 +73,6 @@ cl_sys.x_lb = np.array([-8.,-8.,-8.])
 cl_sys.x0[1] = 0.5
 cl_sys.x0[2] = 0.0
 cl_sys.plot_trajectory()
-cl_sys.animate_simulation()
+anim = cl_sys.animate_simulation()
 cl_sys.plot_phase_plane_trajectory(1,2)
 #cl_sys.plot_phase_plane_trajectory_closed_loop(1,2)

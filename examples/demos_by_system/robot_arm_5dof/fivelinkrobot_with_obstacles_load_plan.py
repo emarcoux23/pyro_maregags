@@ -10,19 +10,16 @@ import numpy as np
 ###############################################################################
 from pyro.planning import randomtree
 from pyro.dynamic  import manipulator
+from pyro.analysis import simulation
+from pyro.analysis import graphical
 ###############################################################################
 
 torque_controlled_robot = manipulator.FiveLinkPlanarManipulatorwithObstacles()
 speed_controlled_robot  = manipulator.SpeedControlledManipulator.from_manipulator( torque_controlled_robot )
 
-q_start = np.array([0,0,0,0,0])
-q_goal  = np.array([1.57,0,0,0,0])
 
-planner = randomtree.RRT( speed_controlled_robot , q_start )
+traj = simulation.Trajectory.load( 'fivelinkplan.npy' )
 
-planner.load_solution('fivelinkplan.npy')
+animator = graphical.Animator( speed_controlled_robot )
 
-planner.plot_open_loop_solution()
-
-speed_controlled_robot.traj = planner.trajectory
-speed_controlled_robot.animate_simulation()
+animator.animate_simulation( traj )

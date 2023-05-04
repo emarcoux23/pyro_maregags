@@ -39,9 +39,7 @@ planner.max_solution_time = 20
 
 planner.find_path_to_goal( q_goal )
 
-planner.save_solution('fivelinkplan.npy')
+#planner.save_solution('fivelinkplan.npy')
 planner.plot_tree()
-planner.plot_open_loop_solution()
-
-speed_controlled_robot.traj = planner.trajectory
-speed_controlled_robot.animate_simulation()
+planner.show_solution()
+planner.animate_solution()

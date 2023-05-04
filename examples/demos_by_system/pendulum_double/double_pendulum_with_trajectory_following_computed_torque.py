@@ -15,8 +15,8 @@ from pyro.analysis import simulation
 sys  = pendulum.DoublePendulum()
 
 #traj = simulation.Trajectory.load('double_pendulum_rrt.npy')
-traj = simulation.Trajectory.load('double_pendulum_directcollocation.npy')
-#traj = simulation.Trajectory.load('double_pendulum_directcollocation_hires.npy')
+#traj = simulation.Trajectory.load('double_pendulum_directcollocation.npy')
+traj = simulation.Trajectory.load('double_pendulum_directcollocation_hires.npy')
 
 # Controller
 ctl  = nonlinear.ComputedTorqueController( sys , traj )

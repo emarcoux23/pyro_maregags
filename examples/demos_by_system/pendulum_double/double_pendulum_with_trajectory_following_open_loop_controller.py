@@ -13,7 +13,7 @@ from pyro.planning import plan
 
 sys  = pendulum.DoublePendulum()
 
-ctl  = plan.OpenLoopController.load_from_file( 'double_pendulum_rrt.npy' )
+ctl  = plan.OpenLoopController.load_from_file( 'double_pendulum_directcollocation_hires.npy')
 
 # New cl-dynamic
 cl_sys = ctl + sys

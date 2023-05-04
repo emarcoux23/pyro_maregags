@@ -29,10 +29,15 @@ sys.u_lb[0] = -20
 cf  = costfunction.QuadraticCostFunction.from_sys( sys )
 
 cf.Q[0,0] = 1.0
-cf.Q[0,0] = 10.0
-cf.R[0,0] = 100
+cf.Q[1,1] = 1.0
+cf.R[0,0] = 1
 
-planner = trajectoryoptimisation.DirectCollocationTrajectoryOptimisation( sys , dt= 0.2, grid = 20 )
+planner = trajectoryoptimisation.DirectCollocationTrajectoryOptimisation( 
+           sys , 
+           dt = 0.2 , 
+           grid = 20 ,
+           cost_function = cf 
+           )
 
 
 planner.x_start = np.array([0,0,0,0])

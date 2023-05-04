@@ -51,7 +51,7 @@ fig , plots = matplotlib.pyplot.subplots(3)
 plots[0].plot( t , f_traj[:,0] )
 plots[1].plot( t , f_traj[:,1] )
 plots[2].plot( t , f_traj[:,2] )
-fig.canvas.set_window_title('Contact forces')
+fig.canvas.manager.set_window_title('Contact forces')
 
 
 

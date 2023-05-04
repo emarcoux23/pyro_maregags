@@ -37,11 +37,7 @@ planner.goal_radius = 0.2
 planner.find_path_to_goal( x_goal )
 
 # Print solution
-planner.save_solution('pendulum_rrt.npy')
+#planner.save_solution('pendulum_rrt.npy')
 planner.plot_tree()
-planner.plot_open_loop_solution()
-
-# Animate Solution
-sys.traj = planner.trajectory
-sys.animate_simulation()
-
+planner.show_solution()
+planner.animate_solution()

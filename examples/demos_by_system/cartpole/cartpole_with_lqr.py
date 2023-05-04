@@ -24,8 +24,8 @@ sys.xbar[1] = np.pi # Up-right position
 # Cost function
 cf  = costfunction.QuadraticCostFunction.from_sys( sys )
 
-cf.Q[0,0] = 1.0
-cf.Q[0,0] = 10.0
+cf.Q[0,0] = 100.0
+cf.Q[1,1] = 1.0
 cf.R[0,0] = 100
 
 ctl = lqr.linearize_and_synthesize_lqr_controller( sys , cf )

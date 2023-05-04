@@ -154,8 +154,6 @@ cl_sys.plot_phase_plane()
 
 cl_sys.plot_phase_plane_closed_loop()
 
-plt.show()
-
 
 
 cl_sys.x0 = np.array([0,5])

@@ -648,7 +648,7 @@ if __name__ == "__main__":
         sys.ubar = np.array([0.1,0.5,2])
         
         sys.compute_trajectory()
-        sys.animate_simulation( is_3d = True )
+        anim = sys.animate_simulation( is_3d = True )
     
     # Drilling robot (Asimov) dynamic eq validation
     

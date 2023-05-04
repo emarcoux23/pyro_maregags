@@ -16,10 +16,7 @@ from pyro.control  import controller
 ##############################################################################
 
 class DoubleIntegrator2( system.ContinuousDynamicSystem ):
-    """ 
-    DoubleIntegrator Example for a ContinuousDynamicSystem
-    
-    """
+
     
     ############################
     def __init__(self):
