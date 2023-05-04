@@ -510,7 +510,6 @@ class ContinuousDynamicSystem:
             self.compute_trajectory()
             
         ani = self.get_animator()
-        ani.animate_simulation( self.traj, **kwargs)
         
         return ani.animate_simulation( self.traj, **kwargs)
         
