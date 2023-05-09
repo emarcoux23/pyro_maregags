@@ -14,6 +14,7 @@ Fichier d'amorce pour les livrables de la problématique GRO640'
 
 import numpy as np
 
+from pyro.control  import robotcontrollers
 from pyro.control.robotcontrollers import EndEffectorPD
 from pyro.control.robotcontrollers import EndEffectorKinematicController
 
@@ -165,7 +166,7 @@ class CustomPositionController( EndEffectorKinematicController ) :
         
 
         
-class CustomDrillingController( EndEffectorPD ) :
+class CustomDrillingController( robotcontrollers.RobotController ) :
     """ 
 
     """
@@ -174,20 +175,14 @@ class CustomDrillingController( EndEffectorPD ) :
     def __init__(self, robot_model ):
         """ """
         
-        EndEffectorPD.__init__( self , robot_model )
+        super().__init__( dof = 3 )
+        
+        self.robot_model = robot_model
         
         # Label
         self.name = 'Custom Drilling Controller'
         
-        ###################################################
-        # Vos paramètres de loi de commande ici !!
-        ###################################################
         
-        # Target effector force
-        self.rbar = np.array([0,0,0]) 
-        
-        
-    
     #############################
     def c( self , y , r , t = 0 ):
         """ 
@@ -210,13 +205,20 @@ class CustomDrillingController( EndEffectorPD ) :
         x = y
         [ q , dq ] = self.x2q( x )
         
+        # Robot model
+        r = self.robot_model.forward_kinematic_effector( q ) # End-effector actual position
+        J = self.robot_model.J( q )      # Jacobian matrix
+        g = self.robot_model.g( q )      # Gravity vector
+        H = self.robot_model.H( q )      # Inertia matrix
+        C = self.robot_model.C( q , dq ) # Coriolis matrix
+            
         ##################################
         # Votre loi de commande ici !!!
         ##################################
         
-        tau = np.zeros(self.m)  # place-holder de bonne dimension
+        u = np.zeros(self.m)  # place-holder de bonne dimension
         
-        return tau
+        return u
         
     
 ###################
