@@ -151,15 +151,19 @@ option a) Using git to clone the repo:
 git clone https://github.com/SherbyRobotics/pyro.git
 ```
 in the folder of your choice.
+
 option b) Download the .zip using the Code/Download Zip link at the top of this page, and then unzip in the folder of your choice.
 
 #### 3. Add the pyro folder to the pythonpath 
 option a) [Easy spyder IDE only] Add it this the spyder menu at python/PYTHONPATH manager. 
+
 In order to run pyro in the terminal directly of in another IDE like VS code, option b) or c) should be used.
+
 option b) [conda]
 ```bash
 conda develop /PATH/TO/PYRO
 ```
+
 option c) [pip]
 Go to the root directory of the pyro folder and run:
 ```bash
