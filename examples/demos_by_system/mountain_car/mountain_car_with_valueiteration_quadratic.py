@@ -18,8 +18,8 @@ sys  = mountaincar.MountainCar()
 sys.x_ub = np.array([+0.2,+2.0])
 sys.x_lb = np.array([-1.7,-2.0])
 
-sys.u_ub[0] = +0.5
-sys.u_lb[0] = -0.5
+sys.u_ub[0] = +0.2
+sys.u_lb[0] = -0.2
 
 # Discrete world 
 grid_sys = discretizer.GridDynamicSystem( sys , [201,201] , [11] )
@@ -28,9 +28,9 @@ grid_sys = discretizer.GridDynamicSystem( sys , [201,201] , [11] )
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
 qcf.xbar = np.array([ 0 , 0 ]) # target
-qcf.INF  = 300
+qcf.INF  = 30
 
-qcf.R[0,0] = 1.0
+qcf.R[0,0] = 10.0
 
 qcf.S[0,0] = 10.0
 qcf.S[1,1] = 10.0
@@ -55,7 +55,7 @@ ctl = dp.get_lookup_table_controller()
 # Simulation
 cl_sys = ctl + sys
 cl_sys.x0   = np.array([-1., 0.])
-cl_sys.compute_trajectory( 10, 10001, 'euler')
+cl_sys.compute_trajectory( 25, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()
 cl_sys.animate_simulation()
