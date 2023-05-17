@@ -24,7 +24,7 @@ sys.u_ub[0] = 5.0
 sys.u_lb[0] = -5.0
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [11] , 0.05)
+grid_sys = discretizer.GridDynamicSystem( sys , [101,101] , [41] , 0.05)
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
@@ -59,7 +59,7 @@ cl_sys = controller.ClosedLoopSystem( sys , ctl )
 ##############################################################################
 
 # Simulation and animation
-cl_sys.x0   = np.array([+5,-3])
+cl_sys.x0   = np.array([+5,+3])
 cl_sys.compute_trajectory( 20, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
 cl_sys.plot_phase_plane_trajectory()

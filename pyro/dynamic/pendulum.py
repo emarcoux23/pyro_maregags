@@ -812,6 +812,137 @@ class TwoIndependentSinglePendulum( mechanical.MechanicalSystem ):
         lines_pts.append( pts )
                 
         return lines_pts
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        show torque as a rotating arrow around the joint
+        
+        """
+        
+        lines_pts   = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+        
+        # FIrst pendulum
+        
+        # Torque
+        f         = u[0] # torque amplitude
+        f_pos     = ( f > 0 )
+        q         = x[0] - np.pi / 2  # rigid link angle
+        max_angle = f * ( np.pi * 2 /3 / ( self.u_ub[0] ) )
+        r         = self.l1 / 5.0  # radius of arc
+        r1        = r/2            # length of arrows
+        da        = 0.2            # angle discretization
+        
+        
+        if abs(f) > (self.u_ub[0] * 0.05):
+        
+            if f_pos:
+                angles = np.arange( 0, max_angle , da  ) + q 
+            else:
+                angles = np.arange( 0, max_angle * -1 , da  ) * -1 + q 
+            n      = angles.size
+            
+            # Draw arc
+            pts = np.zeros((n,3))
+            for i , a in enumerate( angles ):
+                pts[i,:] = [ r * np.cos(a) - 2.0, r * np.sin(a) , 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            # Draw Arrow
+            c = np.cos( max_angle + q )
+            s = np.sin( max_angle + q )
+            
+            pts = np.zeros((3,3))
+            pts[1,:] = [ r * c - 2.0 , r * s , 0 ]
+            if f_pos:
+                pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
+            else:
+                pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+        else:
+            
+            pts = np.zeros((3,3))
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+        # Second pendulum
+        
+        # Torque
+        f         = u[1] # torque amplitude
+        f_pos     = ( f > 0 )
+        q         = x[1] - np.pi / 2  # rigid link angle
+        max_angle = f * ( np.pi * 2 /3 / ( self.u_ub[1] ) )
+        r         = self.l1 / 5.0  # radius of arc
+        r1        = r/2            # length of arrows
+        da        = 0.2            # angle discretization
+        
+        
+        if abs(f) > (self.u_ub[1] * 0.05):
+        
+            if f_pos:
+                angles = np.arange( 0, max_angle , da  ) + q 
+            else:
+                angles = np.arange( 0, max_angle * -1 , da  ) * -1 + q 
+            n      = angles.size
+            
+            # Draw arc
+            pts = np.zeros((n,3))
+            for i , a in enumerate( angles ):
+                pts[i,:] = [ r * np.cos(a) + 2.0 , r * np.sin(a) , 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            # Draw Arrow
+            c = np.cos( max_angle + q )
+            s = np.sin( max_angle + q )
+            
+            pts = np.zeros((3,3))
+            pts[1,:] = [ r * c + 2.0 , r * s , 0 ]
+            if f_pos:
+                pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
+            else:
+                pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+        else:
+            
+            pts = np.zeros((3,3))
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+        
+                
+        return lines_pts , lines_style , lines_color
         
         
         

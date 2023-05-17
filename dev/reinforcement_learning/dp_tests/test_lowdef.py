@@ -10,38 +10,35 @@ import numpy as np
 
 from pyro.dynamic  import pendulum
 from pyro.control  import controller
-import dynamic_programming as dprog
-import discretizer
-import costfunction
+from pyro.analysis import costfunction
+from pyro.planning import dynamicprogramming 
+from pyro.planning import discretizer
 
 sys  = pendulum.SinglePendulum()
 
-sys.x_ub[0] = +2.1
-sys.x_lb[0] = -3.3
-sys.x_ub[1] = +4.0
+sys.x_ub[0] = +4.0
+sys.x_lb[0] = -4.0
+sys.x_ub[1] = +5.0
 sys.x_lb[1] = -5.0
 
-sys.u_ub[0] = +2.5
-sys.u_lb[0] = -2.5
+#sys.u_ub[0] = +5.0
+#sys.u_lb[0] = -5.0
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [401,401] , [31] )
+grid_sys = discretizer.GridDynamicSystem( sys , [41,21] , [3] , dt = 0.2 )
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
 qcf.xbar   = np.array([ -3.14 , 0 ]) # target
-qcf.R[0,0] = 10
-qcf.INF    = 300
-
-qcf.S[0,0] = 10.0
-qcf.S[1,1] = 10.0
+qcf.INF  = 300
+qcf.EPS  = 1.0
 
 # DP algo
 
-dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
+dp = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 
-dp.solve_bellman_equation( tol = 0.1 )
+dp.solve_bellman_equation( tol = 1.0 )
 
 dp.plot_cost2go()
 dp.plot_policy()

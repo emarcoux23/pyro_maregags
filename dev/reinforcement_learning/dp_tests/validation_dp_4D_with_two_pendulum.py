@@ -3,6 +3,8 @@
 """
 Created on Sun Oct 16 22:27:47 2022
 
+Note: Is this exemple working or a work in progress???
+
 @author: alex
 """
 
@@ -10,9 +12,9 @@ import numpy as np
 
 from pyro.dynamic  import pendulum
 from pyro.control  import controller
-import dynamic_programming as dprog
-import discretizer
-import costfunction
+from pyro.analysis import costfunction
+from pyro.planning import dynamicprogramming 
+from pyro.planning import discretizer
 
 sys  = pendulum.TwoIndependentSinglePendulum()
 
@@ -31,9 +33,8 @@ qcf.EPS  = 2.0
 
 
 # DP algo
-#dp = dprog.DynamicProgramming( grid_sys, qcf )
-dp = dprog.DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
-#dp = dprog.DynamicProgrammingFast2DGrid(grid_sys, qcf)
+dp = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
+#dp = dynamicprogramming .DynamicProgrammingFast2DGrid(grid_sys, qcf)
 
 
 #dp.interpol_method = 'nearest' #12 sec
@@ -41,26 +42,16 @@ dp = dprog.DynamicProgrammingWithLookUpTable2( grid_sys, qcf)
 #dp.interpol_method =  'linear' #
 
 #dp.plot_dynamic_cost2go = False
-dp.compute_steps(1,True)
-dp.compute_steps(60)
-dp.save_latest('test4d_2')
+#dp.compute_steps(1,True)
+dp.compute_steps(80)
+#dp.save_latest('test4d_2')
 
+ctl = dp.get_lookup_table_controller()
 
-grid_sys.plot_grid_value( dp.J_next )
+cl_sys = ctl + sys
 
-ctl = dprog.LookUpTableController( grid_sys , dp.pi )
-
-#ctl.plot_control_law( sys = sys , n = 100)
-
-
-#asign controller
-cl_sys = controller.ClosedLoopSystem( sys , ctl )
-
-##############################################################################
-
-# Simulation and animation
-cl_sys.x0   = np.array([0,0.1,0,0.1])
-cl_sys.compute_trajectory( 10, 10001, 'euler')
+cl_sys.x0   = np.array([-0.5,0.1,0,0])
+cl_sys.compute_trajectory( 30, 10001, 'euler')
 cl_sys.plot_trajectory('xu')
-cl_sys.plot_phase_plane_trajectory()
 cl_sys.animate_simulation()
+
