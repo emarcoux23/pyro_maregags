@@ -350,7 +350,7 @@ class MountainCar( manipulator.Manipulator ):
         theta = np.arctan( self.dz_dx( xcg ) ) 
         s = np.sin( theta )
         c = np.cos( theta )
-        l = self.width * u[0] * 5.0 / ( self.u_ub[0] - self.u_lb[0] ) 
+        l = self.width * u[0] * 5.0 * ( self.u_ub[0] - self.u_lb[0] ) 
         h = l * 0.25
         
         pts      = np.zeros(( 5 , 3 ))
@@ -385,7 +385,7 @@ if __name__ == "__main__":
     sys.x0[0] = -1.0
     sys.x0[1] = -0.5
     
-    sys.ubar[0] = 1.0
+    sys.ubar[0] = 20.0
     
     def t2u(t):
         return np.array([np.sin(5.0*t)]) * 1.0
