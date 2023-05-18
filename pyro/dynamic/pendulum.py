@@ -629,9 +629,154 @@ class DoublePendulum( mechanical.MechanicalSystem ):
         
                 
         return lines_pts , lines_style , lines_color
+
+
+
+
+##############################################################################
+        
+class Acrobot( DoublePendulum ):
+    """ 
+    Double pendulum with a single motor at the elbow
+
+    """
+    
+    ############################
+    def __init__(self):
+        """ """
+               
+        # initialize standard params
+        mechanical.MechanicalSystem.__init__(self, dof=2, actuators=1)
+        
+        self.name = 'Acrobot'
+        
+        self.input_label[0] = 'tau'
+        self.input_units[0] = '[Nm]'
+        
+        self.u_lb[0] = -10
+        self.u_ub[0] = +10
+        
+        # params
+        
+        self.l1  = 1 
+        self.l2  = 1
+        self.lc1 = 1
+        self.lc2 = 1
+        
+        self.m1 = 1
+        self.I1 = 0
+        self.m2 = 1
+        self.I2 = 0
+        
+        self.gravity = 9.81
+        
+        self.d1 = 0
+        self.d2 = 0
+        
+        self.l_domain = 3
     
     
+    ###########################################################################
+    def B(self, q ):
+        """ 
+        Actuator Matrix  : dof x m
+        """
+        
+        B = np.array([[0],[1]])
+        
+        return B
     
+        
+    ###########################################################################
+    # Graphical output
+    ###########################################################################
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        show torques as a rotating arrow around the joint
+        
+        """
+        
+        lines_pts   = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+        
+        r          = self.l1 / 5.0  # radius of arc
+        r1         = r/2            # length of arrows
+        da         = 0.2            # angle discretization
+        
+        q1         = -x[0] +  np.pi /2     # rigid link angle
+            
+        
+        # Torque 2
+        x2         = self.l1 * np.sin( -q1 + np.pi /2 )
+        y2         = self.l1 * np.cos( -q1 + np.pi /2)
+        f2         = -u[0] # torque 2 amplitude
+        f2_pos     = ( f2 > 0 )
+        q12        = - x[0] - x[1] +  np.pi /2  # rigid link angle
+        max_angle2 = f2 * ( np.pi * 2 /3 / ( self.u_ub[0] ) )
+        
+        
+        if abs(f2) > (self.u_ub[0] * 0.05):
+        
+            if f2_pos:
+                angles = np.arange( 0, max_angle2 , da  ) + q12 
+            else:
+                angles = np.arange( 0, max_angle2 * -1 , da  ) * -1 + q12 
+            n      = angles.size
+            
+            # Draw arc
+            pts = np.zeros((n,3))
+            for i , a in enumerate( angles ):
+                pts[i,:] = [ r * np.cos(a) + x2 , r * np.sin(a) + y2 , 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-' )
+            lines_color.append( 'r' )
+            
+            # Draw Arrow
+            a = max_angle2 + q12 
+            c = np.cos( a )
+            s = np.sin( a )
+            
+            pts = np.zeros((3,3))
+    
+            pts[1,:] =  [ r * c + x2 , r * s + y2 , 0 ]
+            if f2_pos:
+                pts[0,:] = pts[1,:] + [ -r1/2*c+r1/2*s , -r1/2*s-r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c+r1/2*s , +r1/2*s-r1/2*c, 0 ]
+            else:
+                pts[0,:] = pts[1,:] + [ -r1/2*c-r1/2*s , -r1/2*s+r1/2*c, 0 ]
+                pts[2,:] = pts[1,:] + [ +r1/2*c-r1/2*s , +r1/2*s+r1/2*c, 0 ]
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+        else:
+            
+            pts = np.zeros((3,3))
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+            lines_pts.append( pts )
+            lines_style.append( '-')
+            lines_color.append( 'r' )
+            
+        
+                
+        return lines_pts , lines_style , lines_color
+    
+
+    
+
+
+###############################################################################
+# Two independent Pendulum
 ###############################################################################
 
 class TwoIndependentSinglePendulum( mechanical.MechanicalSystem ):
@@ -961,15 +1106,31 @@ if __name__ == "__main__":
     
     #sys = SinglePendulum()
     
-    sys = TwoIndependentSinglePendulum()
+    if False:
     
-    def t2u(t):
-        return np.array([ t + sys.u_lb[0] , t + sys.u_lb[1]])
-    
-    sys.t2u   = t2u
-    sys.ubar[0] = 2
-    sys.ubar[1] = 1
-    sys.x0[0] = 3.14
-    sys.compute_trajectory( 10 )
-    sys.plot_trajectory('xu')
-    sys.animate_simulation()
+        sys = TwoIndependentSinglePendulum()
+        
+        def t2u(t):
+            return np.array([ t + sys.u_lb[0] , t + sys.u_lb[1]])
+        
+        sys.t2u   = t2u
+        sys.ubar[0] = 2
+        sys.ubar[1] = 1
+        sys.x0[0] = 3.14
+        sys.compute_trajectory( 10 )
+        sys.plot_trajectory('xu')
+        sys.animate_simulation()
+        
+    if True:
+        
+        sys = Acrobot()
+        
+        def t2u(t):
+            return np.array([ t -2 ])
+        
+        sys.t2u   = t2u
+        sys.x0[0] = 3.14
+        sys.compute_trajectory( 10 )
+        sys.plot_trajectory('xu')
+        sys.animate_simulation()
+        
