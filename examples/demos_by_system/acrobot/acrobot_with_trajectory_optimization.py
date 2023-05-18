@@ -16,25 +16,32 @@ from pyro.planning.randomtree             import RRT
 sys = Acrobot()
 
 #Max/Min torque
-sys.u_ub[0] = +30
-sys.u_lb[0] = -30
+sys.u_ub[0] = +50
+sys.u_lb[0] = -50
 
 # RRT
 
 x_start = np.array([-3.14,0,0,0])
 x_goal  = np.array([0,0,0,0])
 
-rrt = RRT( sys)
+rrt = RRT( sys )
     
-rrt.u_options = [ sys.u_ub , sys.u_lb ]
+#rrt.u_options = [ sys.u_ub , sys.u_lb ]
+t = 20.0
+
+rrt.u_options = [
+        np.array([+t]),
+        np.array([-t]),
+        np.array([0.0])
+        ]
 
 rrt.x_start = x_start
 rrt.x_goal  = x_goal
 
 rrt.goal_radius          = 1.5
 rrt.dt                   = 0.1
-rrt.max_nodes            = 10000
-rrt.max_solution_time    = 3.0
+rrt.max_nodes            = 2000
+rrt.max_solution_time    = 10.0
 rrt.max_distance_compute = 1000
 rrt.dyna_plot            = False
 
