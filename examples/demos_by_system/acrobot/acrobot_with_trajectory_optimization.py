@@ -47,7 +47,11 @@ rrt.dyna_plot            = False
 
 rrt.find_path_to_goal()
 
-planner = DirectCollocationTrajectoryOptimisation( sys , 0.1 , 20 )
+tf = rrt.traj.t[-1]
+n  = 30
+dt = tf / n
+
+planner = DirectCollocationTrajectoryOptimisation( sys , dt , n )
 
 planner.x_start = x_start
 planner.x_goal  = x_goal
