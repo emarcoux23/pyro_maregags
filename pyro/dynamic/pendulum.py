@@ -62,6 +62,9 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         self.gravity  = 9.81
         self.d1       = 0
         
+        # graphic
+        self.l_domain = 5.0
+        
         
     ##############################
     def trig(self, q ):
@@ -155,7 +158,7 @@ class SinglePendulum( mechanical.MechanicalSystem ):
     def forward_kinematic_domain(self, q ):
         """ 
         """
-        l = 5
+        l = self.l_domain
         
         domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
                 

@@ -111,9 +111,8 @@ class Rocket( mechanical.MechanicalSystemWithPositionInputs ):
         
         delta = u[1]
         
-        # TODO PLACE HOLDER
         B[0,0] = -np.sin( q[2] + delta )
-        B[1,0] = np.cos( q[2] + delta)
+        B[1,0] =  np.cos( q[2] + delta)
         B[2,0] = - self.ycg * np.sin( delta )
         
         return B
