@@ -37,7 +37,7 @@ t_max  = t_max_star * mgl
 q      = q_star * mgl
 theta  = theta_star
 dtheta = dtheta_star * omega
-J_max  = J_max_star * mgl**2 / omega
+J_max  = 200
 J_min  = J_min_star * mgl**2 / omega
 
 # kinematic
