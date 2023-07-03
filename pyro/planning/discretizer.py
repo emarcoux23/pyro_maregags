@@ -222,8 +222,6 @@ class GridDynamicSystem:
                         
         elif self.sys.n == 4:
             
-            # NOT yet validated!!!
-            
             for i in range(self.x_grid_dim[0]):
                 for j in range(self.x_grid_dim[1]):
                     for k in range(self.x_grid_dim[2]):
@@ -406,7 +404,45 @@ class GridDynamicSystem:
                     self.s_next_table[ node_id ,  action_id ] = s_next
                     
                     
-                        
+    ##############################
+    ### Save load
+    ##############################
+    
+    ##############################
+    def save_lookup_tables(self, name = 'grid' ):
+        """  
+        
+        """
+        
+        np.savez( name, 
+                 x_next_table = self.x_next_table ,
+                 x_next_isok  = self.x_next_isok ,
+                 action_isok  = self.action_isok   )
+        
+        
+        
+    ##############################
+    def load_lookup_tables(self, name = 'grid' ):
+        """  
+        
+        """
+        
+        try:
+            
+            data = np.load( name + '.npz' )
+            
+        except:
+            
+            print('\n File not found ')
+            
+        else:
+            
+            self.x_next_table = data['x_next_table']
+            self.x_next_isok  = data['x_next_isok']
+            self.action_isok  = data['action_isok']
+        
+    
+    
                         
     
     ##############################

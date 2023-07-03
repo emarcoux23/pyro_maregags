@@ -6,27 +6,31 @@ Created on Mon Nov 12 20:28:17 2018
 """
 ##############################################################################
 import numpy as np
+import matplotlib.pyplot as plt
 ##############################################################################
 from pyro.dynamic  import pendulum
 from pyro.planning import discretizer
 from pyro.analysis import costfunction
 from pyro.planning import dynamicprogramming
+from pyro.analysis import graphical
 ##############################################################################
-
-sys  = pendulum.InvertedPendulum()
 
 
 m = 1
 g = 10
 l = 1
 
-t_max_star  = 0.35
+t_max_star  = 0.5
 q_star      = 0.1
+
+case_name = 'test'
+
+    
+sys  = pendulum.InvertedPendulum()
 
 theta_star  = 2.0 * np.pi
 dtheta_star = 1.0 * np.pi
 time_star   = 2.0 * np.pi * 10.0
-
 
 omega = np.sqrt( ( g / l  ) )
 mgl   = m * g * l
@@ -37,8 +41,8 @@ theta  = theta_star
 dtheta = dtheta_star * omega
 time   = time_star / omega
 J_max  = mgl**2 / omega * time_star * ( ( q_star * theta_star )**2 + t_max_star**2 )
-J_min  = J_max / 4000
 
+print('\n m=',m,' g=',g,' l=',l,' t_max=', t_max, ' q=', q)
 
 # kinematic
 sys.lc1 = l
@@ -61,7 +65,13 @@ sys.x_lb = np.array([ - theta , - dtheta ])
 dt = 0.05
 
 # Discrete world 
-grid_sys = discretizer.GridDynamicSystem( sys , [301,301] , [21] , dt )
+grid_sys = discretizer.GridDynamicSystem( sys , [301,301] , [21] , dt , True )
+grid_sys.save_lookup_tables('301_21')
+
+#grid_sys = discretizer.GridDynamicSystem( sys , [301,301] , [21] , dt , False )
+#grid_sys.load_lookup_tables('301_21')
+
+
 
 # Cost Function
 qcf = costfunction.QuadraticCostFunction.from_sys(sys)
@@ -89,16 +99,79 @@ dp.compute_steps( steps )
 #dp.solve_bellman_equation( tol = J_min )
 
 
+grid_sys.fontsize = 10
+qcf.INF  = 0.1 * J_max
 dp.clean_infeasible_set()
-dp.plot_cost2go_3D()
+dp.plot_cost2go()
 dp.plot_policy()
+dp.cost2go_fig[0].savefig( case_name + '_cost2go.pdf')
+dp.policy_fig[0].savefig( case_name + '_policy.pdf')
 
 ctl = dp.get_lookup_table_controller()
 
 # Simulation
 cl_sys = ctl + sys
 cl_sys.x0   = np.array([-3.14, 0.])
-cl_sys.compute_trajectory( 10, 10001, 'euler')
-cl_sys.plot_trajectory('xu')
-cl_sys.plot_phase_plane_trajectory()
+cl_sys.compute_trajectory( 6 , 6001, 'euler')
+#cl_sys.plot_trajectory('xu')
+#cl_sys.plot_phase_plane_trajectory()
 #cl_sys.animate_simulation()
+
+tp = graphical.TrajectoryPlotter( sys )
+tp.fontsize = 10
+tp.plot( cl_sys.traj , 'xu')
+tp.fig.savefig( case_name + '_traj.pdf')
+
+
+
+##################################
+# Dimensionless policy plot
+##################################
+
+fig = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
+fig.canvas.manager.set_window_title( 'dimentionless policy' )
+ax  = fig.add_subplot(1, 1, 1)
+
+xname = r'$\theta^*$'#self.sys.state_label[x] #+ ' ' + self.sys.state_units[x]
+yname = r'$\dot{\theta}^* = \frac{\dot{\theta}}{\omega}$'#self.sys.state_label[y] #+ ' ' + self.sys.state_units[y]
+zname = r'$\tau^*=\frac{\tau}{mgl}$'
+
+ax.set_ylabel(yname, fontsize=10)
+ax.set_xlabel(xname, fontsize=10)
+
+x_level = grid_sys.x_level[ 0 ] * 1
+y_level = grid_sys.x_level[ 1 ] * (1 / omega)
+
+##################################
+### Create grid of data and plot
+#################################
+
+u = grid_sys.get_input_from_policy( dp.pi , 0 )
+
+u2 =  u * (1/mgl)
+
+J_grid_nd = grid_sys.get_grid_from_array( u2 ) 
+
+J_grid_2d = grid_sys.get_2D_slice_of_grid( J_grid_nd , 0 , 1 )
+
+mesh = ax.pcolormesh( x_level, y_level, J_grid_2d.T, 
+               shading='gouraud' , cmap = 'bwr') #, norm = colors.LogNorm()
+
+#mesh.set_clim(vmin=jmin, vmax=jmax)
+
+##################################
+# Figure param
+##################################
+
+ax.tick_params( labelsize = 10 )
+ax.grid(True)
+
+cbar = fig.colorbar( mesh )
+
+cbar.set_label(zname, fontsize=10 , rotation=90)
+
+fig.tight_layout()
+fig.show()
+fig.savefig( case_name + '_dimpolicy.pdf')
+    
+    
