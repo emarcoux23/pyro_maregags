@@ -278,7 +278,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , re
             u[i] = ctl.c( xi, ri, ti) * (1/mgl)
             
     
-        rax.plot( x , u , label= r'$t_{max}^* =$ %f' % t_max_star )
+        rax.plot( x , u , label= r'$t_{max}^* =$ %0.1f' % t_max_star )
         rax.set_xlim([ x_min, x_max ])
         rax.set_xlabel( xname, fontsize=10 )
         rax.grid(True)
@@ -308,12 +308,14 @@ def compute_regime_figure( res = 'mid'):
     # case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.1 , case_name = 't9', rax = rax, res = res)
     # case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.1 , case_name = 't10', rax = rax, res = res)
     
-    rax.legend()
+    rax.legend( loc = 'upper right' )
     rfig.tight_layout()
     rfig.show()
     rfig.savefig('regime.pdf')
     rfig.savefig('regime.png')
     rfig.savefig('regime.jpg')
+    
+    return (rfig, rax)
 
 
 
@@ -323,18 +325,17 @@ def compute_regime_figure( res = 'mid'):
 
 res = 'low'
 
-case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1', res = res)
-case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2', res = res)
-case( m=2 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c3', res = res)
-case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c4', res = res)
-case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c5', res = res)
-case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c6', res = res)
-case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c7', res = res)
-case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8', res = res)
-case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9', res = res)
+# case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1', res = res)
+# case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2', res = res)
+# case( m=2 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c3', res = res)
+# case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c4', res = res)
+# case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c5', res = res)
+# case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c6', res = res)
+# case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c7', res = res)
+# case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8', res = res)
+# case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9', res = res)
 
 
-
-compute_regime_figure( res = 'low' )
+fig, ax = compute_regime_figure( res = 'low' )
     
     
