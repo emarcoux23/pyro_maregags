@@ -94,12 +94,67 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     grid_sys.fontsize = 10
     qcf.INF  = 0.1 * J_max
     dp.clean_infeasible_set()
-    dp.plot_cost2go()
-    dp.plot_policy()
-    dp.cost2go_fig[0].savefig( case_name + '_cost2go.pdf')
-    dp.policy_fig[0].savefig( case_name + '_policy.pdf')
+    #dp.plot_cost2go()
+    #dp.plot_policy()
+    #dp.cost2go_fig[0].savefig( case_name + '_cost2go.pdf')
+    #dp.policy_fig[0].savefig( case_name + '_policy.pdf')
+    
+    ##################################
+    # Dimensional policy plot
+    ##################################
+
+    fig = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
+    fig.canvas.manager.set_window_title( 'dimentionless policy' )
+    ax  = fig.add_subplot(1, 1, 1)
+
+    xname = r'$\theta  \; [rad]$'#self.sys.state_label[x] #+ ' ' + self.sys.state_units[x]
+    yname = r'$\dot{\theta} \; [rad/sec]$'#self.sys.state_label[y] #+ ' ' + self.sys.state_units[y]
+    zname = r'$\tau \; [Nm]$'
+    sys.state_label[0] = r'$\theta$'
+    sys.state_label[1] = r'$\dot{\theta}$'
+    sys.input_label[0] = r'$\tau$'
+    
+    xrange = 2.0 * np.pi
+    yrange = np.pi * np.sqrt( 10 / 1. )
+    zrange = 20.
+
+    ax.set_ylabel(yname, fontsize=10)
+    ax.set_xlabel(xname, fontsize=10)
+
+    x_level = grid_sys.x_level[ 0 ] 
+    y_level = grid_sys.x_level[ 1 ] 
+
+
+    u = grid_sys.get_input_from_policy( dp.pi , 0 )
+
+    u2 =  u 
+
+    J_grid_nd = grid_sys.get_grid_from_array( u2 ) 
+
+    J_grid_2d = grid_sys.get_2D_slice_of_grid( J_grid_nd , 0 , 1 )
+
+    mesh = ax.pcolormesh( x_level, y_level, J_grid_2d.T, 
+                   shading='gouraud' , cmap = 'bwr', vmin = -zrange, vmax = zrange ) #, norm = colors.LogNorm()
+
+    ax.tick_params( labelsize = 10 )
+    ax.grid(True)
+    ax.set_ylim( -yrange, +yrange)
+    ax.set_xlim( -xrange, xrange)
+
+    cbar = fig.colorbar( mesh )
+
+    cbar.set_label(zname, fontsize=10 , rotation=90)
+
+    fig.tight_layout()
+    fig.show()
+    fig.savefig( case_name + '_policy.pdf')
 
     ctl = dp.get_lookup_table_controller()
+    
+    
+    ##################################
+    # Trajectory plot
+    ##################################
 
     # Simulation
     cl_sys = ctl + sys
@@ -112,9 +167,14 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     tp = graphical.TrajectoryPlotter( sys )
     tp.fontsize = 10
     tp.plot( cl_sys.traj , 'xu')
+    #tp.plots[0].set_ylim([-xrange, xrange])
+    #tp.plots[1].set_ylim([-yrange, yrange])
+    tp.plots[1].set_ylim([-5.5, 5.5])
+    tp.plots[2].set_ylim([-zrange, zrange])
     tp.fig.savefig( case_name + '_traj.pdf')
-
-
+    
+    
+    
 
     ##################################
     # Dimensionless policy plot
@@ -134,9 +194,6 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     x_level = grid_sys.x_level[ 0 ] * 1
     y_level = grid_sys.x_level[ 1 ] * (1 / omega)
 
-    ##################################
-    ### Create grid of data and plot
-    #################################
 
     u = grid_sys.get_input_from_policy( dp.pi , 0 )
 
@@ -151,9 +208,6 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
 
     #mesh.set_clim(vmin=jmin, vmax=jmax)
 
-    ##################################
-    # Figure param
-    ##################################
 
     ax.tick_params( labelsize = 10 )
     ax.grid(True)
@@ -169,12 +223,27 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     
 
 
-#case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1')
-#case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2')
-#case( m=2 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c3')
+# case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1')
+# case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2')
+# case( m=2 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c3')
 case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c4')
 case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c5')
 case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c6')
-#case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c7')
-#case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8')
-#case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9')
+case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c7')
+case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8')
+case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9')
+
+#case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c10')
+#case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 'c11')
+#case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 'c12')
+
+# case( m=1 , g=10 , l=1 , t_max_star=0.2 , q_star= 0.05 , case_name = 't1')
+# case( m=1 , g=10 , l=1 , t_max_star=0.3 , q_star= 0.05 , case_name = 't2')
+# case( m=1 , g=10 , l=1 , t_max_star=0.4 , q_star= 0.05 , case_name = 't3')
+# case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't4')
+# case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.05 , case_name = 't5')
+# case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 't6')
+# case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 't7')
+# case( m=1 , g=10 , l=1 , t_max_star=1.5 , q_star= 0.05 , case_name = 't8')
+# case( m=1 , g=10 , l=1 , t_max_star=2.0 , q_star= 0.05 , case_name = 't9')
+# case( m=1 , g=10 , l=1 , t_max_star=5.0 , q_star= 0.05 , case_name = 't10')
