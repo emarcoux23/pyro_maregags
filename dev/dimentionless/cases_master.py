@@ -16,25 +16,34 @@ from pyro.analysis import graphical
 ##############################################################################
 
 
-def case( m , g , l , t_max_star , q_star , case_name = 'test '):
+def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , res = 'reg'):
     
-    sys  = pendulum.InvertedPendulum()
-
+    # Additionnal fixed domain dimentionless parameters
     theta_star  = 2.0 * np.pi
     dtheta_star = 1.0 * np.pi
     time_star   = 2.0 * np.pi * 10.0
-
+    
+    # Combined system parameters
     omega = np.sqrt( ( g / l  ) )
     mgl   = m * g * l
-
+    
+    # Dimentional parameters
     t_max  = t_max_star * mgl
     q      = q_star * mgl
     theta  = theta_star
     dtheta = dtheta_star * omega
     time   = time_star / omega
     J_max  = mgl**2 / omega * time_star * ( ( q_star * theta_star )**2 + t_max_star**2 )
-
-    print('\n m=',m,' g=',g,' l=',l,' t_max=', t_max, ' q=', q)
+    
+    print('\n\nCase :' + case_name )
+    print('----------------------------------------------------')
+    print(' m=',m,' g=',g,' l=',l,' t_max=', t_max, ' q=', q)
+    
+    ################################
+    # Dynamic system definition
+    ################################
+    
+    sys  = pendulum.InvertedPendulum()
 
     # kinematic
     sys.lc1 = l
@@ -53,19 +62,39 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
 
     sys.x_ub = np.array([ + theta , + dtheta ])
     sys.x_lb = np.array([ - theta , - dtheta ])
+    
+    ################################
+    # Discritized grid
+    ################################
+    
+    if res == 'low' :
 
-    dt = 0.05
-
-    # Discrete world 
-    grid_sys = discretizer.GridDynamicSystem( sys , [301,301] , [21] , dt , True )
+        dt = 0.1
+        nx = 101
+        nu = 11
+        
+    elif res == 'hi' :
+        
+        dt = 0.05
+        nx = 501
+        nu = 101
+        
+    else:
+        
+        dt = 0.05
+        nx = 301
+        nu = 21
+            
+    grid_sys = discretizer.GridDynamicSystem( sys , [nx,nx] , [nu] , dt , True )
     #grid_sys.save_lookup_tables('301_21')
 
     #grid_sys = discretizer.GridDynamicSystem( sys , [301,301] , [21] , dt , False )
     #grid_sys.load_lookup_tables('301_21')
 
+    ################################
+    # Cost function
+    ################################
 
-
-    # Cost Function
     qcf = costfunction.QuadraticCostFunction.from_sys(sys)
 
     qcf.xbar = np.array([ 0 , 0 ]) # target
@@ -81,7 +110,10 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     qcf.S[1,1] = 0.0
 
 
-    # DP algo
+    ################################
+    # Cost function
+    ################################
+    
     dp = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys, qcf )
 
 
@@ -94,6 +126,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     grid_sys.fontsize = 10
     qcf.INF  = 0.1 * J_max
     dp.clean_infeasible_set()
+    
     #dp.plot_cost2go()
     #dp.plot_policy()
     #dp.cost2go_fig[0].savefig( case_name + '_cost2go.pdf')
@@ -148,13 +181,15 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     fig.tight_layout()
     fig.show()
     fig.savefig( case_name + '_policy.pdf')
+    fig.savefig( case_name + '_policy.png')
+    fig.savefig( case_name + '_policy.jpg')
+    
 
-    ctl = dp.get_lookup_table_controller()
-    
-    
     ##################################
     # Trajectory plot
     ##################################
+    
+    ctl = dp.get_lookup_table_controller()
 
     # Simulation
     cl_sys = ctl + sys
@@ -172,8 +207,8 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     tp.plots[1].set_ylim([-5.5, 5.5])
     tp.plots[2].set_ylim([-zrange, zrange])
     tp.fig.savefig( case_name + '_traj.pdf')
-    
-    
+    tp.fig.savefig( case_name + '_traj.png')
+    tp.fig.savefig( case_name + '_traj.jpg')
     
 
     ##################################
@@ -219,31 +254,87 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test '):
     fig.tight_layout()
     fig.show()
     fig.savefig( case_name + '_dimpolicy.pdf')
+    fig.savefig( case_name + '_dimpolicy.png')
+    fig.savefig( case_name + '_dimpolicy.jpg')
     
     
+    if rax is not None:
+    
+    ###############################
+    # 2D policy regime figure
+    ###############################
+    
+        n = 101
+        x_min = -5.0
+        x_max = +5.0
+    
+        x = np.linspace( x_min, x_max, n) 
+        u = np.zeros(n)
+    
+        for i in range(n):
+            ri = 0
+            xi = np.array([ x[i] , 0.0 ])
+            ti = 0
+            u[i] = ctl.c( xi, ri, ti) * (1/mgl)
+            
+    
+        rax.plot( x , u , label= r'$t_{max}^* =$ %f' % t_max_star )
+        rax.set_xlim([ x_min, x_max ])
+        rax.set_xlabel( xname, fontsize=10 )
+        rax.grid(True)
+        rax.tick_params( labelsize = 10 )
+        rax.set_ylabel( zname, fontsize=10)
+    
+    
+    
+
+def compute_regime_figure( res = 'mid'):
+
+    rfig = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
+    rax  = rfig.add_subplot(1, 1, 1)
+    
+    #res = 'low'
+    #res = 'mid'
+    #res = 'hi'
+    
+    case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't1', rax = rax, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 't2', rax = rax, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=1.5 , q_star= 0.05 , case_name = 't3', rax = rax, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=2.0 , q_star= 0.05 , case_name = 't4', rax = rax, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=2.5 , q_star= 0.05 , case_name = 't5', rax = rax, res = res)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.1 , case_name = 't6', rax = rax, res = res)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.7 , q_star= 0.1 , case_name = 't7', rax = rax, res = res)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.1 , case_name = 't8', rax = rax, res = res)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.1 , case_name = 't9', rax = rax, res = res)
+    # case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.1 , case_name = 't10', rax = rax, res = res)
+    
+    rax.legend()
+    rfig.tight_layout()
+    rfig.show()
+    rfig.savefig('regime.pdf')
+    rfig.savefig('regime.png')
+    rfig.savefig('regime.jpg')
 
 
-# case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1')
-# case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2')
-# case( m=2 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c3')
-case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c4')
-case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c5')
-case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c6')
-case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c7')
-case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8')
-case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9')
 
-#case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c10')
-#case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 'c11')
-#case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 'c12')
+####################################
+### Main
+####################################
 
-# case( m=1 , g=10 , l=1 , t_max_star=0.2 , q_star= 0.05 , case_name = 't1')
-# case( m=1 , g=10 , l=1 , t_max_star=0.3 , q_star= 0.05 , case_name = 't2')
-# case( m=1 , g=10 , l=1 , t_max_star=0.4 , q_star= 0.05 , case_name = 't3')
-# case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't4')
-# case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.05 , case_name = 't5')
-# case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 't6')
-# case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 't7')
-# case( m=1 , g=10 , l=1 , t_max_star=1.5 , q_star= 0.05 , case_name = 't8')
-# case( m=1 , g=10 , l=1 , t_max_star=2.0 , q_star= 0.05 , case_name = 't9')
-# case( m=1 , g=10 , l=1 , t_max_star=5.0 , q_star= 0.05 , case_name = 't10')
+res = 'low'
+
+case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1', res = res)
+case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2', res = res)
+case( m=2 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c3', res = res)
+case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c4', res = res)
+case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c5', res = res)
+case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 'c6', res = res)
+case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c7', res = res)
+case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8', res = res)
+case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9', res = res)
+
+
+
+compute_regime_figure( res = 'low' )
+    
+    
