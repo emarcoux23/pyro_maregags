@@ -16,12 +16,12 @@ from pyro.analysis import graphical
 ##############################################################################
 
 
-def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , rax2 = None, res = 'reg'):
+def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , rax2 = None, res = 'reg', legend = 0):
     
     # Additionnal fixed domain dimentionless parameters
     theta_star  = 2.0 * np.pi
     dtheta_star = 1.0 * np.pi
-    time_star   = 2.0 * np.pi * 10.0
+    time_star   = 2.0 * np.pi * 20.0
     
     # Combined system parameters
     omega = np.sqrt( ( g / l  ) )
@@ -84,6 +84,12 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
         dt = 0.025
         nx = 501
         nu = 101
+        
+    elif res == 'test' :
+        
+        dt = 0.5
+        nx = 21
+        nu = 3
         
     else:
         
@@ -271,8 +277,8 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     ###############################
     
         n = 101
-        x_min = -5.0
-        x_max = +5.0
+        x_min = - theta_star - 0.1
+        x_max = + theta_star + 0.1
     
         x = np.linspace( x_min, x_max, n) 
         u = np.zeros(n)
@@ -282,9 +288,15 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
             xi = np.array([ x[i] , 0.0 ])
             ti = 0
             u[i] = ctl.c( xi, ri, ti) * (1/mgl)
+        
+        
+        if legend == 1:
+            rax.plot( x , u , label= r'$\tau_{max}^* =$ %0.1f' % t_max_star )
+        elif legend == 2:
+            rax.plot( x , u , label= r'$q^* =$ %0.2f' % q_star )
+        else:
+            rax.plot( x , u )
             
-    
-        rax.plot( x , u , label= r'$t_{max}^* =$ %0.1f' % t_max_star )
         rax.set_xlim([ x_min, x_max ])
         rax.set_xlabel( xname, fontsize=10 )
         rax.grid(True)
@@ -298,8 +310,8 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     ###############################
     
         n = 101
-        x_min = -3.0
-        x_max = +3.0
+        x_min = - dtheta_star - 0.1
+        x_max = + dtheta_star + 0.1
     
         x = np.linspace( x_min, x_max, n) 
         u = np.zeros(n)
@@ -311,7 +323,13 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
             u[i] = ctl.c( xi, ri, ti) * (1/mgl)
             
     
-        rax2.plot( x , u , label= r'$t_{max}^* =$ %0.1f' % t_max_star )
+        if legend == 1:
+            rax2.plot( x , u , label= r'$\tau_{max}^* =$ %0.1f' % t_max_star )
+        elif legend == 2:
+            rax2.plot( x , u , label= r'$q^* =$ %0.2f' % q_star )
+        else:
+            rax2.plot( x , u )
+            
         rax2.set_xlim([ x_min, x_max ])
         rax2.set_xlabel( yname, fontsize=10 )
         rax2.grid(True)
@@ -321,7 +339,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     
     
 
-def compute_regime_figure( res = 'mid'):
+def sensitivity( ts , qs , res = 'mid' , name = 'sensitivity' , legend = 1):
 
     rfig = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
     rax  = rfig.add_subplot(1, 1, 1)
@@ -329,35 +347,37 @@ def compute_regime_figure( res = 'mid'):
     rfig2 = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
     rax2  = rfig2.add_subplot(1, 1, 1)
     
-    #res = 'low'
-    #res = 'mid'
-    #res = 'hi'
+    n = ts.size
     
-    # case( m=1 , g=10 , l=1 , t_max_star=0.1 , q_star= 0.05 , case_name = 't1', rax = rax, rax2 = rax2, res = res)
-    # case( m=1 , g=10 , l=1 , t_max_star=0.2 , q_star= 0.05 , case_name = 't2', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.3 , q_star= 0.05 , case_name = 't3', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.4 , q_star= 0.05 , case_name = 't4', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't5', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.05 , case_name = 't6', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.7 , q_star= 0.05 , case_name = 't7', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 't8', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.05 , case_name = 't9', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.10 , q_star= 0.05 , case_name = 't10', rax = rax, rax2 = rax2, res = res)
+    for i in range(n):
+        
+        case( m=1 , g=10 , l=1 , t_max_star= ts[i] , q_star= qs[i] , case_name = 's' + str(i) , rax = rax, rax2 = rax2, res = res, legend = legend)
+    
+    
+    # case( m=1 , g=10 , l=1 , t_max_star=0.1 , q_star= 0.05 , case_name = 't1', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.2 , q_star= 0.05 , case_name = 't2', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.3 , q_star= 0.05 , case_name = 't3', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.4 , q_star= 0.05 , case_name = 't4', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't5', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.05 , case_name = 't6', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.7 , q_star= 0.05 , case_name = 't7', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 't8', rax = rax, rax2 = rax2, res = res, legend = 1)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.05 , case_name = 't9', rax = rax, rax2 = rax2, res = res, legend = 1)
     
     
     rax.legend( loc = 'upper right' )
     rfig.tight_layout()
     rfig.show()
-    rfig.savefig('regime.pdf')
-    rfig.savefig('regime.png')
-    rfig.savefig('regime.jpg')
+    rfig.savefig( name + '.pdf')
+    rfig.savefig( name + '.png')
+    rfig.savefig( name + '.jpg')
     
     rax2.legend( loc = 'upper right' )
     rfig2.tight_layout()
     rfig2.show()
-    rfig2.savefig('regime2.pdf')
-    rfig2.savefig('regime2.png')
-    rfig2.savefig('regime2.jpg')
+    rfig2.savefig( name + '2.pdf')
+    rfig2.savefig( name + '2.png')
+    rfig2.savefig( name + '2.jpg')
     
     return (rfig, rax, rfig2, rax2)
 
@@ -367,7 +387,7 @@ def compute_regime_figure( res = 'mid'):
 ### Main
 ####################################
 
-res = 'low'
+res = 'test'
 
 # case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1', res = res)
 # case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2', res = res)
@@ -379,7 +399,14 @@ res = 'low'
 # case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8', res = res)
 # case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9', res = res)
 
+ts = np.array([  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9])
+qs = np.array([  0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05])
 
-fig, ax, fig2, ax2 = compute_regime_figure( res = 'low' )
+fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 'sensitivity_q_cts', legend = 1)
+
+ts = np.array([  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5])
+qs = np.array([  0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09])
+
+fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 'sensitivity_tau_cts', legend = 2)
     
     
