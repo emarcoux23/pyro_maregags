@@ -16,7 +16,7 @@ from pyro.analysis import graphical
 ##############################################################################
 
 
-def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , res = 'reg'):
+def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , rax2 = None, res = 'reg'):
     
     # Additionnal fixed domain dimentionless parameters
     theta_star  = 2.0 * np.pi
@@ -72,10 +72,16 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , re
         dt = 0.1
         nx = 101
         nu = 11
+    
+    elif res == 'plus' :
+        
+        dt = 0.05
+        nx = 301
+        nu = 101
         
     elif res == 'hi' :
         
-        dt = 0.05
+        dt = 0.025
         nx = 501
         nu = 101
         
@@ -261,7 +267,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , re
     if rax is not None:
     
     ###############################
-    # 2D policy regime figure
+    # 2D policy regime figure (dtheta = 0 )
     ###############################
     
         n = 101
@@ -284,6 +290,33 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , re
         rax.grid(True)
         rax.tick_params( labelsize = 10 )
         rax.set_ylabel( zname, fontsize=10)
+        
+    if rax2 is not None:
+    
+    ###############################
+    # 2D policy regime figure (theta = -np.pi )
+    ###############################
+    
+        n = 101
+        x_min = -3.0
+        x_max = +3.0
+    
+        x = np.linspace( x_min, x_max, n) 
+        u = np.zeros(n)
+    
+        for i in range(n):
+            ri = 0
+            xi = np.array([ -np.pi , x[i] ])
+            ti = 0
+            u[i] = ctl.c( xi, ri, ti) * (1/mgl)
+            
+    
+        rax2.plot( x , u , label= r'$t_{max}^* =$ %0.1f' % t_max_star )
+        rax2.set_xlim([ x_min, x_max ])
+        rax2.set_xlabel( yname, fontsize=10 )
+        rax2.grid(True)
+        rax2.tick_params( labelsize = 10 )
+        rax2.set_ylabel( zname, fontsize=10)
     
     
     
@@ -293,20 +326,23 @@ def compute_regime_figure( res = 'mid'):
     rfig = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
     rax  = rfig.add_subplot(1, 1, 1)
     
+    rfig2 = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
+    rax2  = rfig2.add_subplot(1, 1, 1)
+    
     #res = 'low'
     #res = 'mid'
     #res = 'hi'
     
-    case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't1', rax = rax, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 't2', rax = rax, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=1.5 , q_star= 0.05 , case_name = 't3', rax = rax, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=2.0 , q_star= 0.05 , case_name = 't4', rax = rax, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=2.5 , q_star= 0.05 , case_name = 't5', rax = rax, res = res)
-    # case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.1 , case_name = 't6', rax = rax, res = res)
-    # case( m=1 , g=10 , l=1 , t_max_star=0.7 , q_star= 0.1 , case_name = 't7', rax = rax, res = res)
-    # case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.1 , case_name = 't8', rax = rax, res = res)
-    # case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.1 , case_name = 't9', rax = rax, res = res)
-    # case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.1 , case_name = 't10', rax = rax, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.1 , q_star= 0.05 , case_name = 't1', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.2 , q_star= 0.05 , case_name = 't2', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.3 , q_star= 0.05 , case_name = 't3', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.4 , q_star= 0.05 , case_name = 't4', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't5', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 't6', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=1.5 , q_star= 0.05 , case_name = 't7', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=2.0 , q_star= 0.05 , case_name = 't8', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=2.5 , q_star= 0.05 , case_name = 't9', rax = rax, rax2 = rax2, res = res)
+    
     
     rax.legend( loc = 'upper right' )
     rfig.tight_layout()
@@ -315,7 +351,14 @@ def compute_regime_figure( res = 'mid'):
     rfig.savefig('regime.png')
     rfig.savefig('regime.jpg')
     
-    return (rfig, rax)
+    rax2.legend( loc = 'upper right' )
+    rfig2.tight_layout()
+    rfig2.show()
+    rfig2.savefig('regime2.pdf')
+    rfig2.savefig('regime2.png')
+    rfig2.savefig('regime2.jpg')
+    
+    return (rfig, rax, rfig2, rax2)
 
 
 
@@ -336,6 +379,6 @@ res = 'low'
 # case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9', res = res)
 
 
-fig, ax = compute_regime_figure( res = 'low' )
+fig, ax, fig2, ax2 = compute_regime_figure( res = 'low' )
     
     
