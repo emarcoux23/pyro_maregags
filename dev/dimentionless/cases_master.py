@@ -333,15 +333,16 @@ def compute_regime_figure( res = 'mid'):
     #res = 'mid'
     #res = 'hi'
     
-    case( m=1 , g=10 , l=1 , t_max_star=0.1 , q_star= 0.05 , case_name = 't1', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.2 , q_star= 0.05 , case_name = 't2', rax = rax, rax2 = rax2, res = res)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.1 , q_star= 0.05 , case_name = 't1', rax = rax, rax2 = rax2, res = res)
+    # case( m=1 , g=10 , l=1 , t_max_star=0.2 , q_star= 0.05 , case_name = 't2', rax = rax, rax2 = rax2, res = res)
     case( m=1 , g=10 , l=1 , t_max_star=0.3 , q_star= 0.05 , case_name = 't3', rax = rax, rax2 = rax2, res = res)
     case( m=1 , g=10 , l=1 , t_max_star=0.4 , q_star= 0.05 , case_name = 't4', rax = rax, rax2 = rax2, res = res)
     case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.05 , case_name = 't5', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=1.0 , q_star= 0.05 , case_name = 't6', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=1.5 , q_star= 0.05 , case_name = 't7', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=2.0 , q_star= 0.05 , case_name = 't8', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=2.5 , q_star= 0.05 , case_name = 't9', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.05 , case_name = 't6', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.7 , q_star= 0.05 , case_name = 't7', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 't8', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.05 , case_name = 't9', rax = rax, rax2 = rax2, res = res)
+    case( m=1 , g=10 , l=1 , t_max_star=0.10 , q_star= 0.05 , case_name = 't10', rax = rax, rax2 = rax2, res = res)
     
     
     rax.legend( loc = 'upper right' )
