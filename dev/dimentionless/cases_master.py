@@ -351,7 +351,7 @@ def sensitivity( ts , qs , res = 'mid' , name = 'sensitivity' , legend = 1):
     
     for i in range(n):
         
-        case( m=1 , g=10 , l=1 , t_max_star= ts[i] , q_star= qs[i] , case_name = 's' + str(i) , rax = rax, rax2 = rax2, res = res, legend = legend)
+        case( m=1 , g=10 , l=1 , t_max_star= ts[i] , q_star= qs[i] , case_name = name + '_level_' + str(i+1) , rax = rax, rax2 = rax2, res = res, legend = legend)
     
     
     # case( m=1 , g=10 , l=1 , t_max_star=0.1 , q_star= 0.05 , case_name = 't1', rax = rax, rax2 = rax2, res = res, legend = 1)
