@@ -21,7 +21,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     # Additionnal fixed domain dimentionless parameters
     theta_star  = 2.0 * np.pi
     dtheta_star = 1.0 * np.pi
-    time_star   = 2.0 * np.pi * 10.0
+    time_star   = 2.0 * np.pi * 20.0
     
     # Combined system parameters
     omega = np.sqrt( ( g / l  ) )
@@ -284,7 +284,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
             u[i] = ctl.c( xi, ri, ti) * (1/mgl)
             
     
-        rax.plot( x , u , label= r'$t_{max}^* =$ %0.1f' % t_max_star )
+        rax.plot( x , u , label= r'$\tau_{max}^* =$ %0.1f' % t_max_star )
         rax.set_xlim([ x_min, x_max ])
         rax.set_xlabel( xname, fontsize=10 )
         rax.grid(True)
@@ -311,7 +311,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
             u[i] = ctl.c( xi, ri, ti) * (1/mgl)
             
     
-        rax2.plot( x , u , label= r'$t_{max}^* =$ %0.1f' % t_max_star )
+        rax2.plot( x , u , label= r'$\tau_{max}^* =$ %0.1f' % t_max_star )
         rax2.set_xlim([ x_min, x_max ])
         rax2.set_xlabel( yname, fontsize=10 )
         rax2.grid(True)
@@ -341,8 +341,8 @@ def compute_regime_figure( res = 'mid'):
     case( m=1 , g=10 , l=1 , t_max_star=0.6 , q_star= 0.05 , case_name = 't6', rax = rax, rax2 = rax2, res = res)
     case( m=1 , g=10 , l=1 , t_max_star=0.7 , q_star= 0.05 , case_name = 't7', rax = rax, rax2 = rax2, res = res)
     case( m=1 , g=10 , l=1 , t_max_star=0.8 , q_star= 0.05 , case_name = 't8', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.05 , case_name = 't9', rax = rax, rax2 = rax2, res = res)
-    case( m=1 , g=10 , l=1 , t_max_star=0.10 , q_star= 0.05 , case_name = 't10', rax = rax, rax2 = rax2, res = res)
+    #case( m=1 , g=10 , l=1 , t_max_star=0.9 , q_star= 0.05 , case_name = 't9', rax = rax, rax2 = rax2, res = res)
+    #case( m=1 , g=10 , l=1 , t_max_star=0.10 , q_star= 0.05 , case_name = 't10', rax = rax, rax2 = rax2, res = res)
     
     
     rax.legend( loc = 'upper right' )
