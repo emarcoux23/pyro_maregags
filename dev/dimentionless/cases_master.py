@@ -383,6 +383,11 @@ qs = np.array([  0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05 ])
 ts = np.array([  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5 ])
 qs = np.array([  0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.12, 0.15 ])
 
-fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_q_5_15', legend = 2)
+# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_q_5_15', legend = 2)
+
+ts = np.array([  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5 ])
+qs = np.array([  0.20, 0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9 ])
+
+# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_q_2_9', legend = 2)
     
     
