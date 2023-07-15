@@ -67,12 +67,12 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     # Discritized grid
     ################################
     
-    if res == 'low' :
+    if res == 'test' :
 
-        dt = 0.1
-        nx = 101
-        nu = 11
-    
+        dt = 0.5
+        nx = 21
+        nu = 3
+        
     elif res == 'plus' :
         
         dt = 0.05
@@ -85,12 +85,6 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
         nx = 501
         nu = 101
         
-    elif res == 'test' :
-        
-        dt = 0.5
-        nx = 21
-        nu = 3
-        
     else:
         
         dt = 0.05
@@ -98,10 +92,6 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
         nu = 21
             
     grid_sys = discretizer.GridDynamicSystem( sys , [nx,nx] , [nu] , dt , True )
-    #grid_sys.save_lookup_tables('301_21')
-
-    #grid_sys = discretizer.GridDynamicSystem( sys , [301,301] , [21] , dt , False )
-    #grid_sys.load_lookup_tables('301_21')
 
     ################################
     # Cost function
@@ -112,49 +102,47 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     qcf.xbar = np.array([ 0 , 0 ]) # target
     qcf.INF  = J_max
 
-
     qcf.Q[0,0] = q ** 2
     qcf.Q[1,1] = 0.0
 
     qcf.R[0,0] = 1.0
 
-    qcf.S[0,0] = 0.0
-    qcf.S[1,1] = 0.0
-
-
     ################################
-    # Cost function
+    # Computing optimal policy
     ################################
     
     dp = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys, qcf )
 
-
-    steps = int( time / dt) 
+    steps = int( time / dt ) 
 
     dp.compute_steps( steps )
-    #dp.solve_bellman_equation( tol = J_min )
 
 
-    grid_sys.fontsize = 10
+    #grid_sys.fontsize = 10
     qcf.INF  = 0.1 * J_max
     dp.clean_infeasible_set()
     
-    #dp.plot_cost2go()
-    #dp.plot_policy()
-    #dp.cost2go_fig[0].savefig( case_name + '_cost2go.pdf')
-    #dp.policy_fig[0].savefig( case_name + '_policy.pdf')
+    
+    ##################################
+    # Fig param
+    ##################################
+    
+    dpi      = 300
+    fontsize = 10
+    figsize  = (4, 3)
     
     ##################################
     # Dimensional policy plot
     ##################################
 
-    fig = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
+    fig = plt.figure( figsize = figsize, dpi=dpi, frameon=True)
     fig.canvas.manager.set_window_title( 'dimentionless policy' )
     ax  = fig.add_subplot(1, 1, 1)
 
-    xname = r'$\theta  \; [rad]$'#self.sys.state_label[x] #+ ' ' + self.sys.state_units[x]
-    yname = r'$\dot{\theta} \; [rad/sec]$'#self.sys.state_label[y] #+ ' ' + self.sys.state_units[y]
+    xname = r'$\theta  \; [rad]$'
+    yname = r'$\dot{\theta} \; [rad/sec]$'
     zname = r'$\tau \; [Nm]$'
+    
     sys.state_label[0] = r'$\theta$'
     sys.state_label[1] = r'$\dot{\theta}$'
     sys.input_label[0] = r'$\tau$'
@@ -163,32 +151,34 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     yrange = np.pi * np.sqrt( 10 / 1. )
     zrange = 20.
 
-    ax.set_ylabel(yname, fontsize=10)
-    ax.set_xlabel(xname, fontsize=10)
+    ax.set_ylabel( yname, fontsize = fontsize )
+    ax.set_xlabel( xname, fontsize = fontsize )
 
     x_level = grid_sys.x_level[ 0 ] 
     y_level = grid_sys.x_level[ 1 ] 
 
 
-    u = grid_sys.get_input_from_policy( dp.pi , 0 )
-
-    u2 =  u 
-
-    J_grid_nd = grid_sys.get_grid_from_array( u2 ) 
-
+    u         = grid_sys.get_input_from_policy( dp.pi , 0 )
+    J_grid_nd = grid_sys.get_grid_from_array( u ) 
     J_grid_2d = grid_sys.get_2D_slice_of_grid( J_grid_nd , 0 , 1 )
 
-    mesh = ax.pcolormesh( x_level, y_level, J_grid_2d.T, 
-                   shading='gouraud' , cmap = 'bwr', vmin = -zrange, vmax = zrange ) #, norm = colors.LogNorm()
+    mesh = ax.pcolormesh( x_level, 
+                          y_level,
+                          J_grid_2d.T, 
+                          shading='gouraud', 
+                          cmap = 'bwr', 
+                          vmin = -zrange, 
+                          vmax = zrange,
+                          rasterized = True ) 
 
-    ax.tick_params( labelsize = 10 )
+    ax.tick_params( labelsize = fontsize )
     ax.grid(True)
     ax.set_ylim( -yrange, +yrange)
     ax.set_xlim( -xrange, xrange)
 
     cbar = fig.colorbar( mesh )
 
-    cbar.set_label(zname, fontsize=10 , rotation=90)
+    cbar.set_label(zname, fontsize = fontsize , rotation = 90 )
 
     fig.tight_layout()
     fig.show()
@@ -207,15 +197,10 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     cl_sys = ctl + sys
     cl_sys.x0   = np.array([-3.14, 0.])
     cl_sys.compute_trajectory( 10 , 6001, 'euler')
-    #cl_sys.plot_trajectory('xu')
-    #cl_sys.plot_phase_plane_trajectory()
-    #cl_sys.animate_simulation()
 
     tp = graphical.TrajectoryPlotter( sys )
-    tp.fontsize = 10
+    tp.fontsize = fontsize
     tp.plot( cl_sys.traj , 'xu')
-    #tp.plots[0].set_ylim([-xrange, xrange])
-    #tp.plots[1].set_ylim([-yrange, yrange])
     tp.plots[1].set_ylim([-5.5, 5.5])
     tp.plots[2].set_ylim([-zrange, zrange])
     tp.fig.savefig( case_name + '_traj.pdf')
@@ -227,7 +212,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     # Dimensionless policy plot
     ##################################
 
-    fig = plt.figure(figsize= (4, 3), dpi=300, frameon=True)
+    fig = plt.figure( figsize= figsize, dpi=dpi, frameon=True)
     fig.canvas.manager.set_window_title( 'dimentionless policy' )
     ax  = fig.add_subplot(1, 1, 1)
 
@@ -235,8 +220,8 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     yname = r'$\dot{\theta}^* = \frac{\dot{\theta}}{\omega}$'#self.sys.state_label[y] #+ ' ' + self.sys.state_units[y]
     zname = r'$\tau^*=\frac{\tau}{mgl}$'
 
-    ax.set_ylabel(yname, fontsize=10)
-    ax.set_xlabel(xname, fontsize=10)
+    ax.set_ylabel(yname, fontsize = fontsize )
+    ax.set_xlabel(xname, fontsize = fontsize )
 
     x_level = grid_sys.x_level[ 0 ] * 1
     y_level = grid_sys.x_level[ 1 ] * (1 / omega)
@@ -250,18 +235,19 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
 
     J_grid_2d = grid_sys.get_2D_slice_of_grid( J_grid_nd , 0 , 1 )
 
-    mesh = ax.pcolormesh( x_level, y_level, J_grid_2d.T, 
-                   shading='gouraud' , cmap = 'bwr') #, norm = colors.LogNorm()
+    mesh = ax.pcolormesh( x_level, 
+                          y_level, 
+                          J_grid_2d.T, 
+                          shading='gouraud', 
+                          cmap = 'bwr',
+                          rasterized = True ) 
 
-    #mesh.set_clim(vmin=jmin, vmax=jmax)
-
-
-    ax.tick_params( labelsize = 10 )
+    ax.tick_params( labelsize = fontsize )
     ax.grid(True)
 
     cbar = fig.colorbar( mesh )
 
-    cbar.set_label(zname, fontsize=10 , rotation=90)
+    cbar.set_label(zname, fontsize = fontsize , rotation = 90 )
 
     fig.tight_layout()
     fig.show()
@@ -298,10 +284,10 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
             rax.plot( x , u )
             
         rax.set_xlim([ x_min, x_max ])
-        rax.set_xlabel( xname, fontsize=10 )
+        rax.set_xlabel( xname, fontsize = fontsize )
         rax.grid(True)
-        rax.tick_params( labelsize = 10 )
-        rax.set_ylabel( zname, fontsize=10)
+        rax.tick_params( labelsize = fontsize )
+        rax.set_ylabel( zname, fontsize = fontsize )
         
     if rax2 is not None:
     
@@ -331,10 +317,10 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
             rax2.plot( x , u )
             
         rax2.set_xlim([ x_min, x_max ])
-        rax2.set_xlabel( yname, fontsize=10 )
+        rax2.set_xlabel( yname, fontsize = fontsize )
         rax2.grid(True)
-        rax2.tick_params( labelsize = 10 )
-        rax2.set_ylabel( zname, fontsize=10)
+        rax2.tick_params( labelsize = fontsize )
+        rax2.set_ylabel( zname, fontsize = fontsize)
     
     
     
@@ -377,7 +363,7 @@ def sensitivity( ts , qs , res = 'mid' , name = 'sensitivity' , legend = 1):
 ### Main
 ####################################
 
-res = 'test'
+res = 'plus'
 
 # case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1', res = res)
 # case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2', res = res)
@@ -389,14 +375,14 @@ res = 'test'
 # case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8', res = res)
 # case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9', res = res)
 
-ts = np.array([  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9])
-qs = np.array([  0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05])
+ts = np.array([  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8 ])
+qs = np.array([  0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05 ])
 
-fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 'sensitivity_q_cts', legend = 1)
+# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_t_1_8', legend = 1)
 
-ts = np.array([  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5])
-qs = np.array([  0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09])
+ts = np.array([  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5 ])
+qs = np.array([  0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.12, 0.15 ])
 
-fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 'sensitivity_tau_cts', legend = 2)
+fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_q_5_15', legend = 2)
     
     
