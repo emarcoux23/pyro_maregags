@@ -205,7 +205,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', show = True, ra
 
     tp = graphical.TrajectoryPlotter( sys )
     tp.fontsize = fontsize
-    tp.plot( cl_sys.traj , 'xu')
+    tp.plot( cl_sys.traj , 'xu' , show = False )
     tp.plots[1].set_ylim([-5.5, 5.5])
     tp.plots[2].set_ylim([-zrange, zrange])
     tp.fig.savefig( case_name + '_traj.pdf')
@@ -384,7 +384,7 @@ def sensitivity( ts , qs , res = 'mid' , name = 'sensitivity' , legend = 1):
 res = 'test'
 
 
-dp , cl_sys = case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'test', res = res, show = False )
+dp , cl_sys = case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'test', res = res, show = True )
 
 # ts = np.array([  0.1,  0.8 ])
 # qs = np.array([  0.05, 0.05 ])
