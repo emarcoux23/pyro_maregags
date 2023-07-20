@@ -16,7 +16,7 @@ from pyro.analysis import graphical
 ##############################################################################
 
 
-def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , rax2 = None, res = 'reg', legend = 0):
+def case( m , g , l , t_max_star , q_star , case_name = 'test ', show = True, rax = None , rax2 = None, res = 'reg', legend = 1):
     
     # Additionnal fixed domain dimentionless parameters
     theta_star  = 2.0 * np.pi
@@ -181,10 +181,15 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     cbar.set_label(zname, fontsize = fontsize , rotation = 90 )
 
     fig.tight_layout()
-    fig.show()
+    #fig.show()
     fig.savefig( case_name + '_policy.pdf')
     fig.savefig( case_name + '_policy.png')
     fig.savefig( case_name + '_policy.jpg')
+    
+    if show:
+        plt.show()
+    else:
+        plt.close( fig )
     
 
     ##################################
@@ -206,6 +211,11 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     tp.fig.savefig( case_name + '_traj.pdf')
     tp.fig.savefig( case_name + '_traj.png')
     tp.fig.savefig( case_name + '_traj.jpg')
+    
+    if show:
+        plt.show()
+    else:
+        plt.close( tp.fig )
     
 
     ##################################
@@ -250,10 +260,15 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
     cbar.set_label(zname, fontsize = fontsize , rotation = 90 )
 
     fig.tight_layout()
-    fig.show()
+    #fig.show()
     fig.savefig( case_name + '_dimpolicy.pdf')
     fig.savefig( case_name + '_dimpolicy.png')
     fig.savefig( case_name + '_dimpolicy.jpg')
+    
+    if show:
+        plt.show()
+    else:
+        plt.close( fig )
     
     
     if rax is not None:
@@ -321,6 +336,9 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', rax = None , ra
         rax2.grid(True)
         rax2.tick_params( labelsize = fontsize )
         rax2.set_ylabel( zname, fontsize = fontsize)
+        
+    
+    return dp , cl_sys
     
     
     
@@ -338,7 +356,7 @@ def sensitivity( ts , qs , res = 'mid' , name = 'sensitivity' , legend = 1):
 
     for i in range(n):
         
-        case( m=1 , g=10 , l=1 , t_max_star= ts[i] , q_star= qs[i] , case_name = name + '_level_' + str(i+1) , rax = rax, rax2 = rax2, res = res, legend = legend)
+        case( m=1 , g=10 , l=1 , t_max_star= ts[i] , q_star= qs[i] , case_name = name + '_level_' + str(i+1) , show = False, rax = rax, rax2 = rax2, res = res, legend = legend)
     
     
     rax.legend( loc = 'upper right' )
@@ -360,10 +378,24 @@ def sensitivity( ts , qs , res = 'mid' , name = 'sensitivity' , legend = 1):
 
 
 ####################################
-### Main
+### Quick tests
 ####################################
 
-res = 'plus'
+res = 'test'
+
+
+dp , cl_sys = case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'test', res = res, show = False )
+
+# ts = np.array([  0.1,  0.8 ])
+# qs = np.array([  0.05, 0.05 ])
+# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's1_test', legend = 1)
+# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's2_test', legend = 2)
+
+####################################
+### Main figures 
+####################################
+
+# res = 'hi'
 
 # case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c1', res = res)
 # case( m=1 , g=10 , l=2 , t_max_star=0.5 , q_star= 0.1 , case_name = 'c2', res = res)
@@ -375,19 +407,21 @@ res = 'plus'
 # case( m=1 , g=10 , l=2 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c8', res = res)
 # case( m=2 , g=10 , l=1 , t_max_star=1.0 , q_star= 10.0 , case_name = 'c9', res = res)
 
-ts = np.array([  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8 ])
-qs = np.array([  0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05 ])
+####################################
+### Sensitivity Figures
+####################################
 
-# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_t_1_8', legend = 1)
+# res = 'hi'
+
+ts = np.array([  0.1,  0.3,  0.5,  1.0,  2.5,  5.0  ])
+qs = np.array([  0.05, 0.05, 0.05, 0.05, 0.05, 0.05 ])
+
+# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_tmax', legend = 1)
 
 ts = np.array([  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5 ])
-qs = np.array([  0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.12, 0.15 ])
+qs = np.array([  0.05, 0.10, 0.12, 0.15, 0.30, 0.50, 1.0,  2.0 ])
 
-# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_q_5_15', legend = 2)
+# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_q', legend = 2)
 
-ts = np.array([  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5,  0.5 ])
-qs = np.array([  0.20, 0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9 ])
-
-# fig, ax, fig2, ax2 = sensitivity(ts, qs , res = res , name = 's_q_2_9', legend = 2)
     
     
