@@ -45,4 +45,6 @@ dp.compute_J_from_Q()
 
 dp.compute_policy_from_Q()
 
-dp.compute_episodes(10)
+dp.compute_episodes(1000)
+
+dp.plot_cost2go()
