@@ -9,10 +9,9 @@ Created on Sun Oct 16 22:27:47 2022
 import numpy as np
 
 from pyro.dynamic  import pendulum
-from pyro.control  import controller
-import dynamic_programming as dprog
-import discretizer
-import costfunction
+from pyro.analysis import costfunction
+from pyro.planning import dynamicprogramming 
+from pyro.planning import discretizer
 
 sys  = pendulum.SinglePendulum()
 
@@ -33,7 +32,7 @@ qcf.S[1,1] = 10.0
 
 
 # DP algo
-dp = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
+dp = dynamicprogramming .DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 
 dp.solve_bellman_equation( tol = 0.1 )
 dp.plot_cost2go()
@@ -43,26 +42,15 @@ ctl = dp.get_lookup_table_controller()
 
 
 # Evaluate on same grid
-#evaluator = dprog.PolicyEvaluatorWithLookUpTable(ctl, grid_sys, qcf)
+#evaluator = dprog.PolicyEvaluator(ctl, grid_sys, qcf)
 #evaluator.solve_bellman_equation()
 #evaluator.plot_cost2go()
 
-# Evaluate on new grid
-grid_sys2 = discretizer.GridDynamicSystem( sys , [301,301] , [11] ,  )
-
-evaluator2 = dprog.PolicyEvaluatorWithLookUpTable(ctl, grid_sys2, qcf)
-evaluator2.solve_bellman_equation()
-evaluator2.plot_cost2go()
-
 
 # Evaluate on new grid
+grid_sys2 = discretizer.GridDynamicSystem( sys , [151,151] , [11] )
 
-# Raise the max torque to avoid hitting the min-max boundary with interpolation
-sys.u_ub[0] = +10
-sys.u_lb[0] = -10
-
-grid_sys2 = discretizer.GridDynamicSystem( sys , [301,301] , [11] )
-
-evaluator2 = dprog.PolicyEvaluatorWithLookUpTable(ctl, grid_sys2, qcf)
+#evaluator2 = dynamicprogramming.PolicyEvaluatorWithLookUpTable( ctl, grid_sys2, qcf)
+evaluator2 = dynamicprogramming.PolicyEvaluator(ctl, grid_sys2, qcf)
 evaluator2.solve_bellman_equation()
 evaluator2.plot_cost2go()

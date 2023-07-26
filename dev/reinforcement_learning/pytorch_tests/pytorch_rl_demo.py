@@ -23,7 +23,8 @@ import torch.nn.functional as F
 
 from pyro.dynamic  import cartpole
 
-sys = cartpole.UnderActuatedRotatingCartPole() #TODO
+sys = cartpole.CartPole()
+sys.xbar[1] = np.pi # Up-right position
 #env = gym.make("CartPole-v1")
 
 # set up matplotlib

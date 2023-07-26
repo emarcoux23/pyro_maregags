@@ -293,7 +293,222 @@ class Drone2D( mechanical.MechanicalSystem ):
         return lines_pts , lines_style , lines_color
     
   
+
+###############################################################################
+        
+class SpeedControlledDrone2D( system.ContinuousDynamicSystem ):
     
+    def __init__(self):
+        
+        # initialize standard params
+        system.ContinuousDynamicSystem.__init__( self, 2, 2, 2)
+        
+        # Labels
+        self.name = 'Speed controlled planar drone'
+        self.state_label = ['x','y']
+        self.input_label = ['vx', 'vy']
+        self.output_label = self.state_label
+        
+        # Units
+        self.state_units = ['[m]','[m]']
+        self.input_units = ['[m/sec]', '[m/sec]']
+        self.output_units = self.state_units
+        
+        # State working range
+        self.x_ub = np.array([+5,+2])
+        self.x_lb = np.array([-5,-2])
+        
+        # Kinematic param
+        self.width  = 1
+        self.height = 0.2
+        
+        # Graphic output parameters 
+        self.dynamic_domain  = True
+        self.dynamic_range   = 10
+        
+        # Point Obstacles
+        self.obstacles = [
+                 np.array([ 0.  , 20. ]) ,
+                 np.array([ 0.  , 25. ]) ,
+                 np.array([ 0.  , 30. ]) ,
+                 np.array([ 5.  , 20. ]) ,
+                 np.array([ 5.  , 25. ]) ,
+                 np.array([ 5.  , 30. ]) ,
+                 np.array([ 10. , 20. ]) ,
+                 np.array([ 10. , 25. ]) ,
+                 np.array([ 10. , 30. ]) ,
+                 np.array([ 2.5 , 35  ]) ,
+                 np.array([ 7.5 , 35  ]) ,
+                ]
+        
+    ###########################################################################
+    def f(self, x , u , t = 0 ):
+        """ 
+        Continuous time foward dynamics evaluation
+        
+        dx = f(x,u,t)
+        
+        INPUTS
+        x  : state vector             n x 1
+        u  : control inputs vector    m x 1
+        t  : time                     1 x 1
+        
+        OUPUTS
+        dx : state derivative vectror n x 1
+        
+        """
+        
+        dx = u       
+        
+        return dx
+    
+    
+    ###########################################################################
+    def forward_kinematic_domain(self, q ):
+        """ 
+        """
+        l = self.width * 10
+        
+        x = q[0]
+        y = q[1]
+        z = 0
+        
+        if self.dynamic_domain:
+        
+            domain  = [ ( -l + x , l + x ) ,
+                        ( -l + y , l + y ) ,
+                        ( -l + z , l + z ) ]#  
+        else:
+            
+            domain  = [ ( -l , l ) ,
+                        ( -l , l ) ,
+                        ( -l , l ) ]#
+                
+        return domain
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines(self, q ):
+        """ 
+        Compute points p = [x;y;z] positions given config q 
+        ----------------------------------------------------
+        - points of interest for ploting
+        
+        Outpus:
+        lines_pts = [] : a list of array (n_pts x 3) for each lines
+        
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+        
+        ###############################
+        # ground line
+        ###############################
+        
+        pts      = np.zeros(( 2 , 3 ))
+        pts[0,:] = np.array([-10,0,0])
+        pts[1,:] = np.array([+10,0,0])
+        
+        lines_pts.append( pts )
+        lines_style.append( '--')
+        lines_color.append( 'k' )
+        
+        ###########################
+        # drone body
+        ###########################
+        
+        x = q[0]
+        y = q[1]
+        s = 0
+        c = 1
+        l = self.width
+        h = self.height
+        
+        pts      = np.zeros(( 4 , 3 ))
+        pts[0,:] = np.array([x+l*c-h*s,y+l*s+h*c,0])
+        pts[1,:] = np.array([x+l*c,y+l*s,0])
+        pts[2,:] = np.array([x-l*c,y-l*s,0])
+        pts[3,:] = np.array([x-l*c-h*s,y-l*s+h*c,0])
+        
+        
+        lines_pts.append( pts )
+        lines_style.append( 'o-')
+        lines_color.append( 'b' )
+        
+        ###########################
+        # drone cg
+        ###########################
+        
+        pts      = np.zeros(( 1 , 3 ))
+        pts[0,:] = np.array([x,y,0])
+        
+        lines_pts.append( pts )
+        lines_style.append( 'o')
+        lines_color.append( 'b' )
+        
+        ###########################
+        # obs
+        ###########################
+        
+        for obs in self.obstacles:
+
+            pts = np.zeros((1,3))
+
+            pts[0,0] = obs[0]
+            pts[0,1] = obs[1]
+
+            lines_pts.append( pts )
+            lines_style.append('o')
+            lines_color.append('k')
+                
+        return lines_pts , lines_style , lines_color
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """ 
+        show trust vectors
+        
+        
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+        
+        ###########################
+        # drone velocity vectors
+        ###########################
+        
+        xcg = x[0]
+        ycg = x[1]
+
+        dx =  u[0]
+        dy =  u[1]
+        
+        v  = np.sqrt( dx ** 2 + dy ** 2)
+        
+        theta = np.arctan2( dy , dx ) - np.pi * 0.5
+        
+        s = np.sin( theta )
+        c = np.cos( theta )
+        l = v * self.width * ( self.u_ub[0] - self.u_lb[0] ) 
+        h = l * 0.25
+        
+        pts      = np.zeros(( 5 , 3 ))
+        pts[0,:] = np.array([xcg,ycg,0])
+        pts[1,:] = np.array([xcg+dx,ycg+dy,0])
+        pts[2,:] = pts[1,:] + np.array([-h*c+h*s,-h*s-h*c,0])
+        pts[3,:] = pts[1,:] 
+        pts[4,:] = pts[1,:] + np.array([h*c+h*s,h*s-h*c,0])
+        
+        lines_pts.append( pts )
+        lines_style.append( '-')
+        lines_color.append( 'r' )
+                
+        return lines_pts , lines_style , lines_color
   
 
 
@@ -579,12 +794,28 @@ class ConstantSpeedHelicopterTunnel( system.ContinuousDynamicSystem ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    sys = Drone2D()
     
-    sys.x0[5] = 0
+    if False:
     
-    sys.ubar[0] = 9.81 * 0.6
-    sys.ubar[1] = 9.81 * 0.7
-    
-    sys.plot_trajectory()
-    sys.animate_simulation()
+        sys = Drone2D()
+        
+        sys.x0[5] = 0
+        
+        sys.ubar[0] = 9.81 * 0.6
+        sys.ubar[1] = 9.81 * 0.7
+        
+        sys.plot_trajectory()
+        sys.animate_simulation()
+        
+    if True:
+        
+        sys = SpeedControlledDrone2D()
+        
+        sys.x0[0] = 0
+        sys.x0[1] = 0
+        
+        sys.ubar[0] = +0.1
+        sys.ubar[1] = +3.0
+        
+        sys.plot_trajectory()
+        sys.animate_simulation()

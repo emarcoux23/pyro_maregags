@@ -10,9 +10,9 @@ import numpy as np
 
 from pyro.dynamic  import pendulum
 from pyro.control  import controller
-import dynamic_programming as dprog
-import discretizer
-import costfunction
+from pyro.planning import dynamicprogramming as dp
+from pyro.planning import discretizer
+from pyro.analysis import costfunction
 
 sys  = pendulum.SinglePendulum()
 
@@ -27,11 +27,11 @@ qcf.INF  = 1000000
 
 
 # DP algo
-dp1 = dprog.DynamicProgramming( grid_sys, qcf )
+dp1 = dp.DynamicProgramming( grid_sys, qcf )
 dp1.compute_steps(10)
 
-dp2 = dprog.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
+dp2 = dp.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
 dp2.compute_steps(10)
 
-dp4 = dprog.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
+dp4 = dp.DynamicProgramming2DRectBivariateSpline(grid_sys, qcf)
 dp4.compute_steps(10)
