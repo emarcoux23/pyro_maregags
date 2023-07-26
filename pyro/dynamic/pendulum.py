@@ -53,7 +53,7 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         """ Set model parameters here """
         
         # kinematic
-        self.l1  = 2 
+        self.l1  = 2.0 
         self.lc1 = 1
         
         # dynamic
@@ -61,6 +61,9 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         self.I1       = 1
         self.gravity  = 9.81
         self.d1       = 0
+        
+        # graphic
+        self.l_domain = 5.0
         
         
     ##############################
@@ -155,7 +158,7 @@ class SinglePendulum( mechanical.MechanicalSystem ):
     def forward_kinematic_domain(self, q ):
         """ 
         """
-        l = 5
+        l = self.l_domain
         
         domain  = [ (-l,l) , (-l,l) , (-l,l) ]#  
                 
@@ -189,7 +192,7 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         
         # pendulum
         pts      = np.zeros(( 2 , 3 ))
-        pts[0,:] = np.array([0,0,0])
+        pts[0,:] = np.array([0.,0.,0.])
         
         [c1,s1] = self.trig( q )
         
@@ -201,6 +204,7 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         lines_color.append( 'b' )
                 
         return lines_pts , lines_style , lines_color
+    
     
     ###########################################################################
     def forward_kinematic_lines_plus(self, x , u , t ):
@@ -271,6 +275,63 @@ class SinglePendulum( mechanical.MechanicalSystem ):
         
                 
         return lines_pts , lines_style , lines_color
+    
+    
+    
+###############################################################################
+
+class InvertedPendulum( SinglePendulum ):
+
+
+    ############################
+    def __init__(self):
+        """ """
+               
+        # initialize standard params
+        mechanical.MechanicalSystem.__init__(self, 1)
+        
+        # Name
+        self.name = 'Inverted Pendulum'
+        
+        # params
+        self.setparams()
+        
+        
+    ###########################################################################
+    def g(self, q ):
+        """ 
+        Gravitationnal forces vector : dof x 1
+        """
+        
+        g = np.zeros( self.dof ) 
+        
+        [c1,s1] = self.trig( q )
+        
+        g[0] = -self.m1 * self.gravity * self.lc1 * s1
+
+        return g
+    
+    ###########################################################################
+    def forward_kinematic_lines(self, q ):
+        
+        q2 = q + np.array([ np.pi ])
+        
+        return SinglePendulum.forward_kinematic_lines( self, q2)
+
+    
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        
+        x2 = x + np.array([  np.pi , 0  ])
+        
+        return SinglePendulum.forward_kinematic_lines_plus( self, x2 , u , t )
+    
+    
+    
+        
+        
         
         
         
@@ -1121,7 +1182,7 @@ if __name__ == "__main__":
         sys.plot_trajectory('xu')
         sys.animate_simulation()
         
-    if True:
+    if False:
         
         sys = Acrobot()
         
@@ -1133,4 +1194,23 @@ if __name__ == "__main__":
         sys.compute_trajectory( 10 )
         sys.plot_trajectory('xu')
         sys.animate_simulation()
+        
+        
+    if True:
+        
+        #sys = SinglePendulum()
+        
+        sys = InvertedPendulum()
+        
+        def t2u(t):
+            return np.array([ 5 * np.sin(3*t) ])
+        
+        sys.t2u   = t2u
+        sys.x0[0] = 3.14
+        sys.compute_trajectory( 10 )
+        sys.plot_trajectory('xu')
+        sys.animate_simulation()
+        
+        
+    
         
