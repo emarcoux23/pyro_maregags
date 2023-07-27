@@ -18,7 +18,7 @@ from pyro.analysis import graphical
 
 def case( m , g , l , t_max_star , q_star , case_name = 'test ', show = True, rax = None , rax2 = None, res = 'reg', legend = 1):
     
-    # Additionnal fixed domain dimentionless parameters
+    # Additionnal fixed domain dimensionless parameters
     theta_star  = 2.0 * np.pi
     dtheta_star = 1.0 * np.pi
     time_star   = 2.0 * np.pi * 20.0
@@ -27,7 +27,7 @@ def case( m , g , l , t_max_star , q_star , case_name = 'test ', show = True, ra
     omega = np.sqrt( ( g / l  ) )
     mgl   = m * g * l
     
-    # Dimentional parameters
+    # Dimensional parameters
     t_max  = t_max_star * mgl
     q      = q_star * mgl
     theta  = theta_star
