@@ -10,6 +10,7 @@ Created on Tue Jun 20 10:29:50 2023
 import numpy as np
 import matplotlib.pyplot as plt
 ###############################################################################
+from pyro.analysis import graphical
 from pyro.dynamic import system
 from pyro.dynamic import mechanical
 ###############################################################################
@@ -136,14 +137,22 @@ class Plane2D( mechanical.MechanicalSystem ):
         self.x_lb = np.array([-50,-0,-2,-10,-10,-10])
         
         # Model param
-        self.mass           = 1
-        self.inertia        = 1
+        self.mass           = 1         # kg
+        self.inertia        = 0.1       # kgm2
         self.gravity        = 9.8
         
         # Aero param
-        self.rho            = 1
-        self.A              = 1
-        self.alpha_stall    = 0.35
+        self.rho            = 1.29      # air density
+        self.Sw             = 0.1         # wing aera
+        self.Cd0            = 0.02      # parasite drag
+        self.AR             = 5.0      # aspect ratio
+        self.e_factor       = 0.8       # oswald efficiency factor
+        
+        self.Sw_tail        = self.Sw  * 0.1
+        self.l_tail         = 0.1
+        
+        
+        self.alpha_stall    = np.pi / 12.
         
         # Kinematic param
         
@@ -173,51 +182,95 @@ class Plane2D( mechanical.MechanicalSystem ):
     ###########################################################################
     def Cl(self, alpha ):
         
-        m = 4
+        # Rough fit on
+        # https://www.aerospaceweb.org/question/airfoils/q0150b.shtml
         
+        Cl = np.sin( 2 * alpha ) # falt plate approx
+        
+        #If not stalled
         if (alpha < self.alpha_stall ) and (alpha > -self.alpha_stall ):
             
-            Cl = m * alpha
-            
-        elif (alpha < 2 * self.alpha_stall ) and (alpha > 0 ):
-            
-            Cl = 2 * self.alpha_stall * m - m * alpha
-            
-        elif (alpha < 0 ) and (alpha > -2 * self.alpha_stall ):
-            
-            Cl = -2 * self.alpha_stall * m - m * alpha
-        
-        else:
-            
-            Cl = 0
+            Cl = Cl + 4 * alpha
         
         return Cl
+    
     
     ###########################################################################
     def Cd(self, alpha ):
         
+        Cl = self.Cl( alpha )
+        
+        # Body parasite drag
+        Cd = self.Cd0 
+        
+        # Wing flat plate approx
+        Cd = Cd + ( 1 - np.cos( 2 * alpha ))
+        
+        #If not stalled: add induced drag
         if (alpha < self.alpha_stall ) and (alpha > -self.alpha_stall ):
             
-            Cd = 0.2 * alpha **2 + 0.1
-            
-        else:
-            
-            Cd = 0.2 * self.alpha_stall ** 2 + 0.1
+            Cd = Cd + Cl **2 / ( np.pi * self.e_factor * self.AR )
                 
         
         return Cd
     
+    #############################
+    def plot_alpha2Cl(self, alpha_min = -3.15, alpha_max = 3.15 , delta = 0.0 ):
+        
+        alphas = np.arange( alpha_min, alpha_max, 0.05 )
+        
+        n   = alphas.shape[0]
+        Cls = np.zeros((n,1))
+        Cds = np.zeros((n,1))
+        Cms = np.zeros((n,1))
+        
+        for i in range(n):
+            Cls[i] = self.Cl( alphas[i] )
+            Cds[i] = self.Cd( alphas[i] )
+            Cms[i] = self.Cm( alphas[i], delta  )
+        
+        fig , ax = plt.subplots(3, figsize=graphical.default_figsize,
+                                dpi= graphical.default_dpi, frameon=True)
+
+        fig.canvas.manager.set_window_title('Aero curve')
+        
+        ax[0].plot( alphas , Cls , 'b')
+        ax[0].set_ylabel('Cl', fontsize=graphical.default_fontsize)
+        ax[0].set_xlabel('alpha', fontsize=graphical.default_fontsize )
+        ax[0].tick_params( labelsize = graphical.default_fontsize )
+        ax[0].grid(True)
+        
+        ax[1].plot( alphas , Cds , 'b')
+        ax[1].set_ylabel('Cd', fontsize=graphical.default_fontsize)
+        ax[1].set_xlabel('alpha', fontsize=graphical.default_fontsize )
+        ax[1].tick_params( labelsize = graphical.default_fontsize )
+        ax[1].grid(True)
+        
+        ax[2].plot( alphas , Cms , 'b')
+        ax[2].set_ylabel('Cm', fontsize=graphical.default_fontsize)
+        ax[2].set_xlabel('alpha', fontsize=graphical.default_fontsize )
+        ax[2].tick_params( labelsize = graphical.default_fontsize )
+        ax[2].grid(True)
+        
+        fig.tight_layout()
+        fig.canvas.draw()
+        
+        plt.show()
+    
     ###########################################################################
     def Cm(self, alpha , delta ):
         
-        Cm = 0 * alpha + 0 * delta
+        Cl_tail = self.Cl( alpha + delta )
+        Cd_tail = self.Cd( alpha + delta )
+        
+        Cm = -( Cl_tail * np.cos( alpha ) + Cd_tail * np.sin( alpha ) ) * self.l_tail * self.Sw_tail / self.Sw
         
         return Cm
     
     ###########################################################################
     def compute_aerodynamic_forces( self, V , alpha , delta ):
         
-        rav = 0.5 * self.rho * self.A * V**2
+        rav = 0.5 * self.rho * self.Sw * V**2
         
         L = rav * self.Cl( alpha )
         D = rav * self.Cd( alpha )
@@ -543,23 +596,25 @@ if __name__ == "__main__":
     
         sys = Plane2D()
         
-        sys.x0   = np.array([0,0,0.0,0,0,0.0])
+        sys.plot_alpha2Cl()
+        
+        sys.x0   = np.array([0,0,0.2,10,0,0])
         
         
         
         def t2u(t):
             
-            u = np.array([ 3* t , 0 ])
+            u = np.array([ 10 , 0 ])
             
             return u
             
         sys.t2u = t2u
         #sys.ubar = np.array([ 3 , -0.05 ])
         
-        # sys.gravity = 0
+        #sys.gravity = 0
         
         sys.compute_trajectory( 10 , 20001 , 'euler' )
-        sys.plot_trajectory('x')
+        #sys.plot_trajectory('x')
         
-        # sys.dynamic_domain = False
+        #sys.dynamic_domain = False
         sys.animate_simulation( time_factor_video=0.5 )
