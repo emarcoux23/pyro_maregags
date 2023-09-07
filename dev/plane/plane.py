@@ -17,13 +17,13 @@ from pyro.dynamic import mechanical
 
 
 ###############################################################################
-def Transformation_Matrix_2D_from_base_angle( theta , bx , by ):
+def Transformation_Matrix_2D_from_base_angle( theta , x , y ):
     
     s = np.sin( theta )
     c = np.cos( theta )
     
-    T = np.array([ [ c   , -s ,  bx ] , 
-                   [ s   ,  c ,  by ] ,
+    T = np.array([ [ c   , -s ,  x ] , 
+                   [ s   ,  c ,  y ] ,
                    [ 0   ,  0 ,  1  ]   ])
     
     return T
@@ -79,7 +79,7 @@ def arrow_from_tip_angle( l , theta , bx , by ):
     return pts_global
 
 ###############################################################################
-def arrow_from_components( vx , vy , bx , by ):
+def arrow_from_base_components( vx , vy , bx , by ):
     
     l = np.sqrt( vx**2 + vy**2 )
     d = l * 0.15              # length of arrow secondary lines
@@ -99,6 +99,27 @@ def arrow_from_components( vx , vy , bx , by ):
     
     return pts_global
 
+###############################################################################
+def arrow_from_tip_components( vx , vy , bx , by ):
+    
+    l = np.sqrt( vx**2 + vy**2 )
+    d = l * 0.15              # length of arrow secondary lines
+    
+    pts_local = np.array([ [ -l  ,  0 ,  1 ] , 
+                           [ 0   ,  0 ,  1 ] ,
+                           [ -d  ,  d ,  1 ] ,
+                           [ 0   ,  0 ,  1 ] ,
+                           [  -d , -d ,  1 ] ])
+    
+    theta = np.arctan2( vy , vx )
+    
+    T = Transformation_Matrix_2D_from_base_angle( theta , bx , by )
+    
+    pts_global = Transform_2D_Pts( pts_local , T )
+    
+    
+    return pts_global
+
 
 
 
@@ -106,7 +127,7 @@ def arrow_from_components( vx , vy , bx , by ):
 # 2D planar drone
 ##############################################################################
         
-class Plane2D( mechanical.MechanicalSystem ):
+class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
     
     """ 
     Equations of Motion
@@ -133,35 +154,40 @@ class Plane2D( mechanical.MechanicalSystem ):
         self.output_units = self.state_units
         
         # State working range
-        self.x_ub = np.array([+50,+100,+2,10,10,10])
-        self.x_lb = np.array([-50,-0,-2,-10,-10,-10])
+        self.x_ub = np.array([+100,+200,+2,30,30,10])
+        self.x_lb = np.array([-100,-0,-2,-30,-30,-10])
+        
+        self.u_ub = np.array([+100,+0.3])
+        self.u_lb = np.array([-100,-0.3])
         
         # Model param
-        self.mass           = 1         # kg
+        self.mass           = 2.0      # kg
         self.inertia        = 0.1       # kgm2
         self.gravity        = 9.8
         
         # Aero param
         self.rho            = 1.29      # air density
-        self.Sw             = 0.1         # wing aera
-        self.Cd0            = 0.02      # parasite drag
+        
+        self.S_w            = 0.2       # wing ref. area
+        self.S_t            = 0.05      # tail ref. area
+        self.l_w            = 0.0       # wing a.c. position with respect to c.g., negative is behind c.g.
+        self.l_t            = 1.0       # tail a.c. position with respect to c.g., negative is behind c.g.
+        
+        # we assume same wing profile and geometry for wing and tail
+        self.Cd0            = 0.02     # parasite drag
         self.AR             = 5.0      # aspect ratio
-        self.e_factor       = 0.8       # oswald efficiency factor
-        
-        self.Sw_tail        = self.Sw  * 0.1
-        self.l_tail         = 0.1
-        
-        
-        self.alpha_stall    = np.pi / 12.
-        
-        # Kinematic param
+        self.e_factor       = 0.8      # oswald efficiency factor
+        self.Cm0            = 0.0      # Aero moment coef. ac
+        self.alpha_stall    = np.pi / 12.      
         
         
         # Graphic output parameters 
-        self.width           = 1
+        self.length          = 2.0   
+        self.l_cg            = self.length * 0.6 # distance from back of airplane to cg
+        self.width           = self.length / 10.0
         self.dynamic_domain  = True
-        self.dynamic_range   = 10
-        self.static_range    = 300
+        self.dynamic_range   = self.length * 1.0
+        self.static_range    = self.length * 30
         
         
     ###########################################################################
@@ -214,8 +240,17 @@ class Plane2D( mechanical.MechanicalSystem ):
         
         return Cd
     
+    
+    ###########################################################################
+    def Cm(self, alpha ):
+        
+        Cm = self.Cm0 
+        
+        return Cm
+    
+    
     #############################
-    def plot_alpha2Cl(self, alpha_min = -3.15, alpha_max = 3.15 , delta = 0.0 ):
+    def plot_alpha2Cl(self, alpha_min = -3.15, alpha_max = 3.15 ):
         
         alphas = np.arange( alpha_min, alpha_max, 0.05 )
         
@@ -227,7 +262,7 @@ class Plane2D( mechanical.MechanicalSystem ):
         for i in range(n):
             Cls[i] = self.Cl( alphas[i] )
             Cds[i] = self.Cd( alphas[i] )
-            Cms[i] = self.Cm( alphas[i], delta  )
+            Cms[i] = self.Cm( alphas[i] )
         
         fig , ax = plt.subplots(3, figsize=graphical.default_figsize,
                                 dpi= graphical.default_dpi, frameon=True)
@@ -257,26 +292,33 @@ class Plane2D( mechanical.MechanicalSystem ):
         
         plt.show()
     
-    ###########################################################################
-    def Cm(self, alpha , delta ):
-        
-        Cl_tail = self.Cl( alpha + delta )
-        Cd_tail = self.Cd( alpha + delta )
-        
-        Cm = -( Cl_tail * np.cos( alpha ) + Cd_tail * np.sin( alpha ) ) * self.l_tail * self.Sw_tail / self.Sw
-        
-        return Cm
+    
     
     ###########################################################################
     def compute_aerodynamic_forces( self, V , alpha , delta ):
         
-        rav = 0.5 * self.rho * self.Sw * V**2
+        rv2 = 0.5 * self.rho * V**2
         
-        L = rav * self.Cl( alpha )
-        D = rav * self.Cd( alpha )
-        M = rav * self.Cm( alpha , delta )
+        c_w = np.sqrt( self.S_w / self.AR ) 
+        c_t = np.sqrt( self.S_t / self.AR ) 
         
-        return ( L , D , M )
+        Cl_w = self.Cl( alpha )
+        Cd_w = self.Cd( alpha )
+        Cm_w = self.Cm( alpha )
+        
+        L_w = rv2 * self.S_w * Cl_w
+        D_w = rv2 * self.S_w * Cd_w
+        M_w = rv2 * self.S_w * c_w * Cm_w
+        
+        Cl_t = self.Cl( alpha + delta )
+        Cd_t = self.Cd( alpha + delta )
+        Cm_t = self.Cm( alpha + delta )
+        
+        L_t = rv2 * self.S_t * Cl_t
+        D_t = rv2 * self.S_t * Cd_t
+        M_t = rv2 * self.S_t * c_t * Cm_t
+        
+        return ( L_w , D_w , M_w , L_t , D_t , M_t )
         
         
         
@@ -331,16 +373,33 @@ class Plane2D( mechanical.MechanicalSystem ):
     
     
     ###########################################################################
-    def d(self, q , dq ):
+    def d(self, q , dq , u ):
         """ 
         State-dependent dissipative forces : dof x 1
         """
         
         V , gamma , alpha = self.compute_velocity_vector( q , dq )
         
-        L, D, M = self.compute_aerodynamic_forces( V , alpha, 0 )
-            
-        d_wind = np.array([ -D , L , M ]) # aero forces in wind aligned basis
+        delta = u[1]
+        
+        L_w, D_w, M_w, L_t, D_t, M_t = self.compute_aerodynamic_forces( V , alpha, delta )
+        
+        ##########################################################
+        # Total aero forces vector at c.g. in wind-aligned basis
+        ##########################################################
+        
+        s = np.sin( alpha )
+        c = np.cos( alpha )
+        
+        L = L_w + L_t
+        D = D_w + D_t
+        M = M_w + M_t - self.l_w * ( L_w * c + D_w * s ) - self.l_t * ( L_t * c + D_t * s )
+        
+        ##########################################################
+        # Transformation of aero forces in global inertial basis
+        ##########################################################
+        
+        d_wind = np.array([ -D , L , M ]) 
         
         s = np.sin( gamma )
         c = np.cos( gamma )
@@ -349,17 +408,17 @@ class Plane2D( mechanical.MechanicalSystem ):
                        [ s   ,  c ,  0 ] ,
                        [ 0   ,  0 ,  1 ]   ])
         
-        d = - R @ d_wind # aero forces in global basis
+        d = - R @ d_wind # aero forces in global inertial basis
         
         return d
     
     ###########################################################################
-    def B(self, q ):
+    def B(self, q , u ):
         """ 
         Actuator Matrix  : dof x m
         """
         
-        B = np.zeros((3,2))
+        B = np.zeros((3,1))
         
         theta = q[2]
         
@@ -375,8 +434,8 @@ class Plane2D( mechanical.MechanicalSystem ):
         """ 
         """
         
-        x = q[0] + self.width * 5
-        y = q[1] + self.width * 1.5
+        x = q[0] 
+        y = q[1] 
         z = 0
         
         if self.dynamic_domain:
@@ -420,7 +479,7 @@ class Plane2D( mechanical.MechanicalSystem ):
         ###########################
         
         w = self.width  # body width
-        l = w * 10      # body lenght
+        l = self.length # body lenght
         
         ###########################
         # Body
@@ -428,10 +487,13 @@ class Plane2D( mechanical.MechanicalSystem ):
         
         pts      = np.zeros(( 5 , 3 ))
         
-        x = q[0]
-        y = q[1]
+        x     = q[0]
+        y     = q[1]
         theta = q[2]
         
+        world_T_body = Transformation_Matrix_2D_from_base_angle( theta , x , y )
+        #body_T_wind  = Transformation_Matrix_2D_from_base_angle( -alpha , 0 , 0 )
+        body_T_drawing = Transformation_Matrix_2D_from_base_angle( 0 , -self.l_cg , -w/2 )
         
         body_pts_local = np.array([ [ 0   ,  0   ,  1 ] , 
                                     [ l   ,  0   ,  1 ] ,
@@ -440,29 +502,37 @@ class Plane2D( mechanical.MechanicalSystem ):
                                     [ w   ,  3*w ,  1 ] ,
                                     [ 0   ,  3*w ,  1 ] ,
                                     [ 0   ,  0   ,  1 ] ])
+
         
-        T_body = Transformation_Matrix_2D_from_base_angle( theta , x , y )
-        
-        body_pts_global = Transform_2D_Pts( body_pts_local , T_body )
+        body_pts_global = Transform_2D_Pts( body_pts_local , world_T_body @  body_T_drawing)
         
         lines_pts.append( body_pts_global )
         lines_style.append( '-')
         lines_color.append( 'b')
+        
+        
+        cg = np.array([ [ x  ,  y   ,  1 ] ])
+        
+        lines_pts.append( cg )
+        lines_style.append( 'o')
+        lines_color.append( 'k')
         
         ###########################
         # Wings
         ###########################
         
         pts      = np.zeros(( 2 , 3 ))
+        
+        c_w = np.sqrt( self.S_w / self.AR )
 
         
-        wings_pts_local = np.array([ [ 3*w   ,  0.5 * w   ,  1 ] , 
-                                    [ 6*w   ,  0.5 * w   ,  1 ] ])
+        wings_pts_body = np.array([ [ -self.l_w + c_w   ,  0  ,  1 ] , 
+                                    [ -self.l_w - c_w   ,  0  ,  1 ] ])
         
         
-        wings_pts_global = Transform_2D_Pts( wings_pts_local , T_body )
+        wings_pts_world = Transform_2D_Pts( wings_pts_body , world_T_body )
         
-        lines_pts.append( wings_pts_global )
+        lines_pts.append( wings_pts_world )
         lines_style.append( '-')
         lines_color.append( 'b')
         
@@ -481,9 +551,6 @@ class Plane2D( mechanical.MechanicalSystem ):
         lines_style.append('--')
         lines_color.append('k')
         
-
-
-        
             
         return lines_pts , lines_style , lines_color
     
@@ -499,15 +566,18 @@ class Plane2D( mechanical.MechanicalSystem ):
         lines_style = []
         lines_color = []
         
-        w = self.width
+        #w = self.width
         
         q, dq = self.x2q(x)
         
-        bx = q[0]
-        by = q[1]
+        x     = q[0]
+        y     = q[1]
         theta = q[2]
         
-        trust_vector_lenght = u[0] * 10 * self.width / (self.u_ub[0] - self.u_lb[0])
+        V , gamma , alpha = self.compute_velocity_vector( q , dq )
+        
+        world_T_body = Transformation_Matrix_2D_from_base_angle( theta , x , y )
+        body_T_wind  = Transformation_Matrix_2D_from_base_angle( -alpha , 0 , 0 )
         
         delta = u[1]
         
@@ -515,10 +585,18 @@ class Plane2D( mechanical.MechanicalSystem ):
         # Trust vector
         ###########################
         
-        pts  = arrow_from_tip_angle( trust_vector_lenght , theta , bx , by )
+        # Max trust --> arrow is long as airplane
+        f_scale = self.length / (self.u_ub[0] - self.u_lb[0])
         
+        trust_vector_lenght = u[0] * f_scale
         
-        lines_pts.append( pts )
+        #pts  = arrow_from_tip_angle( trust_vector_lenght , theta , bx , by )
+        
+        trust_arrow_body = arrow_from_tip_components( trust_vector_lenght, 0, -self.l_cg, 0)
+        
+        trust_arrow_world = Transform_2D_Pts( trust_arrow_body , world_T_body  )
+        
+        lines_pts.append( trust_arrow_world )
         lines_style.append( '-')
         lines_color.append( 'r')
         
@@ -526,52 +604,69 @@ class Plane2D( mechanical.MechanicalSystem ):
         # Control surface
         ###########################
         
-        ctl_pts_local = np.array([ [ 0    ,  0   ,  1 ] , 
-                                    [ -2*w ,  0   ,  1 ] ])
+        c_t = np.sqrt( self.S_t / self.AR )
         
-        b_T_c = Transformation_Matrix_2D_from_base_angle( delta , w ,  0.5 * w )
-        a_T_b = Transformation_Matrix_2D_from_base_angle( theta , bx , by )
+        # NOT TO scale to better see the elevator
+        tail_pts_tail = np.array([ [  1.0 * c_t   ,  0  ,  1 ] , 
+                                   [ -1.0 * c_t   ,  0  ,  1 ] ]) 
         
-        ctl_pts_global = Transform_2D_Pts( ctl_pts_local , a_T_b @ b_T_c )
+        body_T_tail = Transformation_Matrix_2D_from_base_angle( delta , - self.l_t , 0 )
         
-        lines_pts.append( ctl_pts_global )
+        tail_pts_global = Transform_2D_Pts( tail_pts_tail , world_T_body @ body_T_tail)
+        
+        lines_pts.append( tail_pts_global )
         lines_style.append( '-')
         lines_color.append( 'b')
         
-        ###########################
-        # Aero forces
-        ###########################
+        # ###########################
+        # # Velocity vector
+        # ###########################
         
+        v_length = V * self.length / sys.x_ub[3]
+        if v_length > self.length: v_length = self.length
         
-        V , gamma , alpha = self.compute_velocity_vector( q , dq )
+        v_pts = arrow_from_base_components( v_length , 0, 0, 0)
         
-        pts = arrow_from_components(V, 0, 0, 0)
+        v_world = Transform_2D_Pts( v_pts , world_T_body @ body_T_wind  )
         
-        b_T_w = Transformation_Matrix_2D_from_base_angle( -alpha  , 4.5 * w , 0.5 * w )
-        
-        pts_global = Transform_2D_Pts( pts , a_T_b @ b_T_w )
-        
-        lines_pts.append( pts_global )
+        lines_pts.append( v_world  )
         lines_style.append('-')
         lines_color.append('k')
         
-        L, D, M = self.compute_aerodynamic_forces( V , alpha , 0 )
+        # ###########################
+        # # Aero forces
+        # ###########################
         
-        pts = arrow_from_components(0, L, 0, 0)
         
-        b_T_w = Transformation_Matrix_2D_from_base_angle( -alpha  , 4.5 * w , 0.5 * w )
+        L_w, D_w, M_w, L_t, D_t, M_t = self.compute_aerodynamic_forces( V , alpha , delta )
         
-        pts_global = Transform_2D_Pts( pts , a_T_b @ b_T_w )
+        L_w_pts = arrow_from_base_components(0, L_w * f_scale, 0, 0)
+        D_w_pts = arrow_from_base_components(-D_w * f_scale, 0, 0, 0)
+        L_t_pts = arrow_from_base_components(0, L_t * f_scale, 0, 0)
+        D_t_pts = arrow_from_base_components(-D_t * f_scale, 0, 0, 0)
         
-        lines_pts.append( pts_global )
+        body_T_acw = Transformation_Matrix_2D_from_base_angle( 0 , -self.l_w , 0  )
+        body_T_act = Transformation_Matrix_2D_from_base_angle( 0 , -self.l_t , 0  )
+        
+        L_w_pts_global = Transform_2D_Pts( L_w_pts , world_T_body @  body_T_acw @ body_T_wind )
+        D_w_pts_global = Transform_2D_Pts( D_w_pts , world_T_body @  body_T_acw @ body_T_wind )
+        
+        lines_pts.append( L_w_pts_global )
         lines_style.append('-')
-        lines_color.append('c')
+        lines_color.append('b')
         
-        pts = arrow_from_components(-D, 0, 0, 0)
+        lines_pts.append( D_w_pts_global )
+        lines_style.append('-')
+        lines_color.append('r')
         
-        pts_global = Transform_2D_Pts( pts , a_T_b @ b_T_w )
+        L_t_pts_global = Transform_2D_Pts( L_t_pts , world_T_body @  body_T_act @ body_T_wind )
+        D_t_pts_global = Transform_2D_Pts( D_t_pts , world_T_body @  body_T_act @ body_T_wind )
         
-        lines_pts.append( pts_global )
+        lines_pts.append( L_t_pts_global )
+        lines_style.append('-')
+        lines_color.append('b')
+        
+        lines_pts.append( D_t_pts_global )
         lines_style.append('-')
         lines_color.append('r')
         
@@ -596,15 +691,15 @@ if __name__ == "__main__":
     
         sys = Plane2D()
         
-        sys.plot_alpha2Cl()
+        #sys.plot_alpha2Cl()
         
-        sys.x0   = np.array([0,0,0.2,10,0,0])
+        sys.x0   = np.array([0,0,0.0,30,0,0])
         
         
         
         def t2u(t):
             
-            u = np.array([ 10 , 0 ])
+            u = np.array([ 20 , -0.01 ])
             
             return u
             
@@ -613,8 +708,8 @@ if __name__ == "__main__":
         
         #sys.gravity = 0
         
-        sys.compute_trajectory( 10 , 20001 , 'euler' )
-        #sys.plot_trajectory('x')
+        sys.compute_trajectory( 10 , 10001 , 'euler' )
+        sys.plot_trajectory('x')
         
         #sys.dynamic_domain = False
         sys.animate_simulation( time_factor_video=0.5 )
