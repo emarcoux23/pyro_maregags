@@ -157,8 +157,8 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         self.x_ub = np.array([+100,+200,+2,30,30,10])
         self.x_lb = np.array([-100,-0,-2,-30,-30,-10])
         
-        self.u_ub = np.array([+100,+0.3])
-        self.u_lb = np.array([-100,-0.3])
+        self.u_ub = np.array([+10,+0.3])
+        self.u_lb = np.array([-10,-0.3])
         
         # Model param
         self.mass           = 2.0      # kg
@@ -510,12 +510,13 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         lines_style.append( '-')
         lines_color.append( 'b')
         
-        
-        cg = np.array([ [ x  ,  y   ,  1 ] ])
-        
-        lines_pts.append( cg )
-        lines_style.append( 'o')
-        lines_color.append( 'k')
+        if self.dynamic_domain :
+            
+            cg = np.array([ [ x  ,  y   ,  1 ] ])
+            
+            lines_pts.append( cg )
+            lines_style.append( 'o')
+            lines_color.append( 'k')
         
         ###########################
         # Wings
@@ -651,24 +652,40 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         L_w_pts_global = Transform_2D_Pts( L_w_pts , world_T_body @  body_T_acw @ body_T_wind )
         D_w_pts_global = Transform_2D_Pts( D_w_pts , world_T_body @  body_T_acw @ body_T_wind )
         
+        #Change color if stalled:
+        if (alpha < self.alpha_stall ) and (alpha > -self.alpha_stall ):
+            L_color = 'b'
+            D_color = 'r'
+        else:
+            L_color = 'c'
+            D_color = 'm'
+        
         lines_pts.append( L_w_pts_global )
         lines_style.append('-')
-        lines_color.append('b')
+        lines_color.append( L_color )
         
         lines_pts.append( D_w_pts_global )
         lines_style.append('-')
-        lines_color.append('r')
+        lines_color.append( D_color )
         
         L_t_pts_global = Transform_2D_Pts( L_t_pts , world_T_body @  body_T_act @ body_T_wind )
         D_t_pts_global = Transform_2D_Pts( D_t_pts , world_T_body @  body_T_act @ body_T_wind )
         
+        #Change color if stalled:
+        if (( alpha + delta ) < self.alpha_stall ) and ( ( alpha + delta )  > -self.alpha_stall ):
+            L_color = 'b'
+            D_color = 'r'
+        else:
+            L_color = 'c'
+            D_color = 'm'
+        
         lines_pts.append( L_t_pts_global )
         lines_style.append('-')
-        lines_color.append('b')
+        lines_color.append( L_color )
         
         lines_pts.append( D_t_pts_global )
         lines_style.append('-')
-        lines_color.append('r')
+        lines_color.append( D_color )
         
                 
         return lines_pts , lines_style , lines_color
@@ -693,23 +710,22 @@ if __name__ == "__main__":
         
         #sys.plot_alpha2Cl()
         
-        sys.x0   = np.array([0,0,0.0,30,0,0])
+        sys.x0   = np.array([0,0,0.2,15,0,0])
         
         
         
         def t2u(t):
             
-            u = np.array([ 20 , -0.01 ])
+            u = np.array([ 2 * t , -0.12 * t ])
             
             return u
             
         sys.t2u = t2u
-        #sys.ubar = np.array([ 3 , -0.05 ])
         
         #sys.gravity = 0
         
-        sys.compute_trajectory( 10 , 10001 , 'euler' )
+        sys.compute_trajectory( 10 , 20001 , 'euler' )
         sys.plot_trajectory('x')
         
-        #sys.dynamic_domain = False
+        # sys.dynamic_domain = False
         sys.animate_simulation( time_factor_video=0.5 )
