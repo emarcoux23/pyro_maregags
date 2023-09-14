@@ -18,91 +18,8 @@ from pyro.kinematic import drawing
 
 
 
-
-###############################################################################
-def arrow_from_base_angle( l , theta , bx , by ):
-
-    d = l * 0.15          # length of arrow secondary lines
-    
-    pts_local = np.array([ [ 0   ,  0 ,  1 ] , 
-                           [ l   ,  0 ,  1 ] ,
-                           [ l-d ,  d ,  1 ] ,
-                           [ l   ,  0 ,  1 ] ,
-                           [ l-d , -d ,  1 ] ])
-    
-    T = geometry.transformation_matrix_2D( theta , bx , by )
-    
-    pts_global = drawing.transform_points_2D( T , pts_local )
-    
-    
-    return pts_global
-
-
-###############################################################################
-def arrow_from_tip_angle( l , theta , bx , by ):
-
-    d = l * 0.15          # length of arrow secondary lines
-    
-    pts_local = np.array([ [ -l  ,  0 ,  1 ] , 
-                           [ 0   ,  0 ,  1 ] ,
-                           [ -d  ,  d ,  1 ] ,
-                           [ 0   ,  0 ,  1 ] ,
-                           [  -d , -d ,  1 ] ])
-    
-    T = geometry.transformation_matrix_2D( theta , bx , by )
-    
-    pts_global = drawing.transform_points_2D( T , pts_local )
-    
-    
-    return pts_global
-
-###############################################################################
-def arrow_from_base_components( vx , vy , bx , by ):
-    
-    l = np.sqrt( vx**2 + vy**2 )
-    d = l * 0.15              # length of arrow secondary lines
-    
-    pts_local = np.array([ [ 0   ,  0 ,  1 ] , 
-                           [ l   ,  0 ,  1 ] ,
-                           [ l-d ,  d ,  1 ] ,
-                           [ l   ,  0 ,  1 ] ,
-                           [ l-d , -d ,  1 ] ])
-    
-    theta = np.arctan2( vy , vx )
-    
-    T = geometry.transformation_matrix_2D( theta , bx , by )
-    
-    pts_global = drawing.transform_points_2D( T , pts_local )
-    
-    
-    return pts_global
-
-###############################################################################
-def arrow_from_tip_components( vx , vy , bx , by ):
-    
-    l = np.sqrt( vx**2 + vy**2 )
-    d = l * 0.15              # length of arrow secondary lines
-    
-    pts_local = np.array([ [ -l  ,  0 ,  1 ] , 
-                           [ 0   ,  0 ,  1 ] ,
-                           [ -d  ,  d ,  1 ] ,
-                           [ 0   ,  0 ,  1 ] ,
-                           [  -d , -d ,  1 ] ])
-    
-    theta = np.arctan2( vy , vx )
-    
-    T = geometry.transformation_matrix_2D( theta , bx , by )
-    
-    pts_global = drawing.transform_points_2D( T , pts_local )
-    
-    
-    return pts_global
-
-
-
-
 ##############################################################################
-# 2D planar drone
+# 2D planar plane
 ##############################################################################
         
 class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
@@ -572,7 +489,7 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         
         #pts  = arrow_from_tip_angle( trust_vector_lenght , theta , bx , by )
         
-        trust_arrow_body = arrow_from_tip_components( trust_vector_lenght, 0, -self.l_cg, 0)
+        trust_arrow_body = drawing.arrow_from_length_angle( trust_vector_lenght, 0, -self.l_cg, 0 , origin = 'tip')
         
         trust_arrow_world = drawing.transform_points_2D( world_T_body , trust_arrow_body )
         
@@ -605,7 +522,7 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         v_length = V * self.length / self.x_ub[3]
         if v_length > self.length: v_length = self.length
         
-        v_pts = arrow_from_base_components( v_length , 0, 0, 0)
+        v_pts = drawing.arrow_from_length_angle( v_length , 0 )
         
         v_world = drawing.transform_points_2D( world_T_body @ body_T_wind , v_pts )
         
@@ -617,13 +534,12 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         # # Aero forces
         # ###########################
         
-        
         L_w, D_w, M_w, L_t, D_t, M_t = self.compute_aerodynamic_forces( V , alpha , delta )
         
-        L_w_pts = arrow_from_base_components(0, L_w * f_scale, 0, 0)
-        D_w_pts = arrow_from_base_components(-D_w * f_scale, 0, 0, 0)
-        L_t_pts = arrow_from_base_components(0, L_t * f_scale, 0, 0)
-        D_t_pts = arrow_from_base_components(-D_t * f_scale, 0, 0, 0)
+        L_w_pts = drawing.arrow_from_components(               0, L_w * f_scale )
+        D_w_pts = drawing.arrow_from_components(  -D_w * f_scale,             0 )
+        L_t_pts = drawing.arrow_from_components(               0, L_t * f_scale )
+        D_t_pts = drawing.arrow_from_components(  -D_t * f_scale,             0 )
         
         body_T_acw = geometry.transformation_matrix_2D( 0 , -self.l_w , 0  )
         body_T_act = geometry.transformation_matrix_2D( 0 , -self.l_t , 0  )
