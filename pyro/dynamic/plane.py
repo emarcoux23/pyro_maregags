@@ -547,40 +547,25 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         L_w_pts_global = drawing.transform_points_2D( world_T_body @  body_T_acw @ body_T_wind , L_w_pts )
         D_w_pts_global = drawing.transform_points_2D( world_T_body @  body_T_acw @ body_T_wind , D_w_pts )
         
-        #Change color if stalled:
-        if (alpha < self.alpha_stall ) and (alpha > -self.alpha_stall ):
-            L_color = 'b'
-            D_color = 'r'
-        else:
-            L_color = 'c'
-            D_color = 'm'
-        
         lines_pts.append( L_w_pts_global )
         lines_style.append('-')
-        lines_color.append( L_color )
+        lines_color.append('b')
         
         lines_pts.append( D_w_pts_global )
         lines_style.append('-')
-        lines_color.append( D_color )
+        lines_color.append( 'r' )
         
         L_t_pts_global = drawing.transform_points_2D( world_T_body @  body_T_act @ body_T_wind , L_t_pts )
         D_t_pts_global = drawing.transform_points_2D( world_T_body @  body_T_act @ body_T_wind , D_t_pts )
         
-        #Change color if stalled:
-        if (( alpha + delta ) < self.alpha_stall ) and ( ( alpha + delta )  > -self.alpha_stall ):
-            L_color = 'b'
-            D_color = 'r'
-        else:
-            L_color = 'c'
-            D_color = 'm'
         
         lines_pts.append( L_t_pts_global )
         lines_style.append('-')
-        lines_color.append( L_color )
+        lines_color.append('b')
         
         lines_pts.append( D_t_pts_global )
         lines_style.append('-')
-        lines_color.append( D_color )
+        lines_color.append('r')
         
                 
         return lines_pts , lines_style , lines_color

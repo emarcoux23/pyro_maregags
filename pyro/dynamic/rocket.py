@@ -299,7 +299,7 @@ if __name__ == "__main__":
     sys.x0[0] = 0
     
     sys.ubar[0] = sys.mass * sys.gravity * 1.1
-    sys.ubar[1] = -0.005
+    sys.ubar[1] = -0.001
     
     sys.plot_trajectory()
     sys.animate_simulation()
