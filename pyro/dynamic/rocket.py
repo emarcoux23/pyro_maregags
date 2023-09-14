@@ -132,7 +132,7 @@ class Rocket( mechanical.MechanicalSystemWithPositionInputs ):
     
         
     ###########################################################################
-    def d(self, q , dq ):
+    def d(self, q , dq , u ):
         """ 
         State-dependent dissipative forces : dof x 1
         """

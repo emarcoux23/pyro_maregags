@@ -10,35 +10,13 @@ Created on Tue Jun 20 10:29:50 2023
 import numpy as np
 import matplotlib.pyplot as plt
 ###############################################################################
-from pyro.analysis import graphical
-from pyro.dynamic import system
-from pyro.dynamic import mechanical
+from pyro.analysis  import graphical
+from pyro.dynamic   import mechanical
+from pyro.kinematic import geometry
+from pyro.kinematic import drawing
 ###############################################################################
 
 
-###############################################################################
-def Transformation_Matrix_2D_from_base_angle( theta , x , y ):
-    
-    s = np.sin( theta )
-    c = np.cos( theta )
-    
-    T = np.array([ [ c   , -s ,  x ] , 
-                   [ s   ,  c ,  y ] ,
-                   [ 0   ,  0 ,  1 ] ])
-    
-    return T
-
-
-###############################################################################
-def Transform_2D_Pts( pts , T ):
-    
-    pts_transformed = np.zeros( pts.shape )
-    
-    for i in range(pts.shape[0]):
-        
-        pts_transformed[ i ] = T @ pts[ i ]
-    
-    return pts_transformed
 
 
 ###############################################################################
@@ -52,9 +30,9 @@ def arrow_from_base_angle( l , theta , bx , by ):
                            [ l   ,  0 ,  1 ] ,
                            [ l-d , -d ,  1 ] ])
     
-    T = Transformation_Matrix_2D_from_base_angle( theta , bx , by )
+    T = geometry.transformation_matrix_2D( theta , bx , by )
     
-    pts_global = Transform_2D_Pts( pts_local , T )
+    pts_global = drawing.transform_points_2D( T , pts_local )
     
     
     return pts_global
@@ -71,9 +49,9 @@ def arrow_from_tip_angle( l , theta , bx , by ):
                            [ 0   ,  0 ,  1 ] ,
                            [  -d , -d ,  1 ] ])
     
-    T = Transformation_Matrix_2D_from_base_angle( theta , bx , by )
+    T = geometry.transformation_matrix_2D( theta , bx , by )
     
-    pts_global = Transform_2D_Pts( pts_local , T )
+    pts_global = drawing.transform_points_2D( T , pts_local )
     
     
     return pts_global
@@ -92,9 +70,9 @@ def arrow_from_base_components( vx , vy , bx , by ):
     
     theta = np.arctan2( vy , vx )
     
-    T = Transformation_Matrix_2D_from_base_angle( theta , bx , by )
+    T = geometry.transformation_matrix_2D( theta , bx , by )
     
-    pts_global = Transform_2D_Pts( pts_local , T )
+    pts_global = drawing.transform_points_2D( T , pts_local )
     
     
     return pts_global
@@ -113,9 +91,9 @@ def arrow_from_tip_components( vx , vy , bx , by ):
     
     theta = np.arctan2( vy , vx )
     
-    T = Transformation_Matrix_2D_from_base_angle( theta , bx , by )
+    T = geometry.transformation_matrix_2D( theta , bx , by )
     
-    pts_global = Transform_2D_Pts( pts_local , T )
+    pts_global = drawing.transform_points_2D( T , pts_local )
     
     
     return pts_global
@@ -491,9 +469,9 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         y     = q[1]
         theta = q[2]
         
-        world_T_body = Transformation_Matrix_2D_from_base_angle( theta , x , y )
-        #body_T_wind  = Transformation_Matrix_2D_from_base_angle( -alpha , 0 , 0 )
-        body_T_drawing = Transformation_Matrix_2D_from_base_angle( 0 , -self.l_cg , -w/2 )
+        world_T_body = geometry.transformation_matrix_2D( theta , x , y )
+        #body_T_wind  = transformation_matrix_2D_from_base_angle( -alpha , 0 , 0 )
+        body_T_drawing = geometry.transformation_matrix_2D( 0 , -self.l_cg , -w/2 )
         
         body_pts_local = np.array([ [ 0   ,  0   ,  1 ] , 
                                     [ l   ,  0   ,  1 ] ,
@@ -504,7 +482,7 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
                                     [ 0   ,  0   ,  1 ] ])
 
         
-        body_pts_global = Transform_2D_Pts( body_pts_local , world_T_body @  body_T_drawing)
+        body_pts_global = drawing.transform_points_2D( world_T_body @  body_T_drawing , body_pts_local )
         
         lines_pts.append( body_pts_global )
         lines_style.append( '-')
@@ -531,7 +509,7 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
                                     [ -self.l_w - c_w   ,  0  ,  1 ] ])
         
         
-        wings_pts_world = Transform_2D_Pts( wings_pts_body , world_T_body )
+        wings_pts_world = drawing.transform_points_2D( world_T_body , wings_pts_body )
         
         lines_pts.append( wings_pts_world )
         lines_style.append( '-')
@@ -577,8 +555,9 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         
         V , gamma , alpha = self.compute_velocity_vector( q , dq )
         
-        world_T_body = Transformation_Matrix_2D_from_base_angle( theta , x , y )
-        body_T_wind  = Transformation_Matrix_2D_from_base_angle( -alpha , 0 , 0 )
+        
+        world_T_body = geometry.transformation_matrix_2D( theta , x , y )
+        body_T_wind  = geometry.transformation_matrix_2D( -alpha , 0 , 0 )
         
         delta = u[1]
         
@@ -595,7 +574,7 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         
         trust_arrow_body = arrow_from_tip_components( trust_vector_lenght, 0, -self.l_cg, 0)
         
-        trust_arrow_world = Transform_2D_Pts( trust_arrow_body , world_T_body  )
+        trust_arrow_world = drawing.transform_points_2D( world_T_body , trust_arrow_body )
         
         lines_pts.append( trust_arrow_world )
         lines_style.append( '-')
@@ -611,9 +590,9 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         tail_pts_tail = np.array([ [  1.0 * c_t   ,  0  ,  1 ] , 
                                    [ -1.0 * c_t   ,  0  ,  1 ] ]) 
         
-        body_T_tail = Transformation_Matrix_2D_from_base_angle( delta , - self.l_t , 0 )
+        body_T_tail = geometry.transformation_matrix_2D( delta , - self.l_t , 0 )
         
-        tail_pts_global = Transform_2D_Pts( tail_pts_tail , world_T_body @ body_T_tail)
+        tail_pts_global = drawing.transform_points_2D( world_T_body @ body_T_tail , tail_pts_tail )
         
         lines_pts.append( tail_pts_global )
         lines_style.append( '-')
@@ -628,7 +607,7 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         
         v_pts = arrow_from_base_components( v_length , 0, 0, 0)
         
-        v_world = Transform_2D_Pts( v_pts , world_T_body @ body_T_wind  )
+        v_world = drawing.transform_points_2D( world_T_body @ body_T_wind , v_pts )
         
         lines_pts.append( v_world  )
         lines_style.append('-')
@@ -646,11 +625,11 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         L_t_pts = arrow_from_base_components(0, L_t * f_scale, 0, 0)
         D_t_pts = arrow_from_base_components(-D_t * f_scale, 0, 0, 0)
         
-        body_T_acw = Transformation_Matrix_2D_from_base_angle( 0 , -self.l_w , 0  )
-        body_T_act = Transformation_Matrix_2D_from_base_angle( 0 , -self.l_t , 0  )
+        body_T_acw = geometry.transformation_matrix_2D( 0 , -self.l_w , 0  )
+        body_T_act = geometry.transformation_matrix_2D( 0 , -self.l_t , 0  )
         
-        L_w_pts_global = Transform_2D_Pts( L_w_pts , world_T_body @  body_T_acw @ body_T_wind )
-        D_w_pts_global = Transform_2D_Pts( D_w_pts , world_T_body @  body_T_acw @ body_T_wind )
+        L_w_pts_global = drawing.transform_points_2D( world_T_body @  body_T_acw @ body_T_wind , L_w_pts )
+        D_w_pts_global = drawing.transform_points_2D( world_T_body @  body_T_acw @ body_T_wind , D_w_pts )
         
         #Change color if stalled:
         if (alpha < self.alpha_stall ) and (alpha > -self.alpha_stall ):
@@ -668,8 +647,8 @@ class Plane2D( mechanical.MechanicalSystemWithPositionInputs ):
         lines_style.append('-')
         lines_color.append( D_color )
         
-        L_t_pts_global = Transform_2D_Pts( L_t_pts , world_T_body @  body_T_act @ body_T_wind )
-        D_t_pts_global = Transform_2D_Pts( D_t_pts , world_T_body @  body_T_act @ body_T_wind )
+        L_t_pts_global = drawing.transform_points_2D( world_T_body @  body_T_act @ body_T_wind , L_t_pts )
+        D_t_pts_global = drawing.transform_points_2D( world_T_body @  body_T_act @ body_T_wind , D_t_pts )
         
         #Change color if stalled:
         if (( alpha + delta ) < self.alpha_stall ) and ( ( alpha + delta )  > -self.alpha_stall ):
