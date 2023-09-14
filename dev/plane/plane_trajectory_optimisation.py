@@ -20,7 +20,7 @@ sys.x0   = np.array([0,0,0,20,0,0])
 
 def t2u(t):
     
-    u = np.array([ 10 , -0.2  ])
+    u = np.array([ 20 , -0.1  ])
     
     return u
     
@@ -29,17 +29,17 @@ sys.t2u = t2u
 #sys.gravity = 0
 
 sys.compute_trajectory( 2 , 2001 , 'euler' )
-# sys.plot_trajectory('x')
-# sys.animate_simulation( time_factor_video=0.5 )
+#sys.plot_trajectory('x')
+sys.animate_simulation( time_factor_video=0.5 )
 
 planner = DirectCollocationTrajectoryOptimisation( sys )
 
 planner.x_start = sys.x0
-planner.x_goal  = np.array([25,20,1.6,0,10,0])
+planner.x_goal  = sys.traj.x[-1,:]
 
 planner.grid    = 20
 planner.dt      = 0.1
-planner.maxiter = 200
+planner.maxiter = 400
 
 planner.set_initial_trajectory_guest( sys.traj )
 
