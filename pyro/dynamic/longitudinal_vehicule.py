@@ -183,6 +183,47 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         
         return dx
     
+    #############################
+    def isavalidinput(self , x , u):
+        """ check if u is in the control inputs domain given x """
+        
+        ans = False
+        
+        # Min-Max Slip
+        
+        for i in range(self.m):
+            ans = ans or ( u[i] < self.u_lb[i] )
+            ans = ans or ( u[i] > self.u_ub[i] )
+        
+        # Normal Forces Negatives?
+        
+        slip = u
+        v    = x[1]
+        
+        # compute ratio of horizontal/vertical force
+        mu = self.slip2force( slip ) 
+        
+        # constant params local vairables
+        ry, rr, rf = self.compute_ratios() 
+        m          = self.mass 
+        g          = self.gravity
+        rcda       = self.rho * self.cdA
+        
+        # Drag froce
+        fd = 0.5 * rcda * v * np.abs( v ) # drag froce with the right sign
+        
+        # Acceleration (equation considering weight transfer)
+        a  = (mu * m * g * rr - fd )/( m * (1 + mu * ry ))
+        
+        # Normal force check
+        fn_front = m * g * rr - m * a * ry
+        fn_rear  = m * g * rf + m * a * ry
+        
+        ans = ans or ( fn_front < 0. )
+        ans = ans or ( fn_rear  < 0. )
+            
+        return not(ans)
+    
     
     ###########################################################################
     # For graphical output

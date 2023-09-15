@@ -15,7 +15,7 @@ from pyro.planning import dynamicprogramming
 from pyro.analysis import graphical
 ##############################################################################
 
-case_name = 'car_test_l5_w50'
+case_name = 'car_test'
 show = True
 res = 'std'
 legend = 1
@@ -24,7 +24,7 @@ legend = 1
 #dim context
 
 x_c_star = 0.5
-y_c_star = 0.5 
+y_c_star = 0.7
 x_w_star = 50.0
 
 # param
@@ -40,7 +40,7 @@ x_w = x_w_star * length
 x_max = 10 * length
 v_max = 2 * np.sqrt( gravity * length )
 t_max = 10 * x_max / v_max
-s_max = 0.3
+s_max = 0.1
 j_max = t_max * ( ( x_max / x_w  ) **2 + s_max ** 2 )
 
 
@@ -66,7 +66,7 @@ sys.rho     = 1.      # air density [kg/m3]
 sys.cdA     = 0.    # drag coef time area [m2]
 
 # Ground traction curve parameters
-sys.mu_max   = 0.5
+sys.mu_max   = 1.0
 sys.mu_slope = 70.
 
 sys.u_ub[0]  = + s_max
