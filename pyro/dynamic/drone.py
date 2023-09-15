@@ -794,8 +794,9 @@ class ConstantSpeedHelicopterTunnel( system.ContinuousDynamicSystem ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
+    #sys = Drone2D()
     
-    if False:
+    if True:
     
         sys = Drone2D()
         
@@ -807,7 +808,7 @@ if __name__ == "__main__":
         sys.plot_trajectory()
         sys.animate_simulation()
         
-    if True:
+    if False:
         
         sys = SpeedControlledDrone2D()
         
