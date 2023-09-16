@@ -122,6 +122,8 @@ To learn how to use pyro, see the following notebook tutorials hosted on colab:
 
 Also see exemples scripts in pyro/examples/ 
 
+and tutorial video (in french) on youtube: [here](https://youtube.com/playlist?list=PL6adNeJ0A8UtD_HQJTv6FHalnj0t7RyVa&si=SoZGOcYpsjLWvw27)
+
 
 # Installation #
 
