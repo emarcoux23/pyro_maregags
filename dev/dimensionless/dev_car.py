@@ -24,8 +24,8 @@ legend = 1
 #dim context
 
 x_c_star = 0.5
-y_c_star = 0.7
-x_w_star = 50.0
+y_c_star = 1.2
+x_w_star = 10.0
 
 # param
 length  = 5.0

@@ -381,7 +381,7 @@ def sensitivity( ts , qs , res = 'mid' , name = 'sensitivity' , legend = 1):
 ### Quick tests
 ####################################
 
-res = 'test'
+res = 'std'
 
 
 dp , cl_sys = case( m=1 , g=10 , l=1 , t_max_star=0.5 , q_star= 0.1 , case_name = 'test', res = res, show = True )
