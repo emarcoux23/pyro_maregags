@@ -22,8 +22,9 @@ planner = DirectCollocationTrajectoryOptimisation( sys , 0.1, 40 )
 planner.x_start = np.array([0.5,0.5,0,0])
 planner.x_goal  = np.array([0,0,0,0])
 
+planner.init_dynamic_plot()
 planner.compute_optimal_trajectory()
-planner.show_solution()
+# planner.show_solution()
 planner.animate_solution()
 
 

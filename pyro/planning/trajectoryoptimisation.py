@@ -7,10 +7,13 @@ Created on Mon Oct  4 05:49:06 2021
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
+
 from scipy.optimize import minimize
 
 from pyro.analysis import simulation
 from pyro.planning import plan
+from pyro.analysis import graphical
 
 
 ###############################################################################
@@ -27,7 +30,7 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     """
     
     ############################
-    def __init__(self, sys , dt = 0.2 , grid = 20 , cost_function = None ):
+    def __init__(self, sys , dt = 0.2 , grid = 20 , cost_function = None,  dynamic_plot = False ):
         
         
         # Set sys, default cost function x_start and x_goal
@@ -48,12 +51,36 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
         # Memory variable
         self.iter_count = 0
         
+        # Optional Convergence Graph
+        self.dynamic_plot = dynamic_plot
+        
+        if dynamic_plot:
+            
+            self.init_dynamic_plot()
+            
+            
+    ############################
+    def init_dynamic_plot(self):
+        
+        # Graphic option
+        self.dynamic_plot = True
+            
+        traj = self.decisionvariables2traj( self.dec_init )
+        self.plotter = graphical.TrajectoryPlotter( self.sys )
+        self.plotter.plot( traj, 'xu' )
+        
         
     ############################
     def set_initial_trajectory_guest(self, traj):
         
         new_traj      = traj.re_sample( self.grid )
         self.dec_init = self.traj2decisionvariables( new_traj )
+        
+        if self.dynamic_plot:
+            
+            traj = self.decisionvariables2traj( self.dec_init )
+            self.plotter.update_plot( traj, 'xu' )
+            plt.pause( 0.001 )
         
     
     ############################
@@ -291,11 +318,18 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     
     
     ##############################
-    def display_callback(self, a ):
+    def display_callback(self, x ):
         
         self.iter_count = self.iter_count + 1
         
         print('Optimizing trajectory: Iteration', self.iter_count)
+        
+        if self.dynamic_plot:
+            
+            traj = self.decisionvariables2traj( x )
+            self.plotter.update_plot( traj, 'xu' )
+            plt.pause( 0.001 )
+        
         
         
     ##############################
@@ -346,5 +380,7 @@ if __name__ == "__main__":
     planner.x_start = np.array([0.1,0])
     planner.x_goal  = np.array([-3.14,0])
     
+    planner.init_dynamic_plot()
+    
     planner.compute_solution()
-    planner.show_solution()
+    # planner.show_solution()

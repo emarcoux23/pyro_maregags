@@ -212,6 +212,8 @@ class TrajectoryPlotter:
         """
         
         lines = self.lines
+        sys   = self.sys
+        plots = self.plots
         
         j = 0
         
@@ -220,25 +222,35 @@ class TrajectoryPlotter:
             # For all states
             for i in range( sys.n ):
                 lines[j].set_data( traj.t , traj.x[:,i] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
                 j = j + 1
 
         if plot == 'All' or plot == 'u' or plot == 'xu' or plot == 'xuj':
             # For all inputs
             for i in range( sys.m ):
                 lines[j].set_data( traj.t , traj.u[:,i] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
                 j = j + 1
 
         if plot == 'All' or plot == 'y' or plot == 'xy':
             # For all outputs
             for i in range( sys.p ):
                 lines[j].set_data( traj.t , traj.y[:,i] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
                 j = j + 1
 
         if plot == 'All' or plot == 'j' or plot == 'xuj':
             # Cost function
             lines[j].set_data( traj.t , traj.dJ[:,i] )
+            plots[j].relim()
+            plots[j].autoscale_view(True,True,True)
             j = j + 1
             lines[j].set_data( traj.t , traj.J[:,i] )
+            plots[j].relim()
+            plots[j].autoscale_view(True,True,True)
             j = j + 1
             
         if plot == 'z':
@@ -246,6 +258,8 @@ class TrajectoryPlotter:
             n = sys.n - sys.controller.l
             for i in range( self.l ):
                 lines[j].set_data( traj.t , traj.x[:,i+n] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
                 j = j + 1
         
     
