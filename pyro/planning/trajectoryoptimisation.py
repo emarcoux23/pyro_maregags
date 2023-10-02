@@ -9,6 +9,8 @@ Created on Mon Oct  4 05:49:06 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
+import time
+
 from scipy.optimize import minimize
 
 from pyro.analysis import simulation
@@ -50,6 +52,7 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
         
         # Memory variable
         self.iter_count = 0
+        self.start_time = time.time()
         
         # Optional Convergence Graph
         self.dynamic_plot = dynamic_plot
@@ -74,7 +77,7 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     def set_initial_trajectory_guest(self, traj):
         
         new_traj      = traj.re_sample( self.grid )
-        self.dec_init = self.traj2decisionvariables( new_traj )
+        self.dec_init = self.traj2decisionvariables( new_traj )[:,0]
         
         if self.dynamic_plot:
             
@@ -256,7 +259,7 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     
         x , u = self.decisionvariables2xu( dec )
         
-        residues_vec = np.zeros( (self.grid-1) * self.sys.n )
+        residues = np.zeros( ( self.grid - 1 , self.sys.n  ))
         
         for i in range(self.grid-1):
             
@@ -278,13 +281,9 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
             #num diff
             delta_x_num = x[:,i+1] - x[:,i] # numerical delta in trajectory data
             
-            diff = delta_x_num - delta_x_eqs
+            residues[i,:] = delta_x_num - delta_x_eqs
             
-            for j in range(self.sys.n):
-                #TODO numpy manip for replacing slow for loop
-                residues_vec[i + (self.grid-1) * j ] = diff[j]
-            
-        return residues_vec
+        return residues.flatten()
     
     
     ##############################
@@ -322,7 +321,8 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
         
         self.iter_count = self.iter_count + 1
         
-        print('Optimizing trajectory: Iteration', self.iter_count)
+        print('Optimizing trajectory: iteration no', self.iter_count , 
+              ' elapsed time = %.2f' % (time.time() - self.start_time ) )
         
         if self.dynamic_plot:
             
@@ -334,6 +334,8 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
         
     ##############################
     def compute_optimal_trajectory(self):
+        
+        self.start_time = time.time()
         
         self.compute_bounds()
         
@@ -383,4 +385,7 @@ if __name__ == "__main__":
     planner.init_dynamic_plot()
     
     planner.compute_solution()
-    # planner.show_solution()
+    planner.show_solution()
+
+    
+    

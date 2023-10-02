@@ -56,9 +56,9 @@ class PLaneController( controller.StaticController ) :
         theta = y[2]
         y     = y[1]
         
-        T         = 10 * ( self.v_ref - v )
+        T         = +10 * ( self.v_ref - v )
         
-        theta_ref = 0.1 * ( self.y_ref - y )
+        theta_ref = +0.1 * ( self.y_ref - y )
         
         delta     = -0.5 * ( theta_ref - theta )
         
