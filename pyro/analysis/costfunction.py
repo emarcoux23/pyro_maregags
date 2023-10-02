@@ -256,8 +256,15 @@ class QuadraticCostFunctionVectorized( CostFunction ):
     def h(self, x , t = 0):
         """ Final cost function with zero value """
         
-        # Quadratic terminal cost
-        J_f = np.diag( x.T @ self.S @ x )
+        if x.ndim == 1 :
+            
+            J_f = x.T @ self.S @ x 
+            
+            
+        else:
+            
+            # Quadratic terminal cost
+            J_f = np.diag( x.T @ self.S @ x )
         
         return J_f
     
@@ -265,9 +272,14 @@ class QuadraticCostFunctionVectorized( CostFunction ):
     #############################
     def g(self, x, u, t):
         """ Quadratic additive cost """
-
         
-        dJ = np.diag( x.T @ self.Q @ x )
+        if x.ndim == 1 :
+            
+            dJ = x.T @ self.Q @ x 
+            
+        else:
+        
+            dJ = np.diag( x.T @ self.Q @ x )
         
         return dJ
 

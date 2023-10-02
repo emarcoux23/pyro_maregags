@@ -289,7 +289,15 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
             
             # Vectorized operation version
             
-            pass
+            t  = np.linspace(0, ( self.grid - 1 )* self.dt, self.grid)
+            
+            dx = self.sys.f( x ,u , t )
+            
+            dx_eqs = 0.5 * ( dx[:,0:-1] + dx[:,1:] ) * self.dt
+            
+            dx_num = np.diff( x )
+            
+            residues = dx_num - dx_eqs
             
         
         else:
