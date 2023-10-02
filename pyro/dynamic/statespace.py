@@ -35,6 +35,8 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         
         ContinuousDynamicSystem.__init__( self, n, m, p)
         
+        self.is_vectorized = True
+        
     ############################################
     def _check_dimensions(self):
         

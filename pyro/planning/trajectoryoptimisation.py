@@ -50,6 +50,16 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
         self.compute_bounds()
         self.dec_init   = np.zeros( grid * ( sys.n + sys.m ) )
         
+        
+        # Check if vectorized operation are available
+        try:
+            is_vectorized = self.sys.is_vectorized & self.cost_function.is_vectorized
+        except:
+            is_vectorized = False
+        self.is_vectorized = is_vectorized
+            
+        
+        
         # Memory variable
         self.iter_count = 0
         self.start_time = time.time()
@@ -110,17 +120,20 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
         m    = self.sys.m   # number of inputs
         grid = self.grid    # number of time steps
     
-        x = np.zeros( ( n , grid ) ) 
-        u = np.zeros( ( m , grid ) )
+        # x = np.zeros( ( n , grid ) ) 
+        # u = np.zeros( ( m , grid ) )
         
-        # Extract states variables
-        for i in range(self.sys.n):
-            x[i,:] = dec[ i * grid : (i+1) * grid ]
+        # # Extract states variables
+        # for i in range(self.sys.n):
+        #     x[i,:] = dec[ i * grid : (i+1) * grid ]
             
-        # Extract input variables
-        for j in range(self.sys.m):
-            k = n + j
-            u[j,:] = dec[ k * grid : (k+1) * grid ]
+        # # Extract input variables
+        # for j in range(self.sys.m):
+        #     k = n + j
+        #     u[j,:] = dec[ k * grid : (k+1) * grid ]
+        
+        x = dec[: n * grid ].reshape( n , grid )
+        u = dec[ n * grid :].reshape( m , grid )
         
         return x,u
     
@@ -229,26 +242,39 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
         
         x,u = self.decisionvariables2xu( dec )
         
-        J = 0
+        if self.is_vectorized:
+            
+            # Vectorized operation version
+            t  = np.linspace(0, ( self.grid - 1 )* self.dt, self.grid)
+            
+            dJ = self.cost_function.g( x , u , t )
+            
+            J = np.trapz( dJ , t )
+            
+        else:
+            
+            # Loop version
         
-        for i in range(self.grid -1):
-            #i
-            x_i = x[:,i]
-            u_i = u[:,i]
-            t_i = i*self.dt
-            dJi = self.cost_function.g( x_i , u_i, t_i )
+            J = 0
             
-            #i+1
-            x_i1 = x[:,i+1]
-            u_i1 = u[:,i+1]
-            t_i1 = (i+1)*self.dt
-            dJi1 = self.cost_function.g( x_i1 , u_i1, t_i1 )
-            
-            #trapez
-            dJ = 0.5 * ( dJi + dJi1 )
-            
-            #integral
-            J = J + dJ * self.dt
+            for i in range(self.grid -1):
+                #i
+                x_i = x[:,i]
+                u_i = u[:,i]
+                t_i = i*self.dt
+                dJi = self.cost_function.g( x_i , u_i, t_i )
+                
+                #i+1
+                x_i1 = x[:,i+1]
+                u_i1 = u[:,i+1]
+                t_i1 = (i+1)*self.dt
+                dJi1 = self.cost_function.g( x_i1 , u_i1, t_i1 )
+                
+                #trapez
+                dJ = 0.5 * ( dJi + dJi1 )
+                
+                #integral
+                J = J + dJ * self.dt
             
         return J
     
@@ -259,29 +285,40 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     
         x , u = self.decisionvariables2xu( dec )
         
-        residues = np.zeros( ( self.grid - 1 , self.sys.n  ))
+        if self.is_vectorized:
+            
+            # Vectorized operation version
+            
+            pass
+            
         
-        for i in range(self.grid-1):
+        else:
             
-            #i
-            x_i = x[:,i]
-            u_i = u[:,i]
-            t_i = i*self.dt
-            dx_i = self.sys.f(x_i,u_i,t_i) # analytical state derivatives
+            # Loop version
+        
+            residues = np.zeros( ( self.grid - 1 , self.sys.n  ))
             
-            #i+1
-            x_i1 = x[:,i+1]
-            u_i1 = u[:,i+1]
-            t_i1 = (i+1)*self.dt
-            dx_i1 = self.sys.f(x_i1,u_i1,t_i1) # analytical state derivatives
-            
-            #trapez
-            delta_x_eqs = 0.5 * self.dt * (dx_i + dx_i1)
-            
-            #num diff
-            delta_x_num = x[:,i+1] - x[:,i] # numerical delta in trajectory data
-            
-            residues[i,:] = delta_x_num - delta_x_eqs
+            for i in range(self.grid-1):
+                
+                #i
+                x_i = x[:,i]
+                u_i = u[:,i]
+                t_i = i*self.dt
+                dx_i = self.sys.f(x_i,u_i,t_i) # analytical state derivatives
+                
+                #i+1
+                x_i1 = x[:,i+1]
+                u_i1 = u[:,i+1]
+                t_i1 = (i+1)*self.dt
+                dx_i1 = self.sys.f(x_i1,u_i1,t_i1) # analytical state derivatives
+                
+                #trapez
+                delta_x_eqs = 0.5 * self.dt * (dx_i + dx_i1)
+                
+                #num diff
+                delta_x_num = x[:,i+1] - x[:,i] # numerical delta in trajectory data
+                
+                residues[i,:] = delta_x_num - delta_x_eqs
             
         return residues.flatten()
     
