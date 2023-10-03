@@ -10,7 +10,7 @@ import numpy as np
 
 from pyro.dynamic.massspringdamper        import TwoMass
 from pyro.planning.trajectoryoptimisation import DirectCollocationTrajectoryOptimisation
-from pyro.analysis.costfunction          import QuadraticCostFunctionVectorized
+from pyro.analysis.costfunction           import QuadraticCostFunctionVectorized
 
 
 sys = TwoMass()
@@ -26,9 +26,9 @@ planner = DirectCollocationTrajectoryOptimisation( sys , 0.1, 40 , cost_function
 planner.x_start = np.array([0.5,0.5,0,0])
 planner.x_goal  = np.array([0,0,0,0])
 
-# planner.init_dynamic_plot()
+planner.init_dynamic_plot()
 planner.compute_optimal_trajectory()
 # planner.show_solution()
-planner.animate_solution()
+# planner.animate_solution()
 
 

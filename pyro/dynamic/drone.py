@@ -327,19 +327,19 @@ class SpeedControlledDrone2D( system.ContinuousDynamicSystem ):
         self.dynamic_range   = 10
         
         # Point Obstacles
-        self.obstacles = [
-                 np.array([ 0.  , 20. ]) ,
-                 np.array([ 0.  , 25. ]) ,
-                 np.array([ 0.  , 30. ]) ,
-                 np.array([ 5.  , 20. ]) ,
-                 np.array([ 5.  , 25. ]) ,
-                 np.array([ 5.  , 30. ]) ,
-                 np.array([ 10. , 20. ]) ,
-                 np.array([ 10. , 25. ]) ,
-                 np.array([ 10. , 30. ]) ,
-                 np.array([ 2.5 , 35  ]) ,
-                 np.array([ 7.5 , 35  ]) ,
-                ]
+        self.obstacles = np.array([[ 0.  , 20. ] ,
+                                   [ 0.  , 25. ] ,
+                                   [ 0.  , 30. ] ,
+                                   [ 5.  , 20. ] ,
+                                   [ 5.  , 25. ] ,
+                                   [ 5.  , 30. ] ,
+                                   [ 10. , 20. ] ,
+                                   [ 10. , 25. ] ,
+                                   [ 10. , 30. ] ,
+                                   [ 2.5 , 35  ] ,
+                                   [ 7.5 , 35  ] ] )
+        
+        self.is_vectorized = True
         
     ###########################################################################
     def f(self, x , u , t = 0 ):
@@ -796,7 +796,7 @@ if __name__ == "__main__":
     
     #sys = Drone2D()
     
-    if True:
+    if False:
     
         sys = Drone2D()
         
@@ -808,7 +808,7 @@ if __name__ == "__main__":
         sys.plot_trajectory()
         sys.animate_simulation()
         
-    if False:
+    if True:
         
         sys = SpeedControlledDrone2D()
         

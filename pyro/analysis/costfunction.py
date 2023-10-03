@@ -275,11 +275,11 @@ class QuadraticCostFunctionVectorized( CostFunction ):
         
         if x.ndim == 1 :
             
-            dJ = x.T @ self.Q @ x 
+            dJ = x.T @ self.Q @ x + u.T @ self.R @ u
             
         else:
         
-            dJ = np.diag( x.T @ self.Q @ x )
+            dJ = np.diag( x.T @ self.Q @ x ) + np.diag( u.T @ self.R @ u )
         
         return dJ
 

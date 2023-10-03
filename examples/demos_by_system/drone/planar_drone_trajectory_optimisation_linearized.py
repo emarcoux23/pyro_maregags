@@ -12,6 +12,8 @@ from pyro.dynamic.drone                   import Drone2D
 from pyro.planning.trajectoryoptimisation import DirectCollocationTrajectoryOptimisation
 from pyro.dynamic.statespace              import linearize
 
+from pyro.analysis.costfunction           import QuadraticCostFunctionVectorized
+
 
 # Non-linear model
 sys = Drone2D()
@@ -22,8 +24,9 @@ sys.ubar =  np.array([0.5,0.5]) * sys.mass * sys.gravity
 # Linear model
 ss  = linearize( sys , 0.01 )
 
+cf = QuadraticCostFunctionVectorized( sys.n, sys.m )
 
-planner = DirectCollocationTrajectoryOptimisation( ss )
+planner = DirectCollocationTrajectoryOptimisation( ss , cost_function = cf )
 
 planner.x_start = np.array([-5,0,0,0,0,0])
 planner.x_goal  = np.array([0,0,0,0,0,0])

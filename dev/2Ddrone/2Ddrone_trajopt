@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu May 18 12:30:17 2023
+
+@author: alex
+"""
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+from pyro.dynamic  import drone
+from pyro.analysis import costfunction
+from pyro.planning import trajectoryoptimisation
+
+# from pyro.planning import dynamicprogramming
+
+#############################################################################
+     
+class drone2Dcostfunction( costfunction.CostFunction ):
+    """ 
+
+    
+    """
+    
+    ############################
+    def __init__(self, obstacles ):
+        
+        costfunction.CostFunction.__init__(self)
+        
+        # dimensions
+        self.n = 2
+        self.m = 2
+
+        # Quadratic cost weights
+        self.Q = np.diag( np.ones(self.n)  )
+        self.R = np.diag( np.ones(self.m)  )
+        self.S = np.diag( np.zeros(self.n) )
+        
+        self.obstacles = obstacles
+        
+        self.is_vectorized = False
+        
+    
+    ############################
+    @classmethod
+    def from_sys(cls, sys):
+        """ From ContinuousDynamicSystem instance """
+        
+        instance = cls( sys.n , sys.m )
+        
+        return instance
+    
+
+    #############################
+    def h(self, x , t = 0):
+        """ Final cost function with zero value """
+        
+        if x.ndim == 1 :
+            
+            J_f = x.T @ self.S @ x 
+            
+            
+        else:
+            
+            # Quadratic terminal cost
+            J_f = np.diag( x.T @ self.S @ x )
+        
+        return J_f
+    
+    
+    #############################
+    def g(self, x, u, t):
+        """ Quadratic additive cost """
+        
+        if x.ndim == 1 :
+            
+            dJ = x.T @ self.Q @ x  + u.T @ self.R @ u
+            
+            # deltas    = self.obstacles - x
+            
+            # distances = np.linalg.norm( deltas , axis = 1 )
+            
+            # costs = 1.0 / distances
+            
+            # dJ = dJ + costs.sum()
+            
+        else:
+        
+            dJ = np.diag( x.T @ self.Q @ x )
+            
+            # plt.pause( 0.01 )
+            # input("Press Enter to continue...")
+            
+        
+        return dJ
+
+sys  = drone.SpeedControlledDrone2D()
+
+
+obstacles = np.array([[ 0.  , 20. ] ,
+                    [ 0.  , 25. ] ,
+                    [ 0.  , 30. ] ,
+                    [ 5.  , 20. ] ,
+                    [ 5.  , 25. ] ,
+                    [ 5.  , 30. ] ,
+                    [ 10. , 20. ] ,
+                    [ 10. , 25. ] ,
+                    [ 10. , 30. ] ,
+                    [ 2.5 , 35  ] ,
+                    [ 7.5 , 35  ] ] )
+
+sys.obstacles = obstacles
+
+sys.x_ub = np.array([+100,+100])
+sys.x_lb = np.array([-10,-10])
+
+sys.u_ub = np.array([+10,+10])
+sys.u_lb = np.array([-10,-10])
+
+
+
+cf = drone2Dcostfunction( obstacles )
+
+cf.Q[0,0] =   0.0
+cf.Q[1,1] =   0.0
+cf.R[0,0] = 100.0
+cf.R[1,1] = 100.0
+
+
+        
+x0 = 0.0
+y0 = 0.0
+xf = 10.0
+yf = 30.0
+tf = 10.0
+vx = (xf-x0)/tf
+vy = (yf-y0)/tf
+
+grid = 20
+dt   = tf / grid
+
+planner = trajectoryoptimisation.DirectCollocationTrajectoryOptimisation( sys , dt , grid , cf)
+
+planner.dec_init[ 0 * grid : 1 * grid ] = np.linspace( x0 , xf , grid )
+planner.dec_init[ 1 * grid : 2 * grid ] = np.linspace( y0 , yf , grid )
+planner.dec_init[ 2 * grid : 3 * grid ] = vx
+planner.dec_init[ 3 * grid : 4 * grid ] = vy
+
+
+planner.x_start = np.array([x0,y0])
+planner.x_goal  = np.array([xf,yf])
+
+planner.init_dynamic_plot()
+planner.compute_solution()
+planner.animate_solution()
+

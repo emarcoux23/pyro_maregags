@@ -249,7 +249,7 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
             
             dJ = self.cost_function.g( x , u , t )
             
-            J = np.trapz( dJ , t )
+            J  = np.trapz( dJ , t )
             
         else:
             
@@ -430,7 +430,7 @@ if __name__ == "__main__":
     planner.init_dynamic_plot()
     
     planner.compute_solution()
-    planner.show_solution()
+    planner.animate_solution()
 
     
     
