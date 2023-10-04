@@ -110,7 +110,7 @@ class drone2Dcostfunction( costfunction.CostFunction ):
             
             # costs[ distances > self.d_tol ] = 0
             
-            dJ = dJ + costs.sum()
+            dJ = dJ + costs.sum( axis = 0 )
             
         
         return dJ
@@ -154,7 +154,7 @@ cf.nab    = 10000.0
         
 x0 =  0.0
 y0 = 16.0
-xf = 10.2
+xf = 0.2
 yf = 27.5
 tf = 10.0
 vx = (xf-x0)/tf
