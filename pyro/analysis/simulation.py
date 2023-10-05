@@ -73,7 +73,7 @@ class Trajectory():
         try:
             # try to load as new format (np.savez)
             # with np.load(name) as data:
-            with np.load(name, allow_pickle=True) as data:
+            with np.load(name) as data:
                 return cls(**data)
 
         except ValueError:
