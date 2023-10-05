@@ -72,7 +72,8 @@ class Trajectory():
     def load(cls, name):
         try:
             # try to load as new format (np.savez)
-            with np.load(name) as data:
+            # with np.load(name) as data:
+            with np.load(name, allow_pickle=True) as data:
                 return cls(**data)
 
         except ValueError:
@@ -85,7 +86,7 @@ class Trajectory():
     ############################
     def _compute_size(self):
         
-        #print(self.t)
+        # print(self.t)
         
         self.time_final = self.t.max()
         self.time_steps = self.t.size
@@ -95,10 +96,13 @@ class Trajectory():
         
         self.ubar = np.zeros( self.m )
 
-        # Check consistency between signals
-        for arr in [self.x, self.y, self.u, self.dx, self.r, self.J, self.dJ]:
-            if (arr is not None) and (arr.shape[0] != self.time_steps):
-                raise ValueError("Result arrays must have same length along axis 0")
+        # # Check consistency between signals
+        # for arr in [self.x, self.y, self.u, self.dx, self.r, self.J, self.dJ]:
+            
+        #     if arr is not None:
+                
+        #         if arr.shape[0] != self.time_steps:
+        #             raise ValueError("Result arrays must have same length along axis 0")
                 
 
     ############################

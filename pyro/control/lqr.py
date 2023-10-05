@@ -12,6 +12,7 @@ from scipy.linalg  import solve_continuous_are
 
 ##############################################################################
 from pyro.control  import linear
+from pyro.control  import controller
 from pyro.dynamic  import statespace
 from pyro.analysis import costfunction
 ##############################################################################
@@ -102,6 +103,8 @@ def linearize_and_synthesize_lqr_controller( sys , cf ):
     ctl = synthesize_lqr_controller( ss , cf , sys.xbar , sys.ubar )
     
     return ctl
+
+
     
 
 
