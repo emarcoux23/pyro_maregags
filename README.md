@@ -6,18 +6,18 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-    <img src="https://www.alexandregirard.com/IMG/pyro/rocket.gif" alt="rocket" width="360"/>
+    <img src="https://www.alexandregirard.com/IMG/pyro/rocket.gif" alt="rocket" width="370"/>
     </th>
     <th>
-    <img src="https://www.alexandregirard.com/IMG/pyro/3dofarm.gif" alt="cartpole" width="360"/>
+    <img src="https://www.alexandregirard.com/IMG/pyro/3dofarm.gif" alt="cartpole" width="370"/>
     </th> 
   </tr>
   <tr>
     <td>
-      <img src="https://www.alexandregirard.com/IMG/pyro/cartpole.gif" alt="cartpole_swing_up" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/cartpole.gif" alt="cartpole_swing_up" width="370"/>
     </td>
     <td>
-      <img src="https://www.alexandregirard.com/IMG/pyro/suspension.gif" alt="mass-spring" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/suspension.gif" alt="mass-spring" width="370"/>
     </td> 
   </tr>
 </table>
@@ -51,7 +51,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
       Direct collocation trajectory optimisation
-      <img src="https://www.alexandregirard.com/IMG/pyro/doublependulum" alt="double pendulum" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/doublependulum.gif" alt="doublependulum" width="360"/>
     </th> 
   </tr>
 </table>
@@ -97,13 +97,13 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   </tr>
 </table>
 
-### Unified by a standardized "dynamic system" and "controller" class hierarchy
+### Unified by a standardized *dynamic system*, *controller* and *planner* classes hierarchy
 
-The concept of this toolbox is a hierachy of "dynamic system" objects, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order equations), linear state space, manipulator equations, etc. This structure is then leveraged by analysis tools, from generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, to system-specific tools that leverage specific system propreties such as modal analysis for linear sub-class:
+The concept of this toolbox is a hierachy of *dynamic system* objects, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order equations), linear state space, manipulator equations, etc. This structure is then leveraged by analysis tools, from generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, to system-specific tools that leverage specific system propreties such as modal analysis for linear sub-class:
 
 <img width="800" src="https://www.alexandregirard.com/IMG/pyro/classes.png" class="center">
 
-The core of the library is a mother "dynamic system" class defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = f_{kinematic}(x,u,t)$ that is used for generating animations:
+The core of the library is a mother *dynamic system* class defined by a differential equation $\dot{x} = f(x,u,t)$, an optionnaly an output equation $y = h(x,u,t)$ and a foward kinematic equation that is used for generating animations:
 
 <img width="500" src="https://www.alexandregirard.com/IMG/pyro/dynamic.png" class="center">
 
