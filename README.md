@@ -6,19 +6,18 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-    <img src="https://www.alexandregirard.com/IMG/compressed_gif/rocket.gif" alt="rocket" width="360"/>
+    <img src="https://www.alexandregirard.com/IMG/pyro/rocket.gif" alt="rocket" width="360"/>
     </th>
     <th>
-    <img src="https://user-images.githubusercontent.com/16725496/163005905-ad2205b0-150d-44de-bd43-a3b31a0bf10e.gif" alt="cartpole" width="360"/>
+    <img src="https://www.alexandregirard.com/IMG/pyro/3dofarm.gif" alt="cartpole" width="360"/>
     </th> 
   </tr>
   <tr>
     <td>
-      <!--- <img src="https://www.alexandregirard.com/IMG/compressed_gif/drone.gif" alt="drone" width="360"/> --->
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/cartpole_swing_up.gif" alt="cartpole_swing_up" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/cartpole.gif" alt="cartpole_swing_up" width="360"/>
     </td>
     <td>
-    <img src="https://www.alexandregirard.com/IMG/compressed_gif/two_mass_spring_pid.gif" alt="mass-spring" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/suspension.gif" alt="mass-spring" width="360"/>
     </td> 
   </tr>
 </table>
@@ -28,31 +27,31 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Computed torque controller
-      <img src="https://user-images.githubusercontent.com/16725496/197431073-9c3d874b-1766-4ee5-9267-756d89c98278.png" alt="cost2go" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/ctc.png" alt="ctc" width="360"/>
     </th>
     <th>
       Sliding mode controller
-      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/smc.png" alt="smc" width="360"/>
     </th> 
   </tr>
   <tr>
     <th>
       Dynamic programming
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/cost2go_animation-2.gif" alt="cost2go" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/J.gif" alt="cost2go" width="360"/>
     </th>
     <th>
       Optimal torque policy
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/policy_animation-2.gif" alt="policy" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/pi.gif" alt="policy" width="360"/>
     </th> 
   </tr>
   <tr>
     <th>
       Rapidly-exploring random tree planning
-      <img src="https://user-images.githubusercontent.com/16725496/197430609-1d31a083-7337-410a-8b58-b81cd1075ed0.png" alt="cost2go" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/rrt.png" alt="rrt" width="360"/>
     </th>
     <th>
       Direct collocation trajectory optimisation
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/double_pendulum_swing_up.gif" alt="policy" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/doublependulum" alt="double pendulum" width="360"/>
     </th> 
   </tr>
 </table>
@@ -62,39 +61,39 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Simulation (computing trajectories)
-      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/traj.png" alt="traj" width="360"/>
     </th>
     <th>
       Phase plane analysis
-      <img src="https://user-images.githubusercontent.com/16725496/197414348-12fbdf3b-7d02-4ae4-b757-95fa701cbe81.png" alt="phase-plane" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/pp.png" alt="phase-plane" width="360"/>
     </th> 
   </tr>
     <tr>
     <th>
       Generating animated simulations
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/Animation.gif" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/plane.gif" alt="ani" width="360"/>
     </th>
     <th>
       Robot arm manipulability ellipsoid
-      <img src="https://user-images.githubusercontent.com/16725496/197432396-250badab-1b45-4d52-ac2e-1f92f49cd7ef.png" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/elp.png" alt="elp" width="360"/>
   </tr>
   <tr>
     <th>
       Bode plot or output/input
-      <img src="https://user-images.githubusercontent.com/16725496/197540975-18d0ecf1-08bc-4f7e-b1a1-ee5b26ec1101.png" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/bode.png" alt="bode" width="360"/>
     </th>
     <th>
       Pole zero map of output/input
-      <img src="https://user-images.githubusercontent.com/16725496/197540988-418f03d4-f977-4791-b0da-2f576c87fed2.png" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/pz.png" alt="pz" width="360"/>
   </tr>
   <tr>
     <th>
       Modal analysis (mode 1)
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/mode1.gif" alt="ani" width="360"/>
+      <img src="hhttps://www.alexandregirard.com/IMG/pyro/mode1.gif" alt="mode1" width="360"/>
     </th>
     <th>
       Modal analysis (mode 2)
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/mode2.gif" alt="ani" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/mode2.gif" alt="mode2" width="360"/>
   </tr>
 </table>
 
@@ -102,11 +101,11 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 
 The concept of this toolbox is a hierachy of "dynamic system" objects, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order equations), linear state space, manipulator equations, etc. This structure is then leveraged by analysis tools, from generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, to system-specific tools that leverage specific system propreties such as modal analysis for linear sub-class:
 
-<img width="800" src="https://github.com/SherbyRobotics/pyro/assets/16725496/8856d929-0912-4909-a0db-edda9b837120" class="center">
+<img width="800" src="https://www.alexandregirard.com/IMG/pyro/classes.png" class="center">
 
 The core of the library is a mother "dynamic system" class defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = f_{kinematic}(x,u,t)$ that is used for generating animations:
 
-<img width="500" src="https://github.com/SherbyRobotics/pyro/assets/16725496/16cdb4f0-82aa-42d4-8b6a-82dbde04e75e" class="center">
+<img width="500" src="https://www.alexandregirard.com/IMG/pyro/dynamic.png" class="center">
 
 # How to use #
 

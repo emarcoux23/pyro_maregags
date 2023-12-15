@@ -604,7 +604,7 @@ if __name__ == "__main__":
         
         #sys.gravity = 0
         
-        sys.compute_trajectory( 10 , 20001 , 'euler' )
+        sys.compute_trajectory( 2 , 1001 , 'euler' )
         sys.plot_trajectory('x')
         
         # sys.dynamic_domain = False
