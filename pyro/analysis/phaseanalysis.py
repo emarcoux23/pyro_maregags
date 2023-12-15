@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-import graphical
+from pyro.analysis import graphical
 
 # Embed font type in PDF
 matplotlib.rcParams['pdf.fonttype'] = 42
