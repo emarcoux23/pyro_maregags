@@ -57,9 +57,9 @@ class TrajectoryPlotter:
         self.sys = sys
 
         # Ploting
-        self.fontsize = 5
-        self.figsize  = (4, 3)
-        self.dpi      = 300
+        self.fontsize = default_fontsize
+        self.figsize  = default_figsize
+        self.dpi      = default_dpi 
 
 
     ##########################################################################
@@ -388,11 +388,11 @@ class Animator:
         self.x_axis = 0
         self.y_axis = 1
         
-        # Params
-        self.figsize   = (4, 3)
-        self.dpi       = 300
+        # Ploting Param
+        self.fontsize = default_fontsize
+        self.figsize  = default_figsize
+        self.dpi      = default_dpi 
         self.linestyle = sys.linestyle 
-        self.fontsize  = 5
         
         # Label
         self.top_right_label = None

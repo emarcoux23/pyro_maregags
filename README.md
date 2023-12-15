@@ -6,18 +6,18 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 <table>
   <tr>
     <th>
-    <img src="https://www.alexandregirard.com/IMG/pyro/rocket.gif" alt="rocket" width="370"/>
+    <img src="https://www.alexandregirard.com/IMG/pyro/rocket.gif" alt="rocket" width="380"/>
     </th>
     <th>
-    <img src="https://www.alexandregirard.com/IMG/pyro/3dofarm.gif" alt="cartpole" width="370"/>
+    <img src="https://www.alexandregirard.com/IMG/pyro/3dofarm.gif" alt="cartpole" width="380"/>
     </th> 
   </tr>
   <tr>
     <td>
-      <img src="https://www.alexandregirard.com/IMG/pyro/cartpole.gif" alt="cartpole_swing_up" width="370"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/cartpole.gif" alt="cartpole_swing_up" width="380"/>
     </td>
     <td>
-      <img src="https://www.alexandregirard.com/IMG/pyro/suspension.gif" alt="mass-spring" width="370"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/suspension.gif" alt="mass-spring" width="380"/>
     </td> 
   </tr>
 </table>
