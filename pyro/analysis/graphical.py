@@ -30,7 +30,7 @@ except:
 
 # Default figure settings
 default_figsize   = (4, 3)
-default_dpi       = 300
+default_dpi       = 250
 default_linestyle = '-'
 default_fontsize  = 5
 
@@ -916,7 +916,7 @@ if __name__ == "__main__":
     sys    = pendulum.DoublePendulum()
     sys.x0 = np.array([0.1,0.1,0,0])
     
-    
+    sys.plot_phase_plane(0,2)
     
     traj = sys.compute_trajectory( 2.0 )
     
@@ -928,6 +928,8 @@ if __name__ == "__main__":
     traj2 = sys.compute_trajectory( 2.0  )
     
     plotter.update_plot( traj2 )
+    
+    plotter.phase_plane_trajectory( traj2 , 0 , 2 )
 
     is_3d = False
     
