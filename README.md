@@ -32,7 +32,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
       Sliding mode controller
-      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="320"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197431126-f5d3660b-0e4b-4e35-bed3-c9b4e40f138e.png" alt="policy" width="360"/>
     </th> 
   </tr>
   <tr>
@@ -52,7 +52,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
     </th>
     <th>
       Direct collocation trajectory optimisation
-      <img src="https://www.alexandregirard.com/IMG/compressed_gif/double_pendulum_swing_up.gif" alt="policy" width="320"/>
+      <img src="https://www.alexandregirard.com/IMG/compressed_gif/double_pendulum_swing_up.gif" alt="policy" width="360"/>
     </th> 
   </tr>
 </table>
@@ -62,7 +62,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Simulation (computing trajectories)
-      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="320"/>
+      <img src="https://user-images.githubusercontent.com/16725496/197414346-35a5fa67-2e44-407c-9342-d9d6f7652716.png" alt="traj" width="360"/>
     </th>
     <th>
       Phase plane analysis
@@ -102,12 +102,11 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
 
 The concept of this toolbox is a hierachy of "dynamic system" objects, from the most generic representation (any non-linear differential equations) to more system specific representations such as mechanical system (second order equations), linear state space, manipulator equations, etc. This structure is then leveraged by analysis tools, from generic tools that work for all sub-class of dynamic systems such as running simulation and phase-plane analysis, to system-specific tools that leverage specific system propreties such as modal analysis for linear sub-class:
 
-<img width="800" src="https://user-images.githubusercontent.com/16725496/163312294-e33d791f-9cc0-48e1-acb3-8a0ebfc0c067.jpg" class="center">
+<img width="800" src="https://github.com/SherbyRobotics/pyro/assets/16725496/8856d929-0912-4909-a0db-edda9b837120" class="center">
 
 The core of the library is a mother "dynamic system" class defined by a differential equation $\dot{x} = f(x,u,t)$, an output equation $y = h(x,u,t)$ and a foward kinematic equation $lines = f_{kinematic}(x,u,t)$ that is used for generating animations:
 
-<img width="500" src="https://user-images.githubusercontent.com/16725496/163312300-faa7fe2c-178e-4c58-ae6c-4b256fd9ab92.jpg" class="center">
-
+<img width="500" src="https://github.com/SherbyRobotics/pyro/assets/16725496/16cdb4f0-82aa-42d4-8b6a-82dbde04e75e" class="center">
 
 # How to use #
 
@@ -121,6 +120,8 @@ To learn how to use pyro, see the following notebook tutorials hosted on colab:
 5.   [The Manipulator Robot class](https://colab.research.google.com/drive/1OILAhXRxM1r5PEB1BWaYtbR147Ff3gr1?usp=sharing)
 
 Also see exemples scripts in pyro/examples/ 
+
+and tutorial video (in french) on youtube: [here](https://youtube.com/playlist?list=PL6adNeJ0A8UtD_HQJTv6FHalnj0t7RyVa&si=SoZGOcYpsjLWvw27)
 
 
 # Installation #
