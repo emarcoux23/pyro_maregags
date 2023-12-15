@@ -103,7 +103,7 @@ The concept of this toolbox is a hierachy of *dynamic system* objects, from the 
 
 <img width="800" src="https://www.alexandregirard.com/IMG/pyro/classes.png" class="center">
 
-The core of the library is a mother *dynamic system* class defined by a differential equation $\dot{x} = f(x,u,t)$, an optionnaly an output equation $y = h(x,u,t)$ and a foward kinematic equation that is used for generating animations:
+The core of the library is a mother *dynamic system* class defined by a differential equation $\dot{x} = f(x,u,t)$, and optionnaly an output equation $y = h(x,u,t)$ and a foward kinematic equation that is used for generating animations:
 
 <img width="500" src="https://www.alexandregirard.com/IMG/pyro/dynamic.png" class="center">
 
