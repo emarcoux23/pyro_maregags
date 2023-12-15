@@ -89,7 +89,7 @@ An object-based toolbox for robot dynamic simulation, analysis, control and plan
   <tr>
     <th>
       Modal analysis (mode 1)
-      <img src="hhttps://www.alexandregirard.com/IMG/pyro/mode1.gif" alt="mode1" width="360"/>
+      <img src="https://www.alexandregirard.com/IMG/pyro/mode1.gif" alt="mode1" width="360"/>
     </th>
     <th>
       Modal analysis (mode 2)
