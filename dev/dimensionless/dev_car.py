@@ -15,20 +15,23 @@ from pyro.planning import dynamicprogramming
 from pyro.analysis import graphical
 ##############################################################################
 
-case_name = 'car_test'
+case_name = 'car_05_12'
 show = True
 res = 'std'
+res = 'plus'
 legend = 1
 
 
 #dim context
 
+case_name = 'car_05_12'
+length   = 5.0
 x_c_star = 0.5
 y_c_star = 1.2
 x_w_star = 10.0
 
-# param
-length  = 5.0
+
+
 gravity = 9.8
 
 # context

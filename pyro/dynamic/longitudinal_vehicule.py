@@ -69,7 +69,7 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         self.cdA     = 0.3 * 2    # drag coef time area [m2]
         
         # Ground traction curve parameters
-        self.mu_max   = 0.5
+        self.mu_max   = 1.0
         self.mu_slope = 70.
         
         
@@ -171,15 +171,15 @@ class LongitudinalFrontWheelDriveCarWithWheelSlipInput( system.ContinuousDynamic
         dx[0]  = v # velocity
         dx[1]  = a # acc
         
-        ###################
-        # Normal force check
-        fn_front = m * g * rr - m * a * ry
-        fn_rear  = m * g * rf + m * a * ry
-        if (fn_front<0) :
-            print('Normal force on front wheel is negative: fn = ', fn_front)
-        if (fn_rear<0) : 
-            print('Normal force on rear wheel is negative: fn = ', fn_rear)
-        ###################
+        # ###################
+        # # Normal force check
+        # fn_front = m * g * rr - m * a * ry
+        # fn_rear  = m * g * rf + m * a * ry
+        # if (fn_front<0) :
+        #     print('Normal force on front wheel is negative: fn = ', fn_front)
+        # if (fn_rear<0) : 
+        #     print('Normal force on rear wheel is negative: fn = ', fn_rear)
+        # ###################
         
         return dx
     
