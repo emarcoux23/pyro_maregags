@@ -296,10 +296,10 @@ def case( length , x_c_star , y_c_star , x_w_star , case_name = 'test ', show = 
 ### Main figures 
 ####################################
 
-# res = 'plus'
-res = 'hi'
+res = 'plus'
+# res = 'hi'
 
-# case( length = 2.0 , x_c_star = 0.5 , y_c_star = 0.5 , x_w_star = 20.0 , case_name = 'car1', res = res)
+case( length = 2.0 , x_c_star = 0.5 , y_c_star = 0.5 , x_w_star = 20.0 , case_name = 'car1', res = res)
 # case( length = 1.0 , x_c_star = 0.5 , y_c_star = 0.5 , x_w_star = 20.0 , case_name = 'car2', res = res)
 # case( length = 3.0 , x_c_star = 0.5 , y_c_star = 0.5 , x_w_star = 20.0 , case_name = 'car3', res = res)
 
@@ -309,8 +309,11 @@ res = 'hi'
 
 # case( length = 2.0 , x_c_star = 0.5 , y_c_star = 0.1 , x_w_star = 2.0 , case_name = 'car7', res = res)
 # case( length = 1.0 , x_c_star = 0.5 , y_c_star = 0.1 , x_w_star = 2.0 , case_name = 'car8', res = res)
-case( length = 3.0 , x_c_star = 0.5 , y_c_star = 0.1 , x_w_star = 2.0 , case_name = 'car9', res = res)
+# case( length = 3.0 , x_c_star = 0.5 , y_c_star = 0.1 , x_w_star = 2.0 , case_name = 'car9', res = res)
 
+# case( length = 2.0 , x_c_star = 0.5 , y_c_star = 0.9 , x_w_star = 20.0 , case_name = 'car10', res = res)
+# case( length = 1.0 , x_c_star = 0.5 , y_c_star = 0.9 , x_w_star = 20.0 , case_name = 'car11', res = res)
+# case( length = 3.0 , x_c_star = 0.5 , y_c_star = 0.9 , x_w_star = 20.0 , case_name = 'car12', res = res)
     
 
 
