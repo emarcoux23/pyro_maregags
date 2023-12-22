@@ -46,7 +46,7 @@ dp.plot_policy()
 
 #dp.animate_policy( show = True , save = False )
 #dp.animate_cost2go( show = False , save = True )
-#dp.animate_policy( show = False , save = True )
+dp.animate_policy( show = False , save = True )
 
 
 ctl = dp.get_lookup_table_controller()

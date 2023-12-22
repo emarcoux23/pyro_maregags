@@ -30,7 +30,7 @@ except:
 
 # Default figure settings
 default_figsize   = (4, 3)
-default_dpi       = 300
+default_dpi       = 250
 default_linestyle = '-'
 default_fontsize  = 5
 
@@ -57,9 +57,9 @@ class TrajectoryPlotter:
         self.sys = sys
 
         # Ploting
-        self.fontsize = 5
-        self.figsize  = (4, 3)
-        self.dpi      = 300
+        self.fontsize = default_fontsize
+        self.figsize  = default_figsize
+        self.dpi      = default_dpi 
 
 
     ##########################################################################
@@ -114,6 +114,8 @@ class TrajectoryPlotter:
 
         simfig , plots = plt.subplots(l, sharex=True, figsize=self.figsize,
                                       dpi=self.dpi, frameon=True)
+        
+        lines = [None] * l
 
         #######################################################################
         #Fix bug for single variable plotting
@@ -128,7 +130,7 @@ class TrajectoryPlotter:
         if plot=='All' or plot=='x' or plot=='xu' or plot=='xy' or plot=='xuj':
             # For all states
             for i in range( sys.n ):
-                plots[j].plot( traj.t , traj.x[:,i] , 'b')
+                lines[j] = plots[j].plot( traj.t , traj.x[:,i] , 'b')[0]
                 plots[j].set_ylabel(sys.state_label[i] +'\n'+
                 sys.state_units[i] , fontsize=self.fontsize )
                 plots[j].grid(True)
@@ -138,7 +140,7 @@ class TrajectoryPlotter:
         if plot == 'All' or plot == 'u' or plot == 'xu' or plot == 'xuj':
             # For all inputs
             for i in range( sys.m ):
-                plots[j].plot( traj.t , traj.u[:,i] , 'r')
+                lines[j] = plots[j].plot( traj.t , traj.u[:,i] , 'r')[0]
                 plots[j].set_ylabel(sys.input_label[i] + '\n' +
                 sys.input_units[i] , fontsize=self.fontsize )
                 plots[j].grid(True)
@@ -148,7 +150,7 @@ class TrajectoryPlotter:
         if plot == 'All' or plot == 'y' or plot == 'xy':
             # For all outputs
             for i in range( sys.p ):
-                plots[j].plot( traj.t , traj.y[:,i] , 'k')
+                lines[j] = plots[j].plot( traj.t , traj.y[:,i] , 'k')[0]
                 plots[j].set_ylabel(sys.output_label[i] + '\n' +
                 sys.output_units[i] , fontsize=self.fontsize )
                 plots[j].grid(True)
@@ -157,12 +159,12 @@ class TrajectoryPlotter:
 
         if plot == 'All' or plot == 'j' or plot == 'xuj':
             # Cost function
-            plots[j].plot( traj.t , traj.dJ[:] , 'b')
+            lines[j] = plots[j].plot( traj.t , traj.dJ[:] , 'b')[0]
             plots[j].set_ylabel('dJ', fontsize=self.fontsize )
             plots[j].grid(True)
             plots[j].tick_params( labelsize = self.fontsize )
             j = j + 1
-            plots[j].plot( traj.t , traj.J[:] , 'r')
+            lines[j] = plots[j].plot( traj.t , traj.J[:] , 'r')[0]
             plots[j].set_ylabel('J', fontsize=self.fontsize )
             plots[j].grid(True)
             plots[j].tick_params( labelsize = self.fontsize )
@@ -172,7 +174,7 @@ class TrajectoryPlotter:
             # Internal states
             n = sys.n - sys.controller.l
             for i in range( l ):
-                plots[j].plot( traj.t , traj.x[:,i+n] , 'b')
+                lines[j] = plots[j].plot( traj.t , traj.x[:,i+n] , 'b')[0]
                 plots[j].set_ylabel(sys.state_label[i+n] +'\n'+
                 sys.state_units[i+n] , fontsize=self.fontsize )
                 plots[j].grid(True)
@@ -189,8 +191,78 @@ class TrajectoryPlotter:
 
         self.fig   = simfig
         self.plots = plots
+        self.lines = lines
+        self.l     = l
         
-        return (simfig, plots)
+        return (simfig, plots, lines)
+    
+    ##########################################################################
+    def update_plot(self, traj, plot = 'x'):
+        """
+        Create a figure with trajectories for states, inputs, outputs and cost
+        ----------------------------------------------------------------------
+        plot = 'All'
+        plot = 'xu'
+        plot = 'xy'
+        plot = 'x'
+        plot = 'u'
+        plot = 'y'
+        plot = 'j'
+        plot = 'z'
+        """
+        
+        lines = self.lines
+        sys   = self.sys
+        plots = self.plots
+        
+        j = 0
+        
+        if plot=='All' or plot=='x' or plot=='xu' or plot=='xy' or plot=='xuj':
+            
+            # For all states
+            for i in range( sys.n ):
+                lines[j].set_data( traj.t , traj.x[:,i] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
+                j = j + 1
+
+        if plot == 'All' or plot == 'u' or plot == 'xu' or plot == 'xuj':
+            # For all inputs
+            for i in range( sys.m ):
+                lines[j].set_data( traj.t , traj.u[:,i] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
+                j = j + 1
+
+        if plot == 'All' or plot == 'y' or plot == 'xy':
+            # For all outputs
+            for i in range( sys.p ):
+                lines[j].set_data( traj.t , traj.y[:,i] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
+                j = j + 1
+
+        if plot == 'All' or plot == 'j' or plot == 'xuj':
+            # Cost function
+            lines[j].set_data( traj.t , traj.dJ[:,i] )
+            plots[j].relim()
+            plots[j].autoscale_view(True,True,True)
+            j = j + 1
+            lines[j].set_data( traj.t , traj.J[:,i] )
+            plots[j].relim()
+            plots[j].autoscale_view(True,True,True)
+            j = j + 1
+            
+        if plot == 'z':
+            # Internal states
+            n = sys.n - sys.controller.l
+            for i in range( self.l ):
+                lines[j].set_data( traj.t , traj.x[:,i+n] )
+                plots[j].relim()
+                plots[j].autoscale_view(True,True,True)
+                j = j + 1
+        
+    
     
     ##########################################################################
     def phase_plane_trajectory(self, traj, x_axis=0, y_axis=1):
@@ -316,11 +388,11 @@ class Animator:
         self.x_axis = 0
         self.y_axis = 1
         
-        # Params
-        self.figsize   = (4, 3)
-        self.dpi       = 300
+        # Ploting Param
+        self.fontsize = default_fontsize
+        self.figsize  = default_figsize
+        self.dpi      = default_dpi 
         self.linestyle = sys.linestyle 
-        self.fontsize  = 5
         
         # Label
         self.top_right_label = None
@@ -843,6 +915,21 @@ if __name__ == "__main__":
     
     sys    = pendulum.DoublePendulum()
     sys.x0 = np.array([0.1,0.1,0,0])
+    
+    sys.plot_phase_plane(0,2)
+    
+    traj = sys.compute_trajectory( 2.0 )
+    
+    
+    plotter = TrajectoryPlotter( sys )
+    plotter.plot( traj, 'xu' )
+    
+    sys.x0 = np.array([0.2,0.1,0,0])
+    traj2 = sys.compute_trajectory( 2.0  )
+    
+    plotter.update_plot( traj2 )
+    
+    plotter.phase_plane_trajectory( traj2 , 0 , 2 )
 
     is_3d = False
     

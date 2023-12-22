@@ -35,6 +35,8 @@ class StateSpaceSystem(ContinuousDynamicSystem):
         
         ContinuousDynamicSystem.__init__( self, n, m, p)
         
+        self.is_vectorized = True
+        
     ############################################
     def _check_dimensions(self):
         
@@ -205,6 +207,7 @@ def linearize(sys, epsilon_x=0.001, epsilon_u=None):
     
     xbar = sys.xbar.astype(float)
     ubar = sys.ubar.astype(float)
+    tbar = sys.tbar
 
     epsilon_x = np.asarray(epsilon_x)
 
@@ -223,16 +226,16 @@ def linearize(sys, epsilon_x=0.001, epsilon_u=None):
         
 
     def f_x(x):
-        return sys.f(x, ubar, 0)
+        return sys.f(x, ubar, tbar)
 
     def f_u(u):
-        return sys.f(xbar, u, 0)
+        return sys.f(xbar, u, tbar)
 
     def h_x(x):
-        return sys.h(x, ubar, 0)
+        return sys.h(x, ubar, tbar)
 
     def h_u(u):
-        return sys.h(xbar, u, 0)
+        return sys.h(xbar, u, tbar)
 
     A = _approx_jacobian(f_x, xbar, epsilon_x)
     B = _approx_jacobian(f_u, ubar, epsilon_u)

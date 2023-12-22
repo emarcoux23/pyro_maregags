@@ -94,6 +94,7 @@ class ContinuousDynamicSystem:
         # Default state and inputs values    
         self.xbar = np.zeros(self.n)
         self.ubar = np.zeros(self.m)
+        self.tbar = 0
         
         # Plot params
         self.domain           = [ (-10,10) , (-10,10) , (-10,10) ]
