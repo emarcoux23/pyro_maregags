@@ -87,7 +87,41 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
     def set_initial_trajectory_guest(self, traj):
         
         new_traj      = traj.re_sample( self.grid )
-        self.dec_init = self.traj2decisionvariables( new_traj )[:,0]
+        self.dec_init = self.traj2decisionvariables( new_traj )
+        
+        if self.dynamic_plot:
+            
+            traj = self.decisionvariables2traj( self.dec_init )
+            self.plotter.update_plot( traj, 'xu' )
+            plt.pause( 0.001 )
+            
+    ############################
+    def set_linear_initial_guest(self, derivatives = False ):
+        
+        xs = np.linspace(  self.x_start,   self.x_goal, self.grid )
+        us = np.linspace( self.sys.ubar, self.sys.ubar, self.grid )
+        
+        # For second order mechanical system
+        if derivatives:
+            dof = int(self.sys.n/2)
+            tf  = self.grid * self.dt
+            dx  = ( self.x_goal[:dof] - self.x_start[:dof] ) / tf
+            dxs = np.linspace( dx, dx, self.grid )
+            xs[:,dof:] = dxs
+        
+        
+        dec = np.array([]).reshape(0,1) # initialize dec_vars array
+        
+        for i in range(self.sys.n): # append states x
+            arr_to_add = xs[:,i].reshape(self.grid,1)
+            dec = np.append(dec,arr_to_add,axis=0)
+    
+        for i in range(self.sys.m): # append inputs u
+            arr_to_add = us[:,i].reshape(self.grid,1)
+            dec = np.append(dec,arr_to_add,axis=0)
+            
+        self.dec_init = dec[:,0]
+        
         
         if self.dynamic_plot:
             
@@ -170,7 +204,7 @@ class DirectCollocationTrajectoryOptimisation( plan.Planner ):
             arr_to_add = traj.u[:,i].reshape(self.grid,1)
             dec = np.append(dec,arr_to_add,axis=0)
         
-        return dec
+        return dec[:,0]
     
     
     ############################

@@ -26,6 +26,8 @@ planner.x_start = np.array([3.14,0,0,0])
 planner.x_goal  = np.array([0,0,0,0])
 
 planner.maxiter = 500
+planner.set_linear_initial_guest(True)
+planner.init_dynamic_plot()
 planner.compute_optimal_trajectory()
-planner.show_solution()
+# planner.show_solution()
 planner.animate_solution()

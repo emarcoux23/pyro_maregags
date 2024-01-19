@@ -40,6 +40,7 @@ planner.x_start = np.array([-1.0,+0.0])
 planner.x_goal  = np.array([+0.0,+0.0])
 
 planner.init_dynamic_plot()
+planner.set_linear_initial_guest()
 planner.compute_optimal_trajectory()
 # planner.show_solution()
 planner.animate_solution()
