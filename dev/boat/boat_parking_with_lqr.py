@@ -26,11 +26,11 @@ ss  = linearize( sys , 0.01 )
 # Cost function
 cf  = QuadraticCostFunction.from_sys( sys )
 cf.Q[0,0] = 10000
-cf.Q[1,1] = 0
+cf.Q[1,1] = 1
 cf.Q[2,2] = 100
-cf.Q[3,3] = 0
-cf.Q[4,4] = 0
-cf.Q[5,5] = 0
+cf.Q[3,3] = 1
+cf.Q[4,4] = 1
+cf.Q[5,5] = 1
 
 cf.R[0,0] = 1
 cf.R[1,1] = 10000

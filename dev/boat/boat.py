@@ -215,9 +215,15 @@ class Boat( mechanical.MechanicalSystemWithPositionInputs ):
         # trailler line
         ###############################
         
-        pts      = np.zeros(( 2 , 3 ))
-        pts[0,:] = np.array([-10,0,0])
-        pts[1,:] = np.array([+10,0,0])
+        w = 1.2
+        l = 2.0
+        
+        pts      = np.zeros(( 5 , 3 ))
+        pts[0,:] = np.array([-w,-l,0])
+        pts[1,:] = np.array([+w,-l,0])
+        pts[2,:] = np.array([+w,+l,0])
+        pts[3,:] = np.array([-w,+l,0])
+        pts[4,:] = np.array([-w,-l,0])
         
         lines_pts.append( pts )
         lines_style.append( '--')
@@ -298,10 +304,10 @@ if __name__ == "__main__":
     
     sys = Boat()
     
-    sys.x0 = np.array([0,-10,0,0,2,0])
+    sys.x0 = np.array([0,-5,0,0,2,0])
     
-    sys.ubar[0] = 00
-    sys.ubar[1] = 0
+    sys.ubar[0] = 100
+    sys.ubar[1] = 0.1
 
     sys.compute_trajectory( tf = 100  )
     sys.plot_trajectory('x')
