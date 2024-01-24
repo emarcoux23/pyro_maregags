@@ -210,9 +210,9 @@ class Boat( mechanical.MechanicalSystemWithPositionInputs ):
         lines_pts = [] # list of array (n_pts x 3) for each lines
         lines_style = []
         lines_color = []
-        
+
         ###############################
-        # ground line
+        # trailler line
         ###############################
         
         pts      = np.zeros(( 2 , 3 ))
@@ -302,7 +302,7 @@ if __name__ == "__main__":
     
     sys.ubar[0] = 00
     sys.ubar[1] = 0
-    
+
     sys.compute_trajectory( tf = 100  )
-    sys.plot_trajectory()
+    sys.plot_trajectory('x')
     sys.animate_simulation()
