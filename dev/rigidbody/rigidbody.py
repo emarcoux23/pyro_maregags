@@ -504,8 +504,8 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
         self.name = 'Planar Rigid Body'
         self.state_label = ['x','y','theta','v1','v2','w']
         self.state_units = ['[m]','[m]','[rad]','[m/sec]','[m/sec]','[rad/sec]']
-        self.input_label = ['T','delta']
-        self.input_units = ['[N]','[rad]']
+        self.input_label = ['u1','u2']
+        self.input_units = ['[]','[]']
         self.output_label = self.state_label
         self.output_units = self.state_units
 
@@ -548,24 +548,6 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
                         [ 0             , 0               , 1 ] ] )
         
         return N
-    
-    
-    ###########################################################################
-    def B(self, q ):
-        """ 
-        Actuator Matrix  : dof x m
-        """
-        
-        B = np.zeros((3,1))
-        
-        delta = u[1]
-        
-        B[0,0] =  np.cos( delta )
-        B[1,0] =  np.sin( delta )
-        B[2,0] = - self.l_t * np.sin( delta )
-        
-        return B
-    
     
     ###########################################################################
     def g(self, q ):

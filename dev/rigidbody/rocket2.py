@@ -25,6 +25,9 @@ class Rocket2D( RigidBody2D ):
 
         RigidBody2D.__init__( self , force_inputs = 1, other_inputs = 1)
 
+        self.input_label = ['T','delta']
+        self.input_units = ['[N]','[rad]']
+
          # State working range
         self.x_ub = np.array([+50,+100,+2,10,10,10])
         self.x_lb = np.array([-50,-0,-2,-10,-10,-10])
