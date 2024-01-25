@@ -13,170 +13,7 @@ from pyro.dynamic import system
 ###############################################################################
 
 ###############################################################################
-        
-class GeneralizedMechanicalSystem( system.GeneralizedMechanicalSystem ):
-    """ 
-    Generalized Mechanical system with position inputs
-
-    -------------------------------------------------------
-    M(q) dv + C(q,v) v + d(q,v,u) + g(q) = B(q,u) e(u)
-    dq = N(q) v
-    -------------------------------------------------------
-
-    numper of inputs are:
-    m = m_f + m_o
-    ---------------------------------------------------
-    m      :   integer         : number of inputs
-    m_f    :   integer         : number of force inputs
-    m_o    :   integer         : number of other inputs
-    u      :   dim = ( m , 1)  : vector of all input variables
-
-    v        :  dim = (dof, 1)   : velocity variables
-    q        :  dim = (pos, 1)   : position variables 
-    dq       :  dim = (pos, 1)   : derivatives of position variables  
-    dv       :  dim = (dof, 1)   : acceleration variables
-    e        :  dim = (m_f, 1)   : force input variables
-    d(q,v,u) :  dim = (dof, 1)   : state-dependent dissipative forces
-    g(q)     :  dim = (dof, 1)   : state-dependent conservatives forces
-    M(q)     :  dim = (dof, dof) : inertia matrix
-    C(q,v)   :  dim = (dof, dof) : corriolis matrix
-    B(q,u)   :  dim = (dof, m_f) : actuator matrix
-    N(q)     :  dim = (pos, dof) : transformation matrix
-    
-    """
-    
-    ############################
-    def __init__(self, dof = 1 , force_inputs = 1, other_inputs = 1, pos = None):
-        """ """
-        
-        # Degree of Freedom
-        self.dof = dof
-        self.pos = pos
-
-        self.m_f = force_inputs
-        self.m_o = other_inputs
-
-        # Nb of configurations
-        if pos == None:   # If not specifyied 
-            pos = dof
-        
-        # Dimensions
-        n = dof + pos
-        m = self.m_f + self.m_o
-        p = n
-        
-        # initialize standard params
-        system.ContinuousDynamicSystem.__init__(self, n, m, p)
-        
-        # Name
-        self.name = str(dof) + 'DoF Generalized Mechanical System'
-        
-        # Labels, bounds and units
-        for i in range(pos):
-            # positions states
-            self.x_ub[i] = + 10
-            self.x_lb[i] = - 10
-            self.state_label[i] = 'Position '+ str(i)
-            self.state_units[i] = '[m]'
-        for i in range(dof):
-            # generalized velocity states
-            j = i + pos
-            self.x_ub[j] = + 10
-            self.x_lb[j] = - 10
-            self.state_label[j] = 'Velocity ' + str(i)
-            self.state_units[j] = '[m/sec]'
-        for i in range(self.m_f):
-            self.u_ub[i] = + 5
-            self.u_lb[i] = - 5
-            self.input_label[i] = 'Force input ' + str(i)
-            self.input_units[i] ='[N]'
-        self.output_label = self.state_label
-        self.output_units = self.state_units
-            
-    ###########################################################################
-    # The following functions needs to be overloaded by child classes
-    # to represent the dynamic of the system
-    ###########################################################################
-        
-    #############################
-    def u2e( self, u ):
-        """  
-        extract force inputs from all inputs
-        """
-        
-        e = u[ 0 : self.m_f ] 
-        
-        return e
-    
-    ###########################################################################
-    def B(self, q , u ):
-        """ 
-        Actuator Matrix  : dof x m
-        """
-        
-        B = np.zeros( ( self.dof , self.m ) )
-        
-        for i in range(min(self.m,self.dof)):
-            B[i,i] = 1                # Diag matrix for the first m rows
-        
-        return B
-    
-        
-    ###########################################################################
-    def d(self, q , v , u ):
-        """ 
-        State-dependent dissipative forces : dof x 1
-        """
-        
-        d = np.zeros(self.dof ) # Default is zero vector
-        
-        return d
-    
-    
-    ###########################################################################
-    # No need to overwrite the following functions for custom system
-    ###########################################################################
-    
-    ##############################
-    def generalized_forces(self, q  , v  , dv , t = 0 ):
-        
-        raise NotImplementedError
-    
-    
-    ##############################
-    def actuator_forces(self, q  , v  , dv , t = 0 ):
-        """ Computed actuator forces given a trajectory (inverse dynamic) """  
-        
-        raise NotImplementedError
-        
-    
-    ##############################
-    def accelerations(self, q , v , u , t = 0 ):
-        """ 
-        Compute accelerations vector (foward dynamic) 
-        given :
-        - actuator forces 
-        - actual position and velocities
-        """  
-        
-        M = self.M( q )
-        C = self.C( q , v )
-        g = self.g( q  )
-        d = self.d( q , v,  u )
-        B = self.B( q , u )
-
-        e = self.u2e( u )
-        
-        dv = np.linalg.inv( M ) @ ( B @ e - C @ v - g - d )
-        
-        return dv
-    
-    
-
-
-###############################################################################
-        
-class GeneralizedMechanicalSystemWithPositionInputs( system.ContinuousDynamicSystem ):
+class GeneralizedMechanicalSystem( system.ContinuousDynamicSystem ):
     """ 
     Mechanical system where the generalized velocities are not the time 
     derivative of the generalized coordinates.
@@ -204,11 +41,11 @@ class GeneralizedMechanicalSystemWithPositionInputs( system.ContinuousDynamicSys
         
         # Degree of Freedom
         self.dof = dof
-        self.pos = pos
 
         # Nb of configurations
         if pos == None:   # If not specifyied 
             pos = dof
+        self.pos = pos
         
         # Nb of actuators
         if actuators == None:   # If not specifyied the sys is fully actuated
@@ -473,13 +310,284 @@ class GeneralizedMechanicalSystemWithPositionInputs( system.ContinuousDynamicSys
 
 
 
+###############################################################################
+        
+class GeneralizedMechanicalSystemWithPositionInputs( GeneralizedMechanicalSystem ):
+    """ 
+    Generalized Mechanical system with position inputs
 
-# class RigidBody( system.ContinuousDynamicSystem ):
-#     """ 
-#     Mechanical system with Equations of Motion written in
-#     a body-fixed frame of reference
+    -------------------------------------------------------
+    M(q) dv + C(q,v) v + d(q,v,u) + g(q) = B(q,u) e(u)
+    dq = N(q) v
+    -------------------------------------------------------
 
+    numper of inputs are:
+    m = m_f + m_o
+    ---------------------------------------------------
+    m      :   integer         : number of inputs
+    m_f    :   integer         : number of force inputs
+    m_o    :   integer         : number of other inputs
+    u      :   dim = ( m , 1)  : vector of all input variables
+
+    v        :  dim = (dof, 1)   : velocity variables
+    q        :  dim = (pos, 1)   : position variables 
+    dq       :  dim = (pos, 1)   : derivatives of position variables  
+    dv       :  dim = (dof, 1)   : acceleration variables
+    e        :  dim = (m_f, 1)   : force input variables
+    d(q,v,u) :  dim = (dof, 1)   : state-dependent dissipative forces
+    g(q)     :  dim = (dof, 1)   : state-dependent conservatives forces
+    M(q)     :  dim = (dof, dof) : inertia matrix
+    C(q,v)   :  dim = (dof, dof) : corriolis matrix
+    B(q,u)   :  dim = (dof, m_f) : actuator matrix
+    N(q)     :  dim = (pos, dof) : transformation matrix
     
+    """
+    
+    ############################
+    def __init__(self, dof = 1 , force_inputs = 1, other_inputs = 1, pos = None):
+        """ """
+        
+        # Degree of Freedom
+        self.dof = dof
+
+        self.m_f = force_inputs
+        self.m_o = other_inputs
+
+        # Nb of configurations
+        if pos == None:   # If not specifyied 
+            pos = dof
+        self.pos = pos
+        
+        # Dimensions
+        n = dof + pos
+        m = self.m_f + self.m_o
+        p = n
+        
+        # initialize standard params
+        system.ContinuousDynamicSystem.__init__(self, n, m, p)
+        
+        # Name
+        self.name = str(dof) + 'DoF Generalized Mechanical System'
+        
+        # Labels, bounds and units
+        for i in range(pos):
+            # positions states
+            self.x_ub[i] = + 10
+            self.x_lb[i] = - 10
+            self.state_label[i] = 'Position '+ str(i)
+            self.state_units[i] = '[m]'
+        for i in range(dof):
+            # generalized velocity states
+            j = i + pos
+            self.x_ub[j] = + 10
+            self.x_lb[j] = - 10
+            self.state_label[j] = 'Velocity ' + str(i)
+            self.state_units[j] = '[m/sec]'
+        for i in range(self.m_f):
+            self.u_ub[i] = + 5
+            self.u_lb[i] = - 5
+            self.input_label[i] = 'Force input ' + str(i)
+            self.input_units[i] ='[N]'
+        self.output_label = self.state_label
+        self.output_units = self.state_units
+            
+    ###########################################################################
+    # The following functions needs to be overloaded by child classes
+    # to represent the dynamic of the system
+    ###########################################################################
+        
+    #############################
+    def u2e( self, u ):
+        """  
+        extract force inputs from all inputs
+        """
+        
+        e = u[ 0 : self.m_f ] 
+        
+        return e
+    
+    ###########################################################################
+    def B(self, q , u ):
+        """ 
+        Actuator Matrix  : dof x m
+        """
+        
+        B = np.zeros( ( self.dof , self.m_f ) )
+        
+        for i in range(min( self.m_f , self.dof )):
+            B[i,i] = 1   # Diag matrix for the first m rows
+        
+        return B
+    
+        
+    ###########################################################################
+    def d(self, q , v , u ):
+        """ 
+        State-dependent dissipative forces : dof x 1
+        """
+        
+        d = np.zeros(self.dof ) # Default is zero vector
+        
+        return d
+    
+    
+    ###########################################################################
+    # No need to overwrite the following functions for custom system
+    ###########################################################################
+    
+    ##############################
+    def generalized_forces(self, q  , v  , dv , t = 0 ):
+        
+        raise NotImplementedError
+    
+    
+    ##############################
+    def actuator_forces(self, q  , v  , dv , t = 0 ):
+        """ Computed actuator forces given a trajectory (inverse dynamic) """  
+        
+        raise NotImplementedError
+        
+    
+    ##############################
+    def accelerations(self, q , v , u , t = 0 ):
+        """ 
+        Compute accelerations vector (foward dynamic) 
+        given :
+        - actuator forces 
+        - actual position and velocities
+        """  
+        
+        M = self.M( q )
+        C = self.C( q , v )
+        g = self.g( q  )
+        d = self.d( q , v,  u )
+        B = self.B( q , u )
+
+        e = self.u2e( u )
+        
+        dv = np.linalg.inv( M ) @ ( B @ e - C @ v - g - d )
+        
+        return dv
+    
+    
+
+###############################################################################
+        
+class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):    
+    """
+
+    Mechanical system with Equations of Motion written in 
+    a body-fixed frame of reference
+
+    """
+
+    ############################
+    def __init__(self, force_inputs = 1, other_inputs = 1):
+        """ """
+        
+        # Degree of Freedom
+        self.dof = 3
+        self.pos = 3
+
+        self.m_f = force_inputs
+        self.m_o = other_inputs
+
+        # Dimensions
+        n = 6
+        m = self.m_f + self.m_o
+        p = n
+        
+        # initialize standard params
+        system.ContinuousDynamicSystem.__init__(self, n, m, p)
+        
+        # Name
+        self.name = 'Planar Rigid Body'
+        self.state_label = ['x','y','theta','v1','v2','w']
+        self.state_units = ['[m]','[m]','[rad]','[m/sec]','[m/sec]','[rad/sec]']
+        self.input_label = ['T','delta']
+        self.input_units = ['[N]','[rad]']
+        self.output_label = self.state_label
+        self.output_units = self.state_units
+
+        # Dynamic properties
+        self.mass     = 1.0
+        self.inertia  = 1.0
+        self.l_t      = 1.0 # Distance between CG and Thrust
+
+    ###########################################################################
+    def M(self, q ):
+        
+        M = np.diag( np.array([ self.mass , self.mass, self.inertia ]) )
+        
+        return M
+    
+    
+    ###########################################################################
+    def C(self, q , v ):
+
+        C = np.zeros( ( self.dof , self.dof ) ) 
+        
+        return C
+    
+    ###########################################################################
+    def N(self, q ):
+        """ 
+        Transformation matrix from generalized velocities to derivatives of
+        configuration variables
+        ------------------------------------
+        dim( N ) = ( pos , dof )
+
+        dq = N(q) v
+        ------------------------------------
+        """
+
+        theta = q[2]
+
+        N = np.array( [ [ np.cos(theta) , -np.sin(theta)  , 0 ] ,
+                        [ np.sin(theta) , +np.cos(theta)  , 0 ] ,
+                        [ 0             , 0               , 1 ] ] )
+        
+        return N
+    
+    
+    ###########################################################################
+    def B(self, q ):
+        """ 
+        Actuator Matrix  : dof x m
+        """
+        
+        B = np.zeros((3,1))
+        
+        delta = u[1]
+        
+        B[0,0] =  np.cos( delta )
+        B[1,0] =  np.sin( delta )
+        B[2,0] = - self.l_t * np.sin( delta )
+        
+        return B
+    
+    
+    ###########################################################################
+    def g(self, q ):
+        """ 
+        Gravitationnal forces vector : dof x 1
+        """
+        
+        g = np.zeros( self.dof ) # Default is zero vector
+        
+        return g
+    
+        
+    ###########################################################################
+    def d(self, q , v ):
+        """ 
+        State-dependent dissipative forces : dof x 1
+        """
+        
+        d = np.zeros(self.dof ) # Default is zero vector
+        
+        return d
+
     
 '''
 #################################################################
@@ -492,6 +600,7 @@ if __name__ == "__main__":
     """ MAIN TEST """
     
     sys = GeneralizedMechanicalSystem( dof = 2 , pos = 2 , actuators = 2 )
+    sys = GeneralizedMechanicalSystemWithPositionInputs( dof = 3 , pos = 1 , force_inputs= 1 , other_inputs=1 )
     
     sys.show(  q = np.array([ 1.0, 2.0]) )
     sys.show3( q = np.array([-0.5, 1.5]) )
