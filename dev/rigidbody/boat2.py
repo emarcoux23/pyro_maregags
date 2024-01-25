@@ -29,11 +29,11 @@ class Boat2D( RigidBody2D ):
         self.input_units = ['[N]','[N]']
 
          # State working range
-        self.x_ub = np.array([+50,+100,+2,10,10,10])
-        self.x_lb = np.array([-50,-0,-2,-10,-10,-10])
+        self.x_ub = np.array([+10,+10,+2,10,10,10])
+        self.x_lb = np.array([-10,-10,-2,-10,-10,-10])
 
-        self.u_ub = np.array([+100,+100])
-        self.u_lb = np.array([+100,-100])
+        self.u_ub = np.array([+1000,+100])
+        self.u_lb = np.array([-1000,-100])
 
         # Dynamic properties
         self.mass     = 1000.0
