@@ -527,6 +527,11 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
 
         C = np.zeros( ( self.dof , self.dof ) ) 
         
+        w = v[2]
+        
+        C[1,0] = + self.mass * w
+        C[0,1] = - self.mass * w
+        
         return C
     
     ###########################################################################

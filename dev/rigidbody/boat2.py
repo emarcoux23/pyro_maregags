@@ -37,13 +37,13 @@ class Boat2D( RigidBody2D ):
 
         # Dynamic properties
         self.mass     = 1000.0
-        self.inertia  = 1000.0
+        self.inertia  = 10000.0
         self.l_t      = 2.0     # Distance between CG and Thrust vector
 
         self.gravity        = 9.8
 
-        self.damping_coef   = np.array([ [ 1.0, 1.0, 1.0 ] ,  
-                                         [ 1.0, 1.0, 1.0 ] ])
+        self.damping_coef   = np.array([ [ 1.0, 100.0, 1.0 ] ,  
+                                         [ 1.0, 100.0, 1.0 ] ])
 
         # Kinematic param
         self.width  = 1.0
