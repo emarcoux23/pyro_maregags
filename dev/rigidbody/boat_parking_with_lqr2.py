@@ -35,8 +35,8 @@ sys = Boat2D()
 
 # planner.compute_optimal_trajectory()
 
-sys.xbar[3] = 2.0
-sys.ubar[0] = 100.0
+sys.xbar[3] = 0.0
+sys.ubar[0] = 0.0
 
     
 # Linear model
@@ -44,9 +44,9 @@ ss  = linearize( sys , 0.01 )
 
 # Cost function
 cf  = QuadraticCostFunction.from_sys( sys )
-cf.Q[0,0] = 0
-cf.Q[1,1] = 10
-cf.Q[2,2] = 10
+cf.Q[0,0] = 1
+cf.Q[1,1] = 1
+cf.Q[2,2] = 1
 cf.Q[3,3] = 1
 cf.Q[4,4] = 1
 cf.Q[5,5] = 1

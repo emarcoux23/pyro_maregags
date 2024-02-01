@@ -37,13 +37,13 @@ class Boat2D( RigidBody2D ):
 
         # Dynamic properties
         self.mass     = 1000.0
-        self.inertia  = 10000.0
-        self.l_t      = 2.0     # Distance between CG and Thrust vector
+        self.inertia  = 2000.0
+        self.l_t      = 3.0     # Distance between CG and Thrust vector
 
         self.gravity        = 9.8
 
-        self.damping_coef   = np.array([ [ 1.0, 100.0, 1.0 ] ,  
-                                         [ 1.0, 100.0, 1.0 ] ])
+        self.damping_coef   = np.array([ [ 10.0, 1000.0, 10.0 ] ,  
+                                         [ 100.0, 1000.0, 100.0 ] ])
 
         # Kinematic param
         self.width  = 1.0
@@ -187,7 +187,7 @@ class Boat2D( RigidBody2D ):
         ###########################
         
         vx  = u[0] / self.u_ub[0] * self.height
-        vy  = u[1] / self.u_ub[1] * self.height
+        vy  = u[1] / self.u_ub[0] * self.height
         offset = -self.height
         
         pts_body = drawing.arrow_from_components( vx , vy , x = offset, origin = 'tip'  )    
@@ -217,11 +217,11 @@ if __name__ == "__main__":
     sys.x0[1] = 0
     sys.x0[2] = 0
 
-    sys.x0[3] = 1.0
-    sys.x0[4] = 0.0
+    sys.x0[3] = 0.0
+    sys.x0[4] = 0
     sys.x0[5] = 0.0
     
-    sys.ubar[0] = 100
+    sys.ubar[0] = 1000
     sys.ubar[1] = 100
     
     sys.plot_trajectory('xu')
