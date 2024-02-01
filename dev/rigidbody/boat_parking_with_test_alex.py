@@ -44,6 +44,7 @@ class BoatController( controller.StaticController ) :
         self.sys = sys
         
         ss  = linearize( sys , 0.01 )
+        print(ss.A)
         
         # Velocity only
         self.A = ss.A[3:,3:]
@@ -64,6 +65,7 @@ class BoatController( controller.StaticController ) :
         BTS   = np.dot( self.B.T , S )
         R_inv = np.linalg.inv( cf.R )
         self.K     = np.dot( R_inv  , BTS )
+        print(self.K)
         
         self.v_d = np.array([1,0,-0.5])
         
@@ -120,11 +122,17 @@ cl_sys = ctl + sys
 cl_sys.x0 = np.array([3,3,1.0,5,0,0])
 cl_sys.compute_trajectory(20)
 
-# cl_sys.x0 = np.array([-20,10,-2.5,0,0,0])
-# cl_sys.compute_trajectory(20)
+cl_sys.plot_trajectory('xu')
+cl_sys.animate_simulation( time_factor_video = 1.0 )
 
-# cl_sys.x0 = np.array([50,50,0.0,0,0,0])
-# cl_sys.compute_trajectory(50)
+cl_sys.x0 = np.array([-20,10,-2.5,0,0,0])
+cl_sys.compute_trajectory(20)
+
+cl_sys.plot_trajectory('xu')
+cl_sys.animate_simulation( time_factor_video = 1.0 )
+
+cl_sys.x0 = np.array([50,50,0.0,0,0,0])
+cl_sys.compute_trajectory(50)
 
 cl_sys.plot_trajectory('xu')
 cl_sys.animate_simulation( time_factor_video = 1.0 )
