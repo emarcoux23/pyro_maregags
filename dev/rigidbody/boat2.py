@@ -250,17 +250,31 @@ class Boat2D( RigidBody2D ):
         # hydro forces
         ###########################
 
-        q , v = self.x2q( x )
+        # q , v = self.x2q( x )
 
-        f = -self.d( q , v , u)
+        # f = -self.d( q , v , u)
 
-        pts_body = drawing.arrow_from_components( f[0] * f2r , f[1] * f2r )
+        # pts_body = drawing.arrow_from_components( f[0] * f2r , f[1] * f2r )
 
-        pts_W = drawing.transform_points_2D( W_T_B  , pts_body )
+        # pts_W = drawing.transform_points_2D( W_T_B  , pts_body )
 
-        lines_pts.append( pts_W )
-        lines_style.append( '--')
-        lines_color.append( 'k' )
+        # lines_pts.append( pts_W )
+        # lines_style.append( '--')
+        # lines_color.append( 'k' )
+
+        ###########################
+        #  Target
+        ###########################
+
+        a = 10.
+        w = 0.3
+        
+        pts      = np.zeros(( 1 , 3 ))
+        pts[0,:] = np.array([ a * np.cos(w*t) , a * np.sin(w*t), 0.0 ]) 
+        
+        lines_pts.append( pts )
+        lines_style.append( 'o')
+        lines_color.append( 'r' )
 
 
                 
