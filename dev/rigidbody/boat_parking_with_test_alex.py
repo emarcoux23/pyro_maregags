@@ -183,23 +183,23 @@ print(ctl.K)
 # Simulation Closed-Loop Non-linear with LQR controller
 cl_sys = ctl + sys
 
-cl_sys.x0 = np.array([3,3,1.0,5,0,0])
-cl_sys.compute_trajectory(20)
+# cl_sys.x0 = np.array([3,3,1.0,5,0,0])
+# cl_sys.compute_trajectory(20)
 
-cl_sys.plot_trajectory('xu')
-cl_sys.animate_simulation( time_factor_video = 1.0 )
+# # cl_sys.plot_trajectory('xu')
+# cl_sys.animate_simulation( time_factor_video = 1.0 )
 
-cl_sys.x0 = np.array([-20,10,-2.5,0,0,0])
-cl_sys.compute_trajectory(20)
+# cl_sys.x0 = np.array([-20,10,-2.5,0,0,0])
+# cl_sys.compute_trajectory(20)
 
-cl_sys.plot_trajectory('xu')
-cl_sys.animate_simulation( time_factor_video = 1.0 )
+# # cl_sys.plot_trajectory('xu')
+# cl_sys.animate_simulation( time_factor_video = 1.0 )
 
-cl_sys.x0 = np.array([50,50,0.0,0,0,0])
-cl_sys.compute_trajectory(50)
+# cl_sys.x0 = np.array([50,50,0.0,0,0,0])
+# cl_sys.compute_trajectory(50)
 
-cl_sys.plot_trajectory('xu')
-cl_sys.animate_simulation( time_factor_video = 1.0 )
+# # cl_sys.plot_trajectory('xu')
+# # cl_sys.animate_simulation( time_factor_video = 1.0 )
 # cl_sys.animate_simulation( time_factor_video = 1.0 , save = True , file_name = 'boat2' , show = False)
 
 
