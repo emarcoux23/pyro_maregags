@@ -34,6 +34,6 @@ ctl = synthesize_lqr_controller( ss , cf )
 # Simulation Closed-Loop Non-linear with LQR controller
 cl_sys = ctl + sys
 cl_sys.x0 = np.array([-0.1,0.2,0,0])
-cl_sys.compute_trajectory( tf = 2.0 )
+cl_sys.compute_trajectory( tf = 5.0 )
 cl_sys.plot_trajectory('xu')
-cl_sys.animate_simulation( time_factor_video=0.02 )
+cl_sys.animate_simulation( time_factor_video=1.5 )

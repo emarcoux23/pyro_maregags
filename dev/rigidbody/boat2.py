@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 ###############################################################################
-from pyro.dynamic import system
+from pyro.dynamic   import system
 from pyro.kinematic import geometry
 from pyro.kinematic import drawing
 from pyro.analysis  import graphical
@@ -85,7 +85,11 @@ class Boat2D( RigidBody2D ):
     ###########################################################################
     def B(self, q , u ):
         """ 
-        Actuator Matrix  : dof x m
+        Actuator Matrix 
+        ------------------
+        Here u is a 2D point force [ F_x , F_y ]
+        applied at a point located at a distance l_t behind the CG
+        hence also creating a yaw moment
         """
         
         B = np.zeros((3,2))
@@ -113,7 +117,11 @@ class Boat2D( RigidBody2D ):
     ###########################################################################
     def d(self, q , v , u ):
         """ 
-        State-dependent dissipative forces : dof x 1
+        Hydrodynamic dissipative forces
+        -----------------------------------
+
+        The model is a combination of linear and quadratic damping
+
         """
 
         # linear damping 
@@ -165,25 +173,6 @@ class Boat2D( RigidBody2D ):
         lines_style = []
         lines_color = []
         
-        ###############################
-        # parking pose
-        ###############################
-        
-        pts = np.zeros(( 6 , 3 ))
-        l   = self.height * 0.5
-        w   = self.width * 0.5
-        
-        pts[0,:] = np.array([-l, +w,0])
-        pts[1,:] = np.array([-l, -w,0])
-        pts[2,:] = np.array([+l, -w,0])
-        pts[3,:] = np.array([l+w,0,0])
-        pts[4,:] = np.array([+l, +w,0])
-        pts[5,:] = np.array([-l, +w,0])
-        
-        lines_pts.append( pts )
-        lines_style.append( '--')
-        lines_color.append( 'k' )
-        
         ###########################
         #  body
         ###########################
@@ -217,9 +206,7 @@ class Boat2D( RigidBody2D ):
     ###########################################################################
     def forward_kinematic_lines_plus(self, x , u , t ):
         """ 
-        show trust vectors
-        
-        
+        Graphical output showing trust vectors and hydrodynamic forces
         """
         
         lines_pts = [] # list of array (n_pts x 3) for each lines
@@ -261,20 +248,6 @@ class Boat2D( RigidBody2D ):
         # lines_pts.append( pts_W )
         # lines_style.append( '--')
         # lines_color.append( 'k' )
-
-        ###########################
-        #  Target
-        ###########################
-
-        a = 10.
-        w = 0.3
-        
-        pts      = np.zeros(( 1 , 3 ))
-        pts[0,:] = np.array([ a * np.cos(w*t) , a * np.sin(w*t), 0.0 ]) 
-        
-        lines_pts.append( pts )
-        lines_style.append( 'o')
-        lines_color.append( 'r' )
 
 
                 

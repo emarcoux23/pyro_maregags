@@ -10,6 +10,8 @@ Created on Tue Oct 23 20:45:37 2018
 import numpy as np
 ###############################################################################
 from pyro.dynamic import system
+from pyro.kinematic import geometry
+from pyro.kinematic import drawing
 ###############################################################################
 
 ###############################################################################
@@ -220,7 +222,7 @@ class GeneralizedMechanicalSystem( system.ContinuousDynamicSystem ):
         d = self.d( q , v )
                 
         # Generalized forces
-        forces = H @ dv + C @ v + g + d
+        forces = M @ dv + C @ v + g + d
         
         return forces
     
@@ -482,7 +484,7 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
     """
 
     ############################
-    def __init__(self, force_inputs = 1, other_inputs = 1):
+    def __init__(self, force_inputs = 2, other_inputs = 0):
         """ """
         
         # Degree of Freedom
@@ -513,6 +515,10 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
         self.mass     = 1.0
         self.inertia  = 1.0
         self.l_t      = 1.0 # Distance between CG and Thrust
+
+        # Default graphic output parameters
+        self.dynamic_domain  = True
+
 
     ###########################################################################
     def M(self, q ):
@@ -566,7 +572,7 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
     
         
     ###########################################################################
-    def d(self, q , v ):
+    def d(self, q , v , u):
         """ 
         State-dependent dissipative forces : dof x 1
         """
@@ -574,6 +580,129 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
         d = np.zeros(self.dof ) # Default is zero vector
         
         return d
+    
+    ###########################################################################
+    def B(self, q , u ):
+        """ 
+        Actuator Matrix 
+        ------------------
+        This placeholder is for a 2D point force [ F_x , F_y ] 
+        applied at a point located at a distance l_t behind the CG
+        """
+        
+        B = np.zeros(( self.dof, self.m_f ))
+        
+        B[0,0] = 1
+        B[1,1] = 1
+        B[2,1] = - self.l_t 
+        
+        return B
+    
+    ###########################################################################
+    def forward_kinematic_domain(self, q ):
+        """
+        Place holder graphical output ( box with a force )
+        """
+
+        l = self.l_t * 10
+        
+        x = q[0]
+        y = q[1]
+        z = 0
+        
+        if self.dynamic_domain:
+        
+            domain  = [ ( -l + x , l + x ) ,
+                        ( -l + y , l + y ) ,
+                        ( -l + z , l + z ) ]#  
+        else:
+            
+            domain  = [ ( -l , l ) ,
+                        ( -l , l ) ,
+                        ( -l , l ) ]#
+                
+        return domain
+    
+
+    ###########################################################################
+    def forward_kinematic_lines(self, q ):
+        """
+        Place holder graphical output ( box with a force )
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+        
+        ###########################
+        #  body
+        ###########################
+        
+        x     = q[0]
+        y     = q[1]
+        theta = q[2]
+        
+        W_T_B    = geometry.transformation_matrix_2D( theta , x , y )
+
+        w = self.l_t
+
+        # Points in body frame
+        pts      = np.zeros(( 5 , 3 ))
+        pts[0,:] = np.array([-w,+w,0])
+        pts[1,:] = np.array([-w,-w,0])
+        pts[2,:] = np.array([+w,-w,0])
+        pts[3,:] = np.array([+w,+w,0])
+        pts[4,:] = np.array([-w,+w,0])
+        
+        pts_W    = drawing.transform_points_2D( W_T_B , pts )
+
+        lines_pts.append( pts_W )
+        lines_style.append( '-')
+        lines_color.append( 'b' )
+        
+        ###########################
+        #  C.G.
+        ###########################
+        
+        pts      = np.zeros(( 1 , 3 ))
+        pts[0,:] = np.array([x,y,0])
+        
+        lines_pts.append( pts )
+        lines_style.append( 'o')
+        lines_color.append( 'b' )
+                
+        return lines_pts , lines_style , lines_color
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """
+        Place holder graphical output ( box with a force )
+        """
+        
+        lines_pts = [] # list of array (n_pts x 3) for each lines
+        lines_style = []
+        lines_color = []
+
+        # M per Newton of force
+        f2r = 1.0 / self.u_ub[0] * self.l_t
+        
+        ###########################
+        # force vector
+        ###########################
+        
+        vx  = u[0] * f2r
+        vy  = u[1] * f2r
+        offset = -self.l_t
+        
+        pts_body = drawing.arrow_from_components( vx , vy , x = offset, origin = 'tip'  )    
+        W_T_B    = geometry.transformation_matrix_2D( x[2], x[0] , x[1] )
+        pts_W    = drawing.transform_points_2D( W_T_B , pts_body )
+        
+        lines_pts.append( pts_W )
+        lines_style.append( '-')
+        lines_color.append( 'r' )
+
+        return lines_pts , lines_style , lines_color
 
     
 '''
@@ -586,15 +715,16 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    sys = GeneralizedMechanicalSystem( dof = 2 , pos = 2 , actuators = 2 )
-    sys = GeneralizedMechanicalSystemWithPositionInputs( dof = 3 , pos = 1 , force_inputs= 1 , other_inputs=1 )
+    #sys = GeneralizedMechanicalSystem( dof = 2 , pos = 2 , actuators = 2 )
+    #sys = GeneralizedMechanicalSystemWithPositionInputs( dof = 3 , pos = 1 , force_inputs= 1 , other_inputs=1 )
+    sys = RigidBody2D()
     
-    sys.show(  q = np.array([ 1.0, 2.0]) )
-    sys.show3( q = np.array([-0.5, 1.5]) )
+    #sys.show(  q = np.array([ 1.0, 2.0, 0.5 ]) )
     
-    sys.ubar = np.array([1,2])
-    sys.x0   = np.array([0,0,0,0])
+    sys.ubar = np.array([10,2.0])
+    sys.x0   = np.array([0,0,0,0,0,0])
     
+    sys.compute_trajectory( tf = 20 )
     sys.plot_trajectory()
     sys.animate_simulation()
         
