@@ -59,23 +59,15 @@ class Boat2D( rigidbody.RigidBody2D ):
         self.input_label = ['Tx','Ty']
         self.input_units = ['[N]','[N]']
 
-         # State working range
-        self.x_ub = np.array([+10,+10,+2,10,10,10])
-        self.x_lb = np.array([-10,-10,-2,-10,-10,-10])
-
-        # Input working range
-        self.u_ub = np.array([+1000,+100])
-        self.u_lb = np.array([-1000,-100])
-
         # Dynamic properties
-        self.mass     = 1000.0
-        self.inertia  = 2000.0
-        self.l_t      = 2.0     # Distance between CG and Thrust vector
+        self.mass     = 10000.0
+        self.inertia  = 10000.0 * 1.0 ** 2
+        self.l_t      = 3.0     # Distance between CG and Thrust vector
         
         # Hydrodynamic coefficients
 
         # linear damping
-        self.damping_coef = np.array([ 200.0, 1000.0, 1000.0 ])
+        self.damping_coef = np.array([ 2000.0, 20000.0, 10000.0 ])
 
         # quadratic damping
         self.Cx_max = 0.5 
@@ -83,8 +75,8 @@ class Boat2D( rigidbody.RigidBody2D ):
         self.Cm_max = 0.1
 
         self.rho = 1000.0          # water density
-        self.Afc = 0.5             # frontal area
-        self.Alc = 1.0             # lateral area
+        self.Alc = self.l_t * 2    # lateral area
+        self.Afc = 0.25 * self.Alc  # frontal area
         self.loa = self.l_t * 2    # length over all
 
         # current velocity in world frame
@@ -92,7 +84,7 @@ class Boat2D( rigidbody.RigidBody2D ):
         # self.v_current = np.array([0,0,0])    
 
         # Graphic output parameters 
-        self.width           = 2.0
+        self.width           = self.Afc
         self.height          = self.l_t * 2
         self.dynamic_domain  = True
         self.dynamic_range   = 10
@@ -110,6 +102,15 @@ class Boat2D( rigidbody.RigidBody2D ):
         self.drawing_body_pts = pts
 
         self.show_hydrodynamic_forces = False
+
+         # State working range
+        xy_range = l * 3
+        self.x_ub = np.array([+xy_range,+xy_range,+np.pi,10,10,10])
+        self.x_lb = np.array([-xy_range,-xy_range,-np.pi,-10,-10,-10])
+
+        # Input working range
+        self.u_ub = np.array([+10000,+1000])
+        self.u_lb = np.array([-10000,-1000])
 
     ###########################################################################
     def B(self, q , u ):
@@ -348,12 +349,12 @@ if __name__ == "__main__":
     sys.x0[1] = 0
     sys.x0[2] = 0
 
-    sys.x0[3] = 10.0
+    sys.x0[3] = 2.0
     sys.x0[4] = 0.0
     sys.x0[5] = 0.0
     
     sys.ubar[0] = 10000
-    sys.ubar[1] = 10
+    sys.ubar[1] = 1000
 
     sys.plot_alpha2Coefs()
 
