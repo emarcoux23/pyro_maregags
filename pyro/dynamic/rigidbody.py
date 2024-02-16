@@ -33,7 +33,7 @@ class GeneralizedMechanicalSystem( system.ContinuousDynamicSystem ):
     M(q)     :  dim = (dof, dof) : inertia matrix
     C(q,v)   :  dim = (dof, dof) : corriolis matrix
     B(q)     :  dim = (dof, m)   : actuator matrix
-    N(q)     :  dim = (pos, dof) : actuator matrix
+    N(q)     :  dim = (pos, dof) : transformation matrix
     
     """
     
