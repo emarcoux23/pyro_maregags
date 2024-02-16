@@ -4,20 +4,49 @@
 import numpy as np
 import matplotlib.pyplot as plt
 ###############################################################################
-from pyro.dynamic   import system
+from pyro.dynamic   import rigidbody
 from pyro.kinematic import geometry
 from pyro.kinematic import drawing
 from pyro.analysis  import graphical
 ###############################################################################
 
-from rigidbody import RigidBody2D
-
-##############################################################################
-
 ###############################################################################
         
-class Boat2D( RigidBody2D ):    
+class Boat2D( rigidbody.RigidBody2D ):    
     """
+    Simple planar (3 DoF) boat model 
+    
+    Partialy based on
+    'Low-Speed Maneuvering Models for Dynamic Positioning (3 DOFs)'
+    see Section 6.7 in
+    Fossen, Thor I. Handbook of marine craft hydrodynamics and motion control 
+    2nd Editions. John Wiley & Sons, 2021.
+
+    with Equation of motion (in body frame) described by:
+    -------------------------------------------------------
+    M(q) dv + C(q,v) v + d(q,v) = B(q) u
+    dq = N(q) v
+    -------------------------------------------------------
+    v        :  dim = (3, 1)     : velocity variables ( foward speed, sway speed, yaw rate) in body frame
+    q        :  dim = (3, 1)     : position variables ( x , y , theta ) in global frame
+    u        :  dim = (2, 1)     : thruster force vector in body frame
+    d(q,v)   :  dim = (3, 1)     : state-dependent dissipative forces in body frame
+    M(q)     :  dim = (3, 3)     : inertia matrix in body frame
+    C(q,v)   :  dim = (3, 3)     : corriolis matrix in body frame
+    B(q)     :  dim = (3, 2)     : actuator matrix in body frame
+    N(q)     :  dim = (3, 3)     : transformation matrix from body frame to global frame
+
+    with the following hypothesis:
+    - The boat is a planar rigid body with 3 DoF ( surge, sway and yaw)
+    - The input is a 2D force vector [ F_x , F_y ] applied at a distance l_t behind the CG
+    - The boat is subject to linear and quadratic damping
+    - The default quadratic hydronamic forces coef. are taken from
+        Fossen, Thor I. Handbook of marine craft hydrodynamics and motion control
+        2nd Editions. John Wiley & Sons, 2021.
+        See 6.7.1 and Fig. 6.11
+        A rough fit on experimental data from a tanker
+        - TODO: not fully validated
+    - The c.g., c.p and body-frame origin are coincident
 
     """
 
@@ -25,7 +54,7 @@ class Boat2D( RigidBody2D ):
     def __init__(self):
         """ """
 
-        RigidBody2D.__init__( self , force_inputs = 2, other_inputs = 0)
+        rigidbody.RigidBody2D.__init__( self , force_inputs = 2, other_inputs = 0)
 
         self.input_label = ['Tx','Ty']
         self.input_units = ['[N]','[N]']
@@ -34,6 +63,7 @@ class Boat2D( RigidBody2D ):
         self.x_ub = np.array([+10,+10,+2,10,10,10])
         self.x_lb = np.array([-10,-10,-2,-10,-10,-10])
 
+        # Input working range
         self.u_ub = np.array([+1000,+100])
         self.u_lb = np.array([-1000,-100])
 
@@ -41,8 +71,6 @@ class Boat2D( RigidBody2D ):
         self.mass     = 1000.0
         self.inertia  = 2000.0
         self.l_t      = 2.0     # Distance between CG and Thrust vector
-
-        self.gravity  = 9.8     # gravity
         
         # Hydrodynamic coefficients
 
@@ -59,20 +87,19 @@ class Boat2D( RigidBody2D ):
         self.Alc = 1.0             # lateral area
         self.loa = self.l_t * 2    # length over all
 
-        # self.v_current = np.array([0,0,0])    # current velocity in world frame
-
-        # Kinematic param
-        self.width  = 2.0
-        self.height = self.l_t * 2
+        # current velocity in world frame
+        # TODO: not implemented
+        # self.v_current = np.array([0,0,0])    
 
         # Graphic output parameters 
+        self.width           = 2.0
+        self.height          = self.l_t * 2
         self.dynamic_domain  = True
         self.dynamic_range   = 10
         
-        pts = np.zeros(( 6 , 3 ))
         l   = self.height * 0.5
         w   = self.width  * 0.5
-        
+        pts      = np.zeros(( 6 , 3 ))
         pts[0,:] = np.array([-l, +w,0])
         pts[1,:] = np.array([-l, -w,0])
         pts[2,:] = np.array([+l, -w,0])
@@ -81,6 +108,8 @@ class Boat2D( RigidBody2D ):
         pts[5,:] = np.array([-l, +w,0])
         
         self.drawing_body_pts = pts
+
+        self.show_hydrodynamic_forces = False
 
     ###########################################################################
     def B(self, q , u ):
@@ -107,10 +136,11 @@ class Boat2D( RigidBody2D ):
         # Cd = 1 - np.cos( 2 * alpha ) # flat plate approx
         # Cm = 0.0
 
-        # Fig. 7.6 from Fossen
-        Cx = -0.5 * np.cos( alpha  ) * np.abs( np.cos( alpha ) ) 
-        Cy = +0.6 * np.sin( alpha  ) * np.abs( np.sin( alpha ) )
-        Cm = +0.1 * np.sin( 2 * alpha )
+        # Fig. 7.6 from Fossen  (1st edition)
+        # Fig. 6.11 from Fossen (2nd edition)
+        Cx = - self.Cx_max * np.cos( alpha  ) * np.abs( np.cos( alpha ) ) 
+        Cy = + self.Cy_max * np.sin( alpha  ) * np.abs( np.sin( alpha ) )
+        Cm = + self.Cm_max * np.sin( 2 * alpha )
         
         return np.array([ Cx , Cy , Cm ])
         
@@ -134,7 +164,7 @@ class Boat2D( RigidBody2D ):
         Cy = self.CurrentCoef( alpha )[1]
         Cm = self.CurrentCoef( alpha )[2]
 
-        # hydrodynamic forces
+        # quadratic forces
         fx = -0.5 * self.rho * self.Afc * Cx * V2
         fy = -0.5 * self.rho * self.Alc * Cy * V2
         mz = -0.5 * self.rho * self.Alc * self.loa * Cm * V2
@@ -142,6 +172,7 @@ class Boat2D( RigidBody2D ):
         d_quad = np.array([ fx , fy , mz ])
         
         return d_quad + d_lin 
+    
     
     ###########################################################################
     def forward_kinematic_domain(self, q ):
@@ -203,6 +234,7 @@ class Boat2D( RigidBody2D ):
                 
         return lines_pts , lines_style , lines_color
     
+    
     ###########################################################################
     def forward_kinematic_lines_plus(self, x , u , t ):
         """ 
@@ -237,17 +269,19 @@ class Boat2D( RigidBody2D ):
         # hydro forces
         ###########################
 
-        # q , v = self.x2q( x )
+        if self.show_hydrodynamic_forces:
 
-        # f = -self.d( q , v , u)
+            q , v = self.x2q( x )
 
-        # pts_body = drawing.arrow_from_components( f[0] * f2r , f[1] * f2r )
+            f = -self.d( q , v , u)
 
-        # pts_W = drawing.transform_points_2D( W_T_B  , pts_body )
+            pts_body = drawing.arrow_from_components( f[0] * f2r , f[1] * f2r )
 
-        # lines_pts.append( pts_W )
-        # lines_style.append( '--')
-        # lines_color.append( 'k' )
+            pts_W = drawing.transform_points_2D( W_T_B  , pts_body )
+
+            lines_pts.append( pts_W )
+            lines_style.append( '--')
+            lines_color.append( 'k' )
 
 
                 
@@ -322,6 +356,8 @@ if __name__ == "__main__":
     sys.ubar[1] = 10
 
     sys.plot_alpha2Coefs()
+
+    # sys.show_hydrodynamic_forces = True
 
     sys.plot_trajectory('xu')
     sys.animate_simulation()
