@@ -20,9 +20,7 @@ class SingleAxisTrajectoryGenerator:
     This class is a tool to generate a point-to-point trajectory for a
     single axis based on boundary conditions (position and higher order derivative)
 
-    Multiple methods are implemented:
-    - Trapezoidal (acceleration profil is discontinuous)
-    - Polynomial of order N
+    Polynomial of order N
 
     if boundary conditions do not fully specify the profile parameter,
     then an optimization is conducted (TODO)
@@ -30,57 +28,53 @@ class SingleAxisTrajectoryGenerator:
     """
 
     ################################################
-    def __init__(self, tf=10, method="poly", N=5, x0=None, xf=None):
+    def __init__(self, tf=10, N=5, x0=None, xf=None):
 
         self.tf = tf
-
-        self.method = method
         self.poly_N = N
-
-        if method == "trapz":
-            self.max_order = 3
+        self.diff_N = N
+        self.x0 = x0
+        self.xf = xf
 
         self.boundary_condition_N = 3
 
         self.labels = [
-            "position",
-            "velocity",
-            "acceleration",
-            "jerk",
-            "snap",
-            "d5",
-            "d6",
-            "d7",
+            'pos',
+            "vel",
+            "acc",
+            "jerk (3th)",
+            "snap (4th)",
+            "crac (5th)",
+            "pop (6th)",
+            "7th",
+            "8th",
+            "9th",
+            "10th",
         ]
 
     ################################################
-    def set_initial_conditions(self, x0):
+    def compute_b(self):
 
-        N = self.boundary_condition_N
-
-        self.x0 = np.zeros(N)
-        self.x0[:N] = x0[:N]  # First N values only
-
-    ################################################
-    def set_final_conditions(self, xf):
-
-        N = self.boundary_condition_N
-
-        self.xf = np.zeros(N)
-        self.xf[:N] = xf[:N]  # First N values only
-
-    ################################################
-    def generate_polynomial_parameters(self):
-
-        N = self.poly_N
-        tf = self.tf
         x0 = self.x0
         xf = self.xf
+        N = self.boundary_condition_N
 
-        # TODO: N-order version
-        # Place holder for 5-order
+        b = np.hstack((x0[:N], xf[:N]))
 
-        b = np.hstack((x0, xf))
+        print(r"[x(0), \dot{x}(x0), \ddot{x}(x0), ...] = ", x0)
+        print(r"[x(tf), \dot{x}(tf), \ddot{x}(x0), ...] = ", xf)
+        print("Boundary condition vector: \n", b)
+
+        self.b = b
+
+    ################################################
+    def compute_A(self):
+
+        x0 = self.x0
+        xf = self.xf
+        N = self.boundary_condition_N
+
+        # TODO specific poly 5 + N = 3
         A = np.array(
             [
                 [1, 0, 0, 0, 0, 0],
@@ -92,13 +86,27 @@ class SingleAxisTrajectoryGenerator:
             ]
         )
 
-        p = np.linalg.solve(A, b)
+        print("Boundary condition matrix: \n", A)
+        #print("Boundary condition matrix: \n", A2)
 
-        return p
+        self.A = A
 
     ################################################
-    def generate_trajectory(self, p, dt=0.01):
+    def compute_parameters(self):
 
+        A = self.A
+        b = self.b
+
+        p = np.linalg.solve(A, b)
+
+        print("Polynomial parameters: \n", p)
+
+        self.p = p
+
+    ################################################
+    def generate_trajectory2(self, dt=0.01):
+
+        p = self.p
         n = int(self.tf / dt)
         t = np.linspace(0, self.tf, n)
 
@@ -111,10 +119,48 @@ class SingleAxisTrajectoryGenerator:
 
         X = np.vstack((x, dx, ddx, dddx, ddddx))
 
-        return (X, t)
+        self.X = X
+        self.t = t
 
     ################################################
-    def plot_trajectory(self, X, t, n_fig = None):
+    def generate_trajectory(self, dt=0.01):
+
+        p = self.p
+
+        N = self.poly_N # order of polynomial
+
+        steps = int(self.tf / dt)
+        ts = np.linspace(0, self.tf, steps)
+        
+        m = self.diff_N # number of derivative to compute
+
+        X = np.zeros((m,steps))
+
+        # For all jth derivative of the signal
+        for j in range(m):
+            # For all time steps
+            for i in range(steps):
+                t = ts[i]
+                x = 0
+                # For all terms of the polynomical
+                for n in range(j,N+1):
+                    p_n = p[n]
+                    exp = n - j
+                    mul = 1
+                    for k in range(j):
+                        mul = mul * ( n - k )
+                    x = x + mul * p_n * t ** exp
+
+                X[j,i] = x
+
+        self.X = X
+        self.t = ts
+
+    ################################################
+    def plot_trajectory(self, n_fig=None):
+
+        X = self.X
+        t = self.t
 
         n_max = X.shape[0]
 
@@ -132,17 +178,18 @@ class SingleAxisTrajectoryGenerator:
             frameon=True,
         )
 
-        if n==1: ax = [ax]
+        if n == 1:
+            ax = [ax]
 
         for i in range(n):
 
             ax[i].plot(t, X[i, :], "b")
             ax[i].set_ylabel(self.labels[i], fontsize=graphical.default_fontsize)
-            ax[i].set_xlabel("Time[sec]", fontsize=graphical.default_fontsize)
             ax[i].tick_params(labelsize=graphical.default_fontsize)
             ax[i].grid(True)
 
-        fig.tight_layout()
+        ax[-1].set_xlabel("Time[sec]", fontsize=graphical.default_fontsize)
+        #fig.tight_layout()
         fig.canvas.draw()
 
         plt.show()
@@ -150,12 +197,12 @@ class SingleAxisTrajectoryGenerator:
     ################################################
     def solve(self):
 
-        p = self.generate_polynomial_parameters()
-        X, t = self.generate_trajectory(p)
+        self.compute_b()
+        self.compute_A()
 
-        self.plot_trajectory(X, t)
-
-        return (p, X, t)
+        self.compute_parameters()
+        self.generate_trajectory()
+        self.plot_trajectory()
 
 
 """
@@ -170,10 +217,9 @@ if __name__ == "__main__":
 
     ge = SingleAxisTrajectoryGenerator()
 
-    ge.set_initial_conditions(np.array([-1, -1, -1]))
-    ge.set_final_conditions(np.array([1, 1, 1]))
+    ge.x0 = np.array([-1, -1, 0, 10])
+    ge.xf = np.array([1, 0, 0])
 
-    p = ge.generate_polynomial_parameters()
-    X, t = ge.generate_trajectory(p)
+    ge.diff_N = 20
 
-    ge.plot_trajectory(X, t)
+    ge.solve()
