@@ -9,7 +9,10 @@ Created on 22 Feb 2024
 import numpy as np
 import matplotlib.pyplot as plt
 
-# from scipy.optimize import minimize
+import warnings
+
+
+from scipy.optimize import minimize
 
 from pyro.analysis import graphical
 
@@ -36,16 +39,17 @@ class SingleAxisTrajectoryGenerator:
         self.x0 = x0
         self.xf = xf
 
-        self.boundary_condition_N = 3
+        self.bc_t0_N = 3
+        self.bc_tf_N = 3
 
         self.labels = [
-            'pos',
+            "pos",
             "vel",
             "acc",
-            "jerk (3th)",
-            "snap (4th)",
-            "crac (5th)",
-            "pop (6th)",
+            "jerk",
+            "snap",
+            "crac",
+            "pop",
             "7th",
             "8th",
             "9th",
@@ -57,9 +61,10 @@ class SingleAxisTrajectoryGenerator:
 
         x0 = self.x0
         xf = self.xf
-        N = self.boundary_condition_N
+        N0 = self.bc_t0_N
+        Nf = self.bc_tf_N
 
-        b = np.hstack((x0[:N], xf[:N]))
+        b = np.hstack((x0[:N0], xf[:Nf]))
 
         print(r"[x(0), \dot{x}(x0), \ddot{x}(x0), ...] = ", x0)
         print(r"[x(tf), \dot{x}(tf), \ddot{x}(x0), ...] = ", xf)
@@ -70,26 +75,80 @@ class SingleAxisTrajectoryGenerator:
     ################################################
     def compute_A(self):
 
+        tf = self.tf
         x0 = self.x0
         xf = self.xf
-        N = self.boundary_condition_N
+        N0 = self.bc_t0_N
+        Nf = self.bc_tf_N
+        N = self.poly_N
 
-        # TODO specific poly 5 + N = 3
-        A = np.array(
-            [
-                [1, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0],
-                [0, 0, 2, 0, 0, 0],
-                [1, tf, tf**2, tf**3, tf**4, tf**5],
-                [0, 1, 2 * tf, 3 * tf**2, 4 * tf**3, 5 * tf**4],
-                [0, 0, 2, 6 * tf, 12 * tf**2, 20 * tf**3],
-            ]
-        )
+        A = np.zeros((N0 + Nf, N + 1))
+
+        # For all jth derivative of the initial conditions
+        t0 = 0
+        for j in range(N0):
+            # For all terms of the polynomical
+            for n in range(j, N + 1):
+                exp = n - j
+                mul = 1
+                for k in range(j):
+                    mul = mul * (n - k)
+                A[j, n] = mul * t0**exp
+
+        # For all jth derivative of the final conditions
+        for j in range(Nf):
+            # For all terms of the polynomical
+            for n in range(j, N + 1):
+                exp = n - j
+                mul = 1
+                for k in range(j):
+                    mul = mul * (n - k)
+                A[N0 + j, n] = mul * tf**exp
 
         print("Boundary condition matrix: \n", A)
-        #print("Boundary condition matrix: \n", A2)
 
         self.A = A
+
+    ################################################
+    def compute_Q(self):
+
+        Q = np.zeros((self.poly_N + 1, self.poly_N + 1))
+
+        for i in range(self.poly_N + 1):
+            Q[i, i] = 1.0 * i * i
+
+        # TODO compute real Q
+        # see https://groups.csail.mit.edu/rrg/papers/BryIJRR15.pdf
+
+        self.Q = Q
+
+    ################################################
+    def constraints(self, p):
+
+        res = self.A @ p - self.b
+
+        return res
+
+    ################################################
+    def cost(self, p):
+
+        Q = self.Q
+
+        # TODO compute real Q
+        # see https://groups.csail.mit.edu/rrg/papers/BryIJRR15.pdf
+
+        J = p.T @ Q @ p
+
+        # Min Jerk test
+        self.p = p
+        self.generate_trajectory()
+        jerk = self.X[3, :]
+        snap = self.X[4, :]
+
+        # #J = np.abs(jerk).max()
+        J = np.abs(snap).max()
+
+        return J
 
     ################################################
     def compute_parameters(self):
@@ -97,44 +156,60 @@ class SingleAxisTrajectoryGenerator:
         A = self.A
         b = self.b
 
-        p = np.linalg.solve(A, b)
+        if A.shape[0] == A.shape[1]:
+
+            print("Fully constrained trajectory parameters")
+            p = np.linalg.solve(A, b)
+
+        elif A.shape[0] > A.shape[1]:
+
+            warnings.warn(
+                "Warning! : impossible to respect all boundary condition, raise the order of the polynomial"
+            )
+            print(
+                "Overconstrained boundary consitions: solving for best solution in the least-square sense"
+            )
+            p = np.linalg.lstsq(A, b)[0]
+
+        else:
+
+            print("Optimization over free decision variables")
+
+            self.compute_Q()
+
+            p0 = np.zeros(self.poly_N + 1)
+
+            constraints = {"type": "eq", "fun": self.constraints}
+
+            res = minimize(
+                self.cost,
+                p0,
+                method="SLSQP",
+                constraints=constraints,
+                options={"disp": True, "maxiter": 500},
+            )
+
+            p = res.x
+
+            # p = np.linalg.lstsq(A, b)[0]
 
         print("Polynomial parameters: \n", p)
 
         self.p = p
 
     ################################################
-    def generate_trajectory2(self, dt=0.01):
-
-        p = self.p
-        n = int(self.tf / dt)
-        t = np.linspace(0, self.tf, n)
-
-        # TODO: N-order version
-        x = p[0] + p[1] * t + p[2] * t**2 + p[3] * t**3 + p[4] * t**4 + p[5] * t**5
-        dx = p[1] + 2 * p[2] * t + 3 * p[3] * t**2 + 4 * p[4] * t**3 + 5 * p[5] * t**4
-        ddx = 2 * p[2] + 6 * p[3] * t + 12 * p[4] * t**2 + 20 * p[5] * t**3
-        dddx = 6 * p[3] + 24 * p[4] * t + 60 * p[5] * t**2
-        ddddx = 24 * p[4] + 120 * p[5] * t
-
-        X = np.vstack((x, dx, ddx, dddx, ddddx))
-
-        self.X = X
-        self.t = t
-
-    ################################################
     def generate_trajectory(self, dt=0.01):
 
         p = self.p
 
-        N = self.poly_N # order of polynomial
+        N = self.poly_N  # order of polynomial
 
         steps = int(self.tf / dt)
         ts = np.linspace(0, self.tf, steps)
-        
-        m = self.diff_N # number of derivative to compute
 
-        X = np.zeros((m,steps))
+        m = self.diff_N  # number of derivative to compute
+
+        X = np.zeros((m, steps))
 
         # For all jth derivative of the signal
         for j in range(m):
@@ -143,15 +218,15 @@ class SingleAxisTrajectoryGenerator:
                 t = ts[i]
                 x = 0
                 # For all terms of the polynomical
-                for n in range(j,N+1):
+                for n in range(j, N + 1):
                     p_n = p[n]
                     exp = n - j
                     mul = 1
                     for k in range(j):
-                        mul = mul * ( n - k )
-                    x = x + mul * p_n * t ** exp
+                        mul = mul * (n - k)
+                    x = x + mul * p_n * t**exp
 
-                X[j,i] = x
+                X[j, i] = x
 
         self.X = X
         self.t = ts
@@ -189,7 +264,7 @@ class SingleAxisTrajectoryGenerator:
             ax[i].grid(True)
 
         ax[-1].set_xlabel("Time[sec]", fontsize=graphical.default_fontsize)
-        #fig.tight_layout()
+        # fig.tight_layout()
         fig.canvas.draw()
 
         plt.show()
@@ -217,9 +292,54 @@ if __name__ == "__main__":
 
     ge = SingleAxisTrajectoryGenerator()
 
-    ge.x0 = np.array([-1, -1, 0, 10])
-    ge.xf = np.array([1, 0, 0])
+    ge.x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    ge.xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
-    ge.diff_N = 20
+    ge.bc_t0_N = 2
+    ge.bc_tf_N = 2
+    ge.poly_N = 3
+    ge.diff_N = 7
 
     ge.solve()
+
+    ge.bc_t0_N = 3
+    ge.bc_tf_N = 3
+    ge.poly_N = 5
+    ge.diff_N = 7
+
+    ge.solve()
+
+    ge.bc_t0_N = 4
+    ge.bc_tf_N = 4
+    ge.poly_N = 7
+    ge.diff_N = 7
+
+    ge.solve()
+
+    ge.bc_t0_N = 5
+    ge.bc_tf_N = 5
+    ge.poly_N = 9
+    ge.diff_N = 7
+
+    ge.solve()
+
+    ge.bc_t0_N = 6
+    ge.bc_tf_N = 6
+    ge.poly_N = 11
+    ge.diff_N = 7
+
+    ge.solve()
+
+    ge.bc_t0_N = 7
+    ge.bc_tf_N = 7
+    ge.poly_N = 13
+    ge.diff_N = 7
+
+    ge.solve()
+
+    # ge.bc_t0_N = 1
+    # ge.bc_tf_N = 1
+    # ge.poly_N = 3
+    # ge.diff_N = 7
+
+    # ge.solve()
