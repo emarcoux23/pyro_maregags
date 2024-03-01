@@ -292,50 +292,50 @@ if __name__ == "__main__":
 
     ge = SingleAxisTrajectoryGenerator()
 
-    ge.x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    ge.x0 = np.array([0,  0, 0, 0, 0, 0, 0, 0])
     ge.xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
     ge.bc_t0_N = 2
     ge.bc_tf_N = 2
     ge.poly_N = 3
-    ge.diff_N = 7
+    ge.diff_N = 3
 
     ge.solve()
 
-    ge.bc_t0_N = 3
-    ge.bc_tf_N = 3
-    ge.poly_N = 5
-    ge.diff_N = 7
+    # ge.bc_t0_N = 3
+    # ge.bc_tf_N = 3
+    # ge.poly_N = 5
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
 
-    ge.bc_t0_N = 4
-    ge.bc_tf_N = 4
-    ge.poly_N = 7
-    ge.diff_N = 7
+    # ge.bc_t0_N = 4
+    # ge.bc_tf_N = 4
+    # ge.poly_N = 7
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
 
-    ge.bc_t0_N = 5
-    ge.bc_tf_N = 5
-    ge.poly_N = 9
-    ge.diff_N = 7
+    # ge.bc_t0_N = 5
+    # ge.bc_tf_N = 5
+    # ge.poly_N = 9
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
 
-    ge.bc_t0_N = 6
-    ge.bc_tf_N = 6
-    ge.poly_N = 11
-    ge.diff_N = 7
+    # ge.bc_t0_N = 6
+    # ge.bc_tf_N = 6
+    # ge.poly_N = 11
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
 
-    ge.bc_t0_N = 7
-    ge.bc_tf_N = 7
-    ge.poly_N = 13
-    ge.diff_N = 7
+    # ge.bc_t0_N = 7
+    # ge.bc_tf_N = 7
+    # ge.poly_N = 13
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
 
     # ge.bc_t0_N = 1
     # ge.bc_tf_N = 1

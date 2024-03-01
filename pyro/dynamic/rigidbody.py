@@ -670,6 +670,24 @@ class RigidBody2D( GeneralizedMechanicalSystemWithPositionInputs ):
         lines_pts.append( pts )
         lines_style.append( 'o')
         lines_color.append( 'b' )
+
+        ###########################
+        #  Diff flat output
+        ###########################
+
+        J = self.inertia
+        m = self.mass
+        r = self.l_t
+
+        xp = x + J / (m * r) * np.cos(theta)
+        yp = y + J / (m * r) * np.sin(theta)
+
+        pts      = np.zeros(( 1 , 3 ))
+        pts[0,:] = np.array([xp,yp,0])
+        
+        lines_pts.append( pts )
+        lines_style.append( 'o')
+        lines_color.append( 'r' )
                 
         return lines_pts , lines_style , lines_color
     
@@ -721,7 +739,7 @@ if __name__ == "__main__":
     
     #sys.show(  q = np.array([ 1.0, 2.0, 0.5 ]) )
     
-    sys.ubar = np.array([10,2.0])
+    sys.ubar = np.array([1,0.2])
     sys.x0   = np.array([0,0,0,0,0,0])
     
     sys.compute_trajectory( tf = 20 )

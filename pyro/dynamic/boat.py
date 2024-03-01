@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
     sys.plot_alpha2Coefs()
 
-    # sys.show_hydrodynamic_forces = True
+    #sys.show_hydrodynamic_forces = True
 
     sys.plot_trajectory('xu')
     sys.animate_simulation()
