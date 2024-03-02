@@ -175,9 +175,9 @@ class SysEnv(gym.Env):
         # Cost function
         r = -self.sys.cost_function.g(x, u, t)
 
-        terminated = t > self.tf
+        terminated = False # t > self.tf
 
-        truncated = not self.sys.isavalidstate(x_new)
+        truncated = False #not self.sys.isavalidstate(x_new)
 
         # Memory update
         self.x = x_new
