@@ -216,14 +216,20 @@ class SysEnv(gym.Env):
 
 sys = pendulum.InvertedPendulum()
 
+# Setting physical parameter to reflect the gym environment
+
 # Physical parameters
 sys.gravity = 10.0
 sys.m1 = 1.0
-sys.lc1 = 1.0
+sys.l1 = 1.0
+sys.lc1 = 0.5 * sys.l1
+sys.I1 = (1.0 / 12.0) * sys.m1 * sys.l1 ** 2
+
+sys.l_domain = 2 * sys.l1 # graphical domain
 
 # Min/max state and control inputs
-sys.x_ub = np.array([+2 * np.pi, +8])
-sys.x_lb = np.array([-2 * np.pi, -8])
+sys.x_ub = np.array([+np.pi, +8])
+sys.x_lb = np.array([-np.pi, -8])
 sys.u_ub = np.array([+2.0])
 sys.u_lb = np.array([-2.0])
 
@@ -237,7 +243,7 @@ sys.cost_function.Q[1, 1] = 0.1
 gym_env = SysEnv(sys, dt=0.05, render_mode=None)
 
 model = PPO("MlpPolicy", gym_env, verbose=1)
-model.learn(total_timesteps=2500000)
+model.learn(total_timesteps=250000)
 # model.learn(total_timesteps=1000)
 
 gym_env = SysEnv(sys, render_mode="human")
