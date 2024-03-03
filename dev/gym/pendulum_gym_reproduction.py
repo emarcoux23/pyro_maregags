@@ -177,7 +177,7 @@ class SysEnv(gym.Env):
 
         terminated = False # t > self.tf
 
-        truncated = False #not self.sys.isavalidstate(x_new)
+        truncated = t > self.tf #False #not self.sys.isavalidstate(x_new)
 
         # Memory update
         self.x = x_new
@@ -237,7 +237,7 @@ sys.cost_function.Q[1, 1] = 0.1
 gym_env = SysEnv(sys, dt=0.05, render_mode=None)
 
 model = PPO("MlpPolicy", gym_env, verbose=1)
-model.learn(total_timesteps=250000)
+model.learn(total_timesteps=2500000)
 # model.learn(total_timesteps=1000)
 
 gym_env = SysEnv(sys, render_mode="human")
