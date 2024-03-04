@@ -12,11 +12,12 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 
 # Parallel environments
-env = gym.make("LunarLander-v2", render_mode="human")
+env = gym.make("LunarLander-v2", render_mode=None)
 
 model = PPO("MlpPolicy", env, verbose=1)
 model.learn(total_timesteps=250000)
 
+env = gym.make("LunarLander-v2", render_mode="human")
 obs, info = env.reset()
 
 while True:
