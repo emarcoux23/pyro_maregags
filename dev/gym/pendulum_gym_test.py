@@ -283,7 +283,7 @@ for batch in range(batches):
 gym_env = SysEnv(sys, render_mode="human")
 y, info = gym_env.reset()
 
-episodes = 10
+episodes = 3
 for episode in range(episodes):
     y, info = gym_env.reset()
     terminated = False
@@ -291,7 +291,7 @@ for episode in range(episodes):
 
     print("\n Episode:", episode)
     while not (terminated or truncated):
-        u, _states = model.predict(y)
+        u, _states = model.predict(y, deterministic=True)
         y, r, terminated, truncated, info = gym_env.step(u)
         print("t=", gym_env.t, "x=", gym_env.x, "u=", gym_env.u, "r=", r)
 

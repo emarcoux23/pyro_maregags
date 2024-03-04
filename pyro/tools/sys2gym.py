@@ -89,10 +89,10 @@ class Sys2Gym(gym.Env):
         r = -self.sys.cost_function.g(x, u, t)
 
         # Termination of episodes
-        terminated = t_new > self.tf
+        terminated = False
 
         # Truncation of episodes if out of bounds
-        truncated = not self.sys.isavalidstate(x_new)
+        truncated = ( t_new > self.tf ) or ( not self.sys.isavalidstate(x_new) )
 
         # Memory update
         self.x = x_new

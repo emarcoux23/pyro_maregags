@@ -240,12 +240,13 @@ sys.cost_function.R[0, 0] = 0.001
 sys.cost_function.Q[0, 0] = 1.0
 sys.cost_function.Q[1, 1] = 0.1
 
-gym_env = SysEnv(sys, dt=0.05, render_mode=None)
+# gym_env = SysEnv(sys, dt=0.05, render_mode=None)
+gym_env = SysEnv(sys, render_mode="human")
 
 model = PPO("MlpPolicy", gym_env, verbose=1)
 model.learn(total_timesteps=250000)
-model.learn(total_timesteps=2500000)
-# model.learn(total_timesteps=1000)
+# model.learn(total_timesteps=2500000)
+# # model.learn(total_timesteps=1000)
 
 gym_env = SysEnv(sys, render_mode="human")
 y, info = gym_env.reset()
