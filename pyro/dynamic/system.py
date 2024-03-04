@@ -632,6 +632,32 @@ class ContinuousDynamicSystem:
             animations.append( ani )
         
         return linearized_sys , animations
+    
+
+    #############################
+    def convert_to_gymnasium(self ):
+        """
+        Create a gym environment from the system
+
+        """
+
+        try:
+
+            import gymnasium as gym
+            from gymnasium import spaces
+            from pyro.tools.sys2gym import Sys2Gym
+
+            gym_sys = Sys2Gym( self )
+
+            return gym_sys
+        
+        except:
+            
+            raise ImportError('gym library is not installed')
+        
+        
+
+        
 
 
 

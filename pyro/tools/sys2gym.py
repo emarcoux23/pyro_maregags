@@ -34,17 +34,19 @@ class Sys2Gym(gym.Env):
         self.render_mode = render_mode
 
         self.reset_mode = "random"
+        
 
         # Memory
         self.x = sys.x0
         self.u = sys.ubar
         self.t = t0
 
+        # Init
+        self.render_is_initiated = False
+
         if self.render_mode == "human":
 
-            self.animator = self.sys.get_animator()
-            self.animator.show_plus(self.x, self.u, self.t)
-            plt.pause(0.001)
+            self.init_render()
 
     #################################################################
     def reset(self, seed=None, options=None):
@@ -120,11 +122,22 @@ class Sys2Gym(gym.Env):
             self.render()
 
         return y, r, terminated, truncated, info
+    
+    #################################################################
+    def init_render(self):
+
+        self.render_is_initiated = True
+
+        self.animator = self.sys.get_animator()
+        self.animator.show_plus(self.x, self.u, self.t)
+        plt.pause(0.001)
 
     #################################################################
     def render(self):
 
         if self.render_mode == "human":
+            if not self.render_is_initiated:
+                self.init_render()
             self.animator.show_plus_update(self.x, self.u, self.t)
             plt.pause(0.001)
 
@@ -173,7 +186,7 @@ if __name__ == "__main__":
     gym_env.reset_mode = "noisy_x0"
 
     model = PPO("MlpPolicy", gym_env, verbose=1)
-    model.learn(total_timesteps=10000)
+    model.learn(total_timesteps=100000)
 
     gym_env = Sys2Gym(sys, render_mode="human")
 
