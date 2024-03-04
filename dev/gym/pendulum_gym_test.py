@@ -13,6 +13,7 @@ import gymnasium as gym
 from gymnasium import spaces
 
 from pyro.dynamic import pendulum
+from pyro.control import controller
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
@@ -48,10 +49,10 @@ class SysEnv(gym.Env):
     def __init__(self, sys, dt=0.1, tf=10.0, render_mode=None):
 
         # x-y ouputs
-        y_ub = np.array([+1, +1, sys.x_ub[1]])
-        y_lb = np.array([-1, -1, sys.x_lb[1]])
+        # y_ub = np.array([+1, +1, sys.x_ub[1]])
+        # y_lb = np.array([-1, -1, sys.x_lb[1]])
 
-        self.observation_space = spaces.Box(y_lb, y_ub)
+        self.observation_space = spaces.Box(sys.x_lb, sys.x_lb)
         self.action_space = spaces.Box(sys.u_lb, sys.u_ub)
 
         self.sys = sys
@@ -87,6 +88,8 @@ class SysEnv(gym.Env):
         thetadot = self.x[1]
 
         y = np.array([np.cos(theta), np.sin(theta), thetadot], dtype=np.float32)
+
+        y = self.x
 
         return y
 
@@ -230,8 +233,8 @@ sys.l_domain = 2 * sys.l1  # graphical domain
 # Min/max state and control inputs
 sys.x_ub = np.array([+np.pi, +8])
 sys.x_lb = np.array([-np.pi, -8])
-sys.u_ub = np.array([+2.0])
-sys.u_lb = np.array([-2.0])
+sys.u_ub = np.array([+12.0])
+sys.u_lb = np.array([-12.0])
 
 # Cost Function
 # The reward function is defined as: r = -(theta2 + 0.1 * theta_dt2 + 0.001 * torque2)
@@ -243,8 +246,38 @@ sys.cost_function.Q[1, 1] = 0.1
 gym_env = SysEnv(sys, dt=0.05, render_mode=None)
 
 model = PPO("MlpPolicy", gym_env, verbose=1)
-model.learn(total_timesteps=250000)
-model.learn(total_timesteps=2500000)
+
+
+class rl_controller(controller.StaticController):
+
+    def __init__(self, model):
+
+        controller.StaticController.__init__(self, 1, 1, 2)
+        self.model = model
+
+        self.name = "PPO Controller"
+
+    def c(self, y , r , t ):
+
+        u, _states = self.model.predict(y)
+
+        return u
+
+ctl = rl_controller(model)
+
+ctl.plot_control_law( sys=sys ,n = 100)
+plt.show()
+plt.pause(0.001)
+
+batches = 5
+for batch in range(batches):
+
+    model.learn(total_timesteps=200000)
+    ctl.plot_control_law( sys=sys ,n = 100)
+    plt.show()
+    plt.pause(0.001)
+
+# model.learn(total_timesteps=2500000)
 # model.learn(total_timesteps=1000)
 
 gym_env = SysEnv(sys, render_mode="human")
@@ -261,3 +294,39 @@ for episode in range(episodes):
         u, _states = model.predict(y)
         y, r, terminated, truncated, info = gym_env.step(u)
         print("t=", gym_env.t, "x=", gym_env.x, "u=", gym_env.u, "r=", r)
+
+
+
+
+cl_sys = ctl + sys
+
+cl_sys.x0=np.array([-0.2, 0.0])
+cl_sys.compute_trajectory( tf=10.0, n=2000, solver="euler" )
+cl_sys.plot_trajectory('xu')
+cl_sys.animate_simulation()
+
+from pyro.planning import discretizer
+from pyro.planning import dynamicprogramming
+
+sys.x_ub = np.array([+2*np.pi, +8])
+sys.x_lb = np.array([-2*np.pi, -8])
+
+# Discrete world 
+grid_sys = discretizer.GridDynamicSystem( sys , [201,201] , [11] )
+
+# Cost Function
+qcf = sys.cost_function
+
+# DP algo
+dp = dynamicprogramming.DynamicProgrammingWithLookUpTable( grid_sys, qcf)
+
+dp.solve_bellman_equation( tol = 1)
+#dp.solve_bellman_equation( tol = 1 , animate_cost2go = True )
+#dp.solve_bellman_equation( tol = 1 , animate_policy = True )
+
+#dp.animate_cost2go( show = False , save = True )
+#dp.animate_policy( show = False , save = True )
+
+dp.clean_infeasible_set()
+dp.plot_cost2go_3D()
+dp.plot_policy()
