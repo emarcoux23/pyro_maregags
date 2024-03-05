@@ -41,7 +41,7 @@ sys.cost_function.Q[1, 1] = 0.0
 from pyro.planning import discretizer
 from pyro.planning import dynamicprogramming
 
-grid_sys = discretizer.GridDynamicSystem(sys, [201, 201], [11])
+grid_sys = discretizer.GridDynamicSystem(sys, [101, 101], [11])
 
 dp = dynamicprogramming.DynamicProgrammingWithLookUpTable(grid_sys, sys.cost_function)
 
@@ -62,29 +62,18 @@ cl_sys.animate_simulation()
 env = sys.convert_to_gymnasium(dt=0.05, render_mode=None)
 env.reset_mode = "noisy_x0"
 model = PPO("MlpPolicy", env, verbose=1)
-class rl_controller(controller.StaticController):
 
-    def __init__(self, model):
+from pyro.control.reinforcementlearning import stable_baseline3_controller
 
-        controller.StaticController.__init__(self, 1, 1, 2)
-        self.model = model
+ppo_ctl = stable_baseline3_controller(model)
 
-        self.name = "PPO Controller"
-
-    def c(self, y, r, t):
-
-        u, _states = self.model.predict(y, deterministic=True)
-
-        return u
-
-ppo_ctl = rl_controller(model)
 
 ppo_ctl.plot_control_law(sys=sys, n=100)
 plt.show()
 plt.pause(0.001)
 
 n_time_steps = 250000
-batches = 5
+batches = 1
 env.render_mode = None
 for batch in range(batches):
     model.learn(total_timesteps=int(n_time_steps / batches))
