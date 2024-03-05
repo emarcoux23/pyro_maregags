@@ -10,18 +10,20 @@ import numpy as np
 
 from pyro.dynamic.rocket        import Rocket
 from pyro.dynamic.drone         import Drone2D
+from pyro.dynamic.boat          import Boat2D
 
 from stable_baselines3 import PPO
 
 # Non-linear model
 sys = Rocket()
 sys = Drone2D()
+sys = Boat2D()
 
-sys.x_ub = np.array([10, 10, 10, 10, 10, 10])
-sys.x_lb = -sys.x_ub
+# sys.x_ub = np.array([10, 10, 10, 10, 10, 10])
+# sys.x_lb = -sys.x_ub
 
-sys.u_ub = np.array([100, 100])
-sys.u_lb = np.array([0, 0])
+# sys.u_ub = np.array([1000, 100])
+# sys.u_lb = np.array([0, -100])
 
 env = sys.convert_to_gymnasium()
 
@@ -30,7 +32,7 @@ env.reset_mode = "noisy_x0"
 #env.render_mode = "human"
 
 model = PPO("MlpPolicy", env, verbose=1)
-model.learn(total_timesteps=1000000)
+model.learn(total_timesteps=250000)
 
 env = sys.convert_to_gymnasium()
 env.render_mode = "human"
