@@ -16,20 +16,22 @@ from stable_baselines3.common.env_util import make_vec_env
 
 sys = pendulum.InvertedPendulum()
 
-# Physical parameters
-sys.gravity = 10.0
-sys.m1 = 1.0
-sys.l1 = 1.0
-sys.lc1 = 0.5 * sys.l1
-sys.I1 = (1.0 / 12.0) * sys.m1 * sys.l1**2
+# Physical parameters of the prototype
+sys.gravity = 9.8
+sys.m1 = 0.300
+sys.l1 = 0.4
+sys.lc1 = 0.4 
+sys.I1 = 0.0
+
+max_torque = 2.0
 
 sys.l_domain = 2 * sys.l1  # graphical domain
 
 # Min/max state and control inputs
-sys.x_ub = np.array([+2 * np.pi, +8])
-sys.x_lb = np.array([-2 * np.pi, -8])
-sys.u_ub = np.array([+8.0])
-sys.u_lb = np.array([-8.0])
+sys.x_ub = np.array([+2 * np.pi, +12])
+sys.x_lb = np.array([-2 * np.pi, -12])
+sys.u_ub = np.array([+max_torque])
+sys.u_lb = np.array([-max_torque])
 
 # Cost Function
 sys.cost_function.xbar = np.array([0, 0])  # target
@@ -48,21 +50,13 @@ dp = dynamicprogramming.DynamicProgrammingWithLookUpTable(grid_sys, sys.cost_fun
 dp.solve_bellman_equation(tol=0.01)
 dp.clean_infeasible_set()
 dp.plot_policy()
-dp_ctl = dp.get_lookup_table_controller()
-
-cl_sys = dp_ctl + sys
-
-cl_sys.x0 = np.array([-3.0, 0.0])
-cl_sys.compute_trajectory(tf=10.0, n=20000, solver="euler")
-cl_sys.plot_trajectory("xu")
-cl_sys.animate_simulation()
-
-
 
 # Learning
 env = sys.convert_to_gymnasium(dt=0.05, render_mode=None)
 env.reset_mode = "noisy_x0"
 model = PPO("MlpPolicy", env, verbose=1)
+
+model.load('pendulum_dp_vs_ppo_bangbang')
 
 from pyro.control.reinforcementlearning import stable_baseline3_controller
 
@@ -73,14 +67,17 @@ ppo_ctl.plot_control_law(sys=sys, n=100)
 plt.show()
 plt.pause(0.001)
 
-n_time_steps = 50000
-batches = 1
+n_time_steps = 2.5E5
+batches = 5
 env.render_mode = None
 for batch in range(batches):
     model.learn(total_timesteps=int(n_time_steps / batches))
     ppo_ctl.plot_control_law(sys=sys, n=100)
     plt.show()
     plt.pause(0.001)
+
+# Save the model
+model.save('pendulum_dp_vs_ppo_bangbang')
 
 # Animating rl closed-loop
 cl_sys = ppo_ctl + sys
