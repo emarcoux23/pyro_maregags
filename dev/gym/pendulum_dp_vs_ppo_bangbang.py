@@ -33,9 +33,9 @@ sys.u_lb = np.array([-8.0])
 
 # Cost Function
 sys.cost_function.xbar = np.array([0, 0])  # target
-sys.cost_function.R[0, 0] = 1.0
+sys.cost_function.R[0, 0] = 0.1
 sys.cost_function.Q[0, 0] = 1.0
-sys.cost_function.Q[1, 1] = 0.0
+sys.cost_function.Q[1, 1] = 0.1
 
 # DP solution
 from pyro.planning import discretizer
@@ -58,6 +58,7 @@ cl_sys.plot_trajectory("xu")
 cl_sys.animate_simulation()
 
 
+
 # Learning
 env = sys.convert_to_gymnasium(dt=0.05, render_mode=None)
 env.reset_mode = "noisy_x0"
@@ -72,7 +73,7 @@ ppo_ctl.plot_control_law(sys=sys, n=100)
 plt.show()
 plt.pause(0.001)
 
-n_time_steps = 250000
+n_time_steps = 50000
 batches = 1
 env.render_mode = None
 for batch in range(batches):
@@ -84,7 +85,7 @@ for batch in range(batches):
 # Animating rl closed-loop
 cl_sys = ppo_ctl + sys
 
-cl_sys.x0 = np.array([-4.0, -0.5])
+cl_sys.x0 = np.array([-3.0, -0.0])
 cl_sys.compute_trajectory(tf=10.0, n=10000, solver="euler")
 cl_sys.plot_trajectory("xu")
 cl_sys.animate_simulation()

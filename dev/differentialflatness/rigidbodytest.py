@@ -14,7 +14,7 @@ from pyro.planning import plan
 
 # fixed initial position for now
 # initial angular velocity is related to jerk of trajectory
-x0 = -8.0
+x0 = -10.0
 y0 = -2.0
 z0 = 0.0
 
@@ -24,11 +24,11 @@ yf = 0.0
 zf = 0.0 #np.pi / 2
 tf = 10
 
-ddx0 = 1.0
-ddy0 = ddx0 * np.tan(z0)
+ddx0 = 0.0
+ddy0 = -1.0#ddx0 * np.tan(z0)
 
-ddxf = 0.0
-ddyf = -0.1 # ddxf * np.tan(zf)
+ddxf = 1.0
+ddyf =+0.0 # ddxf * np.tan(zf)
 
 bc_y = np.array([y0, 0, ddy0, yf, 0, ddyf])
 
@@ -59,7 +59,7 @@ dday = gex.X[4, :]
 
 # Position theta
 theta = np.arctan2(ay, ax)
-#theta = np.arctan( (ay/ax))
+# theta = np.arctan( (ay/ax))
 s = np.sin(theta)
 c = np.cos(theta)
 dtheta = (day * c - dax * s) / (ax * s + ay * c)
@@ -142,14 +142,14 @@ axes[0].tick_params(labelsize=graphical.default_fontsize)
 axes[0].grid(True)
 
 axes[1].plot(t, dtheta, "b")
-axes[1].plot(t, dtheta_num, "r")
+# axes[1].plot(t, dtheta_num, "r")
 axes[1].set_ylabel("w", fontsize=graphical.default_fontsize)
 axes[1].set_xlabel("t", fontsize=graphical.default_fontsize)
 axes[1].tick_params(labelsize=graphical.default_fontsize)
 axes[1].grid(True)
 
 axes[2].plot(t, ddtheta, "b")
-axes[2].plot(t, ddtheta_num, "r")
+# axes[2].plot(t, ddtheta_num, "r")
 axes[2].set_ylabel("dw", fontsize=graphical.default_fontsize)
 axes[2].set_xlabel("t", fontsize=graphical.default_fontsize)
 axes[2].tick_params(labelsize=graphical.default_fontsize)

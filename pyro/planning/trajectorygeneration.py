@@ -218,6 +218,7 @@ class SingleAxisTrajectoryGenerator:
                 t = ts[i]
                 x = 0
                 # For all terms of the polynomical
+                # TODO could replace this with A(t) generic code
                 for n in range(j, N + 1):
                     p_n = p[n]
                     exp = n - j
@@ -295,19 +296,19 @@ if __name__ == "__main__":
     ge.x0 = np.array([0,  0, 0, 0, 0, 0, 0, 0])
     ge.xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
-    ge.bc_t0_N = 2
-    ge.bc_tf_N = 2
-    ge.poly_N = 3
-    ge.diff_N = 3
-
-    ge.solve()
-
-    # ge.bc_t0_N = 3
-    # ge.bc_tf_N = 3
-    # ge.poly_N = 5
-    # ge.diff_N = 7
+    # ge.bc_t0_N = 2
+    # ge.bc_tf_N = 2
+    # ge.poly_N = 3
+    # ge.diff_N = 3
 
     # ge.solve()
+
+    ge.bc_t0_N = 3
+    ge.bc_tf_N = 3
+    ge.poly_N = 5
+    ge.diff_N = 7
+
+    ge.solve()
 
     # ge.bc_t0_N = 4
     # ge.bc_tf_N = 4
@@ -330,16 +331,16 @@ if __name__ == "__main__":
 
     # ge.solve()
 
-    # ge.bc_t0_N = 7
-    # ge.bc_tf_N = 7
-    # ge.poly_N = 13
-    # ge.diff_N = 7
+    ge.bc_t0_N = 7
+    ge.bc_tf_N = 7
+    ge.poly_N = 13
+    ge.diff_N = 7
 
-    # ge.solve()
+    ge.solve()
 
-    # ge.bc_t0_N = 1
-    # ge.bc_tf_N = 1
-    # ge.poly_N = 3
-    # ge.diff_N = 7
+    ge.bc_t0_N = 1
+    ge.bc_tf_N = 1
+    ge.poly_N = 3
+    ge.diff_N = 7
 
-    # ge.solve()
+    ge.solve()
