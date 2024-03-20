@@ -43,26 +43,19 @@ sys.cost_function.Q[1, 1] = 0.0
 from pyro.planning import discretizer
 from pyro.planning import dynamicprogramming
 
-grid_sys = discretizer.GridDynamicSystem(sys, [301, 301], [21])
+grid_sys = discretizer.GridDynamicSystem(sys, [201, 201], [21])
 
 dp = dynamicprogramming.DynamicProgrammingWithLookUpTable(grid_sys, sys.cost_function)
 
 dp.solve_bellman_equation(tol=0.01)
 dp.clean_infeasible_set()
 dp.plot_policy()
-dp_ctl = dp.get_lookup_table_controller()
-
-cl_sys = dp_ctl + sys
-
-cl_sys.x0 = np.array([-np.pi, 0.0])
-cl_sys.compute_trajectory(tf=10.0, n=20000, solver="euler")
-cl_sys.plot_trajectory("xu")
-cl_sys.animate_simulation()
-
 
 # Learning
 env = sys.convert_to_gymnasium(dt=0.05, render_mode=None)
-env.reset_mode = "x0"
+
+env.clipping_states = True  # test
+
 model = PPO("MlpPolicy", env, verbose=1)
 
 from pyro.control.reinforcementlearning import stable_baseline3_controller
@@ -75,7 +68,7 @@ plt.show()
 plt.pause(0.001)
 
 n_time_steps = 250000
-batches = 1
+batches = 5
 env.render_mode = None
 for batch in range(batches):
     model.learn(total_timesteps=int(n_time_steps / batches))
