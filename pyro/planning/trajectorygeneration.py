@@ -42,6 +42,10 @@ class SingleAxisTrajectoryGenerator:
         self.bc_t0_N = 3
         self.bc_tf_N = 3
 
+        # Optimization
+        self.regulation = 0.0
+        self.Cr = np.array([0, 0, 0, 0.0])
+
         self.labels = [
             "pos",
             "vel",
@@ -112,15 +116,41 @@ class SingleAxisTrajectoryGenerator:
     ################################################
     def compute_Q(self):
 
-        Q = np.zeros((self.poly_N + 1, self.poly_N + 1))
+        N = self.poly_N
+        R = self.diff_N
 
-        for i in range(self.poly_N + 1):
-            Q[i, i] = 1.0 * i * i
+        C = np.zeros((R))
+        C[:self.Cr.shape[0]] = self.Cr
 
-        # TODO compute real Q
+        Q = np.zeros((N + 1, N + 1, R))
+
+        tf = self.tf
+
         # see https://groups.csail.mit.edu/rrg/papers/BryIJRR15.pdf
+        # TODO debug
+        for r in range(R):
+            for i in range(N + 1):
+                for l in range(N + 1):
+                    if (i >= r) and (l >= r):
+                        mul = 1
+                        for m in range(r):
+                            mul = mul * (i-m)*(l-m)
+                        exp = i + l - 2 * r + 1
+                        Q[i, l, r] =  2 * mul * tf**exp / (i+l-2*r+1)
+                    else:
+                        Q[i, l, r] = 0
 
-        self.Q = Q
+        Q_sum = np.zeros((N + 1, N + 1))
+
+        for r in range(R):
+            Q_sum = Q_sum + C[r] * Q[:, :, r]
+        
+        # Regulation
+        Q_sum = Q_sum + self.regulation * np.eye(N + 1)
+
+        self.Q = Q_sum
+
+        return Q
 
     ################################################
     def constraints(self, p):
@@ -134,19 +164,7 @@ class SingleAxisTrajectoryGenerator:
 
         Q = self.Q
 
-        # TODO compute real Q
-        # see https://groups.csail.mit.edu/rrg/papers/BryIJRR15.pdf
-
         J = p.T @ Q @ p
-
-        # Min Jerk test
-        self.p = p
-        self.generate_trajectory()
-        jerk = self.X[3, :]
-        snap = self.X[4, :]
-
-        # #J = np.abs(jerk).max()
-        J = np.abs(snap).max()
 
         return J
 
@@ -181,12 +199,17 @@ class SingleAxisTrajectoryGenerator:
 
             constraints = {"type": "eq", "fun": self.constraints}
 
+            grad = lambda p: 2 * p.T @ self.Q;
+            hess = lambda p: 2 * self.Q;
+
             res = minimize(
                 self.cost,
                 p0,
                 method="SLSQP",
+                jac=grad,
+                hess=hess,
                 constraints=constraints,
-                options={"disp": True, "maxiter": 500},
+                options={"disp": True, "maxiter": 5000},
             )
 
             p = res.x
@@ -293,7 +316,7 @@ if __name__ == "__main__":
 
     ge = SingleAxisTrajectoryGenerator()
 
-    ge.x0 = np.array([0,  0, 0, 0, 0, 0, 0, 0])
+    ge.x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
     ge.xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
     # ge.bc_t0_N = 2
@@ -305,8 +328,11 @@ if __name__ == "__main__":
 
     ge.bc_t0_N = 3
     ge.bc_tf_N = 3
-    ge.poly_N = 5
+    ge.poly_N = 9
     ge.diff_N = 7
+
+    ge.regulation = 0.
+    ge.Cr = np.array([0, 0.0, 1.0, 1.0, 1.0, 0, 0])
 
     ge.solve()
 
@@ -331,16 +357,16 @@ if __name__ == "__main__":
 
     # ge.solve()
 
-    ge.bc_t0_N = 7
-    ge.bc_tf_N = 7
-    ge.poly_N = 13
-    ge.diff_N = 7
+    # ge.bc_t0_N = 7
+    # ge.bc_tf_N = 7
+    # ge.poly_N = 13
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
 
-    ge.bc_t0_N = 1
-    ge.bc_tf_N = 1
-    ge.poly_N = 3
-    ge.diff_N = 7
+    # ge.bc_t0_N = 1
+    # ge.bc_tf_N = 1
+    # ge.poly_N = 3
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
