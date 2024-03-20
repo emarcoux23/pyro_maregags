@@ -265,3 +265,17 @@ if __name__ == "__main__":
         while not (terminated or truncated):
             u, _states = model.predict(y, deterministic=True)
             y, r, terminated, truncated, info = gym_env.step(u)
+
+
+    # from pyro.control.reinforcementlearning import stable_baseline3_controller
+
+    # ppo_ctl = stable_baseline3_controller(model)
+
+
+    # ppo_ctl.plot_control_law(sys=sys, n=100)
+    # cl_sys = ppo_ctl + sys
+
+    # cl_sys.x0 = np.array([-3.0, -0.0])
+    # cl_sys.compute_trajectory(tf=10.0, n=10000, solver="euler")
+    # cl_sys.plot_trajectory("xu")
+    # cl_sys.animate_simulation()
