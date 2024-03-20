@@ -223,27 +223,33 @@ if __name__ == "__main__":
     sys.l_domain = 2 * sys.l1  # graphical domain
 
     # Min/max state and control inputs
-    sys.x_ub = np.array([+3.0 * np.pi, +20])
-    sys.x_lb = np.array([-3.0 * np.pi, -20])
+    sys.x_ub = np.array([+3.0 * np.pi, +8])
+    sys.x_lb = np.array([-3.0 * np.pi, -8])
     sys.u_ub = np.array([+2.0])
     sys.u_lb = np.array([-2.0])
+
+    # Time constant
+    dt = 0.05
 
     # Cost Function
     # The reward function is defined as: r = -(theta2 + 0.1 * theta_dt2 + 0.001 * torque2)
     sys.cost_function.xbar = np.array([0, 0])  # target
-    sys.cost_function.R[0, 0] = 0.001
-    sys.cost_function.Q[0, 0] = 1.0
-    sys.cost_function.Q[1, 1] = 0.1
+    sys.cost_function.R[0, 0] = 0.001 / dt
+    sys.cost_function.Q[0, 0] = 1.0 / dt
+    sys.cost_function.Q[1, 1] = 0.1 / dt
 
     sys.x0 = np.array([-np.pi, 0.0])
 
-    gym_env = Sys2Gym(sys, render_mode=None)
+    gym_env = Sys2Gym(sys, dt=dt, render_mode=None)
+
+    gym_env.clipping_states = True # To reproduce the behavior of gym pendulum
+
     gym_env.reset_mode = "uniform"
-    gym_env.x0_lb = np.array([-np.pi - 0.2, -0.2])
-    gym_env.x0_ub = np.array([-np.pi + 0.2, +0.2])
+    gym_env.x0_lb = np.array([-np.pi , -1.0])
+    gym_env.x0_ub = np.array([+np.pi , +1.0])
 
     model = PPO("MlpPolicy", gym_env, verbose=1)
-    model.learn(total_timesteps=100000)
+    model.learn(total_timesteps=250000)
 
     gym_env = Sys2Gym(sys, render_mode="human")
 
