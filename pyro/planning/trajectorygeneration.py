@@ -14,37 +14,92 @@ import warnings
 
 from scipy.optimize import minimize
 
-from pyro.analysis import graphical
+# Import standard graphical parameters if part of pyro
+try:
+    from pyro.analysis import graphical
+    default_figsize = graphical.default_figsize
+    default_dpi = graphical.default_dpi
+    default_fontsize = graphical.default_fontsize
+except:
+    default_figsize = (10, 6)
+    default_dpi = 100
+    default_fontsize = 12
 
 
 ###############################################################################
-class SingleAxisTrajectoryGenerator:
+class SingleAxisPolynomialTrajectoryGenerator:
     """
     This class is a tool to generate a point-to-point trajectory for a
     single axis based on boundary conditions (position and higher order derivative)
 
     Polynomial of order N
 
-    if boundary conditions do not fully specify the profile parameter,
-    then an optimization is conducted (TODO)
+    x(t) = p0 + p1*t + p2*t^2 + ... + pN*t^N
+
+    if boundary conditions do not fully specify the parameters of the polynomial,
+    then an optimization is conducted to minimize the cost function which is defined
+    as a weighted sum of the integral of the square of the ith derivative of the profile.
+
+    Parameters:
+    -----------
+    tf : float
+        duration of the trajectory
+    poly_N : int
+        order of the polynomial
+    diff_N : int
+        order of the highest derivative to compute
+    x0 : array
+        initial conditions (position, velocity, acceleration, jerk, snap, crackle, pop, ...)
+    xf : array
+        final conditions (position, velocity, acceleration, jerk, snap, crackle, pop, ...)
+    x0_N : int
+        number of initial conditions to impose (higher order derivative of the initial conditions)
+    xf_N : int
+        number of final conditions to impose (higher order derivative of the final conditions)
+    Rs : array
+        weights for the cost function penalizing the ith polynomial parameters directly
+    Ws : array
+        weights for the cost function penalizing the ith derivative of the profile
+    dt : float
+        time step for the numerical solution of the trajectory
+
+    Output:
+    -------
+    p : array
+        polynomial parameters
+    X : array
+        profile of the trajectory X[i, j] is the ith derivative of the profile at time t[j]
+    t : array
+        time vector
 
     """
 
     ################################################
-    def __init__(self, tf=10, N=5, x0=None, xf=None):
+    def __init__(
+        self,
+        tf=10,
+        poly_N=5,
+        diff_N=7,
+        x0=np.array([0.0, 0.0, 0.0]),
+        xf=np.array([0.0, 0.0, 10.0]),
+        dt=0.01,
+    ):
 
         self.tf = tf
-        self.poly_N = N
-        self.diff_N = N
+        self.poly_N = poly_N
+        self.diff_N = diff_N
         self.x0 = x0
         self.xf = xf
+        self.x0_N = x0.shape[0]
+        self.xf_N = xf.shape[0]
+        self.Rs = np.zeros((self.poly_N+1))
+        self.Ws = np.zeros((self.diff_N))
+        self.dt = dt
 
-        self.bc_t0_N = 3
-        self.bc_tf_N = 3
-
-        # Optimization
-        self.regulation = 0.0
-        self.Cr = np.array([0, 0, 0, 0.0])
+        # Outputs
+        self.t = None
+        self.X = None
+        self.p = None
 
         self.labels = [
             "pos",
@@ -61,38 +116,26 @@ class SingleAxisTrajectoryGenerator:
         ]
 
     ################################################
-    def compute_b(self):
-
-        x0 = self.x0
-        xf = self.xf
-        N0 = self.bc_t0_N
-        Nf = self.bc_tf_N
+    def compute_b(self, x0, xf, N0, Nf):
+        """Compute the boundary condition vector b = [x0;xf] which represents the initial and final conditions on the trajectory and its derivatives"""
 
         b = np.hstack((x0[:N0], xf[:Nf]))
 
-        print(r"[x(0), \dot{x}(x0), \ddot{x}(x0), ...] = ", x0)
-        print(r"[x(tf), \dot{x}(tf), \ddot{x}(x0), ...] = ", xf)
-        print("Boundary condition vector: \n", b)
+        print("Boundary condition vector b = [x0;xf]: \n", b)
 
-        self.b = b
+        return b
 
     ################################################
-    def compute_A(self):
+    def compute_A(self, tf, N0, Nf, poly_N):
+        """Compute the boundary condition matrix A which represents on the polynomial parameters are related to the boundary conditions"""
 
-        tf = self.tf
-        x0 = self.x0
-        xf = self.xf
-        N0 = self.bc_t0_N
-        Nf = self.bc_tf_N
-        N = self.poly_N
-
-        A = np.zeros((N0 + Nf, N + 1))
+        A = np.zeros((N0 + Nf, poly_N + 1))
 
         # For all jth derivative of the initial conditions
         t0 = 0
         for j in range(N0):
             # For all terms of the polynomical
-            for n in range(j, N + 1):
+            for n in range(j, poly_N + 1):
                 exp = n - j
                 mul = 1
                 for k in range(j):
@@ -102,7 +145,7 @@ class SingleAxisTrajectoryGenerator:
         # For all jth derivative of the final conditions
         for j in range(Nf):
             # For all terms of the polynomical
-            for n in range(j, N + 1):
+            for n in range(j, poly_N + 1):
                 exp = n - j
                 mul = 1
                 for k in range(j):
@@ -111,68 +154,61 @@ class SingleAxisTrajectoryGenerator:
 
         print("Boundary condition matrix: \n", A)
 
-        self.A = A
+        return A
 
     ################################################
-    def compute_Q(self):
+    def compute_Q(self, poly_N, diff_N, tf, Ws, Rs):
+        """Compute the cost function matrix Q, only used if the boundary conditions do not fully specify the parameters of the polynomial"""
 
-        N = self.poly_N
-        R = self.diff_N
+        # Quadratic cost matrix
+        Q = np.zeros((poly_N + 1, poly_N + 1))
 
-        C = np.zeros((R))
-        C[:self.Cr.shape[0]] = self.Cr
+        # Quadratic cost matrix for each derivative
+        Qs = np.zeros((poly_N + 1, poly_N + 1, diff_N))
 
-        Q = np.zeros((N + 1, N + 1, R))
-
-        tf = self.tf
-
+        # Qs are weight corresponding to computing the integral of the square of the ith derivative of the profile
+        # J = p.T @ Qs[i] @ p = integral( [ d_dt(ith)x(t) ]^2 dt)
         # see https://groups.csail.mit.edu/rrg/papers/BryIJRR15.pdf
-        # TODO debug
-        for r in range(R):
-            for i in range(N + 1):
-                for l in range(N + 1):
+        for r in range(diff_N):
+            for i in range(poly_N + 1):
+                for l in range(poly_N + 1):
                     if (i >= r) and (l >= r):
                         mul = 1
                         for m in range(r):
-                            mul = mul * (i-m)*(l-m)
+                            mul = mul * (i - m) * (l - m)
                         exp = i + l - 2 * r + 1
-                        Q[i, l, r] =  2 * mul * tf**exp / (i+l-2*r+1)
+                        Qs[i, l, r] = 2 * mul * tf**exp / (i + l - 2 * r + 1)
                     else:
-                        Q[i, l, r] = 0
+                        Qs[i, l, r] = 0
 
-        Q_sum = np.zeros((N + 1, N + 1))
+        # Total cost for all derivatives
+        for r in range(diff_N):
+            Q = Q + Ws[r] * Qs[:, :, r]
 
-        for r in range(R):
-            Q_sum = Q_sum + C[r] * Q[:, :, r]
-        
-        # Regulation
-        Q_sum = Q_sum + self.regulation * np.eye(N + 1)
-
-        self.Q = Q_sum
+        # Regulation term penalizing the polynomial parameters directly
+        Q = Q + np.diag(Rs)
 
         return Q
 
     ################################################
-    def constraints(self, p):
+    def solve_for_polynomial_parameters(self, A, b, Q):
+        """Solve for the polynomial parameters pç
 
-        res = self.A @ p - self.b
+        Parameters:
+        -----------
+        A : array
+            boundary condition matrix
+        b : array
+            boundary condition vector
+        Q : array
+            cost function matrix
 
-        return res
+        Output:
+        -------
+        p : array
+            polynomial parameters
 
-    ################################################
-    def cost(self, p):
-
-        Q = self.Q
-
-        J = p.T @ Q @ p
-
-        return J
-
-    ################################################
-    def compute_parameters(self):
-
-        A = self.A
-        b = self.b
+        """
 
         if A.shape[0] == A.shape[1]:
 
@@ -193,17 +229,16 @@ class SingleAxisTrajectoryGenerator:
 
             print("Optimization over free decision variables")
 
-            self.compute_Q()
+            p0 = np.zeros(A.shape[1])
 
-            p0 = np.zeros(self.poly_N + 1)
+            constraints = {"type": "eq", "fun": lambda p: A @ p - b}
+            cost = lambda p: p.T @ Q @ p
+            grad = lambda p: 2 * p.T @ Q
+            hess = lambda p: 2 * Q
 
-            constraints = {"type": "eq", "fun": self.constraints}
-
-            grad = lambda p: 2 * p.T @ self.Q;
-            hess = lambda p: 2 * self.Q;
-
+            # TODO: Change to a solver specifc to quadratic optimization
             res = minimize(
-                self.cost,
+                cost,
                 p0,
                 method="SLSQP",
                 jac=grad,
@@ -214,35 +249,27 @@ class SingleAxisTrajectoryGenerator:
 
             p = res.x
 
-            # p = np.linalg.lstsq(A, b)[0]
+        print("Computed polynomial parameters: \n", p)
 
-        print("Polynomial parameters: \n", p)
-
-        self.p = p
+        return p
 
     ################################################
-    def generate_trajectory(self, dt=0.01):
+    def generate_trajectory(self, tf, p, diff_N, dt=0.01):
 
-        p = self.p
-
-        N = self.poly_N  # order of polynomial
-
-        steps = int(self.tf / dt)
-        ts = np.linspace(0, self.tf, steps)
-
-        m = self.diff_N  # number of derivative to compute
-
-        X = np.zeros((m, steps))
+        Np1 = p.shape[0]  # order of polynomial
+        steps = int(tf / dt) # number of time steps
+        ts = np.linspace(0, tf, steps)
+        X = np.zeros((diff_N, steps))
 
         # For all jth derivative of the signal
-        for j in range(m):
+        for j in range(diff_N):
             # For all time steps
             for i in range(steps):
                 t = ts[i]
                 x = 0
                 # For all terms of the polynomical
                 # TODO could replace this with A(t) generic code
-                for n in range(j, N + 1):
+                for n in range(j, Np1):
                     p_n = p[n]
                     exp = n - j
                     mul = 1
@@ -252,17 +279,13 @@ class SingleAxisTrajectoryGenerator:
 
                 X[j, i] = x
 
-        self.X = X
-        self.t = ts
+        return X, ts
 
     ################################################
-    def plot_trajectory(self, n_fig=None):
+    def plot_trajectory(self, X, t, n_fig=None):
 
-        X = self.X
-        t = self.t
-
+        # Number of derivatives to plot
         n_max = X.shape[0]
-
         if n_fig is None:
             n = n_max
         elif n_fig < n_max:
@@ -272,8 +295,8 @@ class SingleAxisTrajectoryGenerator:
 
         fig, ax = plt.subplots(
             n,
-            figsize=graphical.default_figsize,
-            dpi=graphical.default_dpi,
+            figsize=default_figsize,
+            dpi=default_dpi,
             frameon=True,
         )
 
@@ -283,25 +306,42 @@ class SingleAxisTrajectoryGenerator:
         for i in range(n):
 
             ax[i].plot(t, X[i, :], "b")
-            ax[i].set_ylabel(self.labels[i], fontsize=graphical.default_fontsize)
-            ax[i].tick_params(labelsize=graphical.default_fontsize)
+            ax[i].set_ylabel(self.labels[i], fontsize=default_fontsize)
+            ax[i].tick_params(labelsize=default_fontsize)
             ax[i].grid(True)
 
-        ax[-1].set_xlabel("Time[sec]", fontsize=graphical.default_fontsize)
+        ax[-1].set_xlabel("Time[sec]", fontsize=default_fontsize)
         # fig.tight_layout()
         fig.canvas.draw()
 
         plt.show()
 
     ################################################
-    def solve(self):
+    def solve(self, show = True):
 
-        self.compute_b()
-        self.compute_A()
+        tf = self.tf
+        x0 = self.x0
+        xf = self.xf
+        N0 = self.x0_N
+        Nf = self.xf_N
+        Np = self.poly_N
+        Nd = self.diff_N
+        Ws = self.Ws
+        Rs = self.Rs
+        dt = self.dt
 
-        self.compute_parameters()
-        self.generate_trajectory()
-        self.plot_trajectory()
+        b = self.compute_b(x0, xf, N0, Nf)
+        A = self.compute_A(tf, N0, Nf, Np)
+        Q = self.compute_Q(Np, Nd, tf, Ws, Rs)
+
+        p = self.solve_for_polynomial_parameters(A, b, Q)
+
+        X, t = self.generate_trajectory(tf, p, Nd, dt)
+
+        if show:
+            self.plot_trajectory(X, t)
+
+        return p, X, t
 
 
 """
@@ -314,58 +354,61 @@ class SingleAxisTrajectoryGenerator:
 if __name__ == "__main__":
     """MAIN TEST"""
 
-    ge = SingleAxisTrajectoryGenerator()
+    ge = SingleAxisPolynomialTrajectoryGenerator()
 
     ge.x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
     ge.xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
-    # ge.bc_t0_N = 2
-    # ge.bc_tf_N = 2
+    # ge.x0_N = 2
+    # ge.xf_N = 2
     # ge.poly_N = 3
     # ge.diff_N = 3
 
     # ge.solve()
 
-    ge.bc_t0_N = 3
-    ge.bc_tf_N = 3
-    ge.poly_N = 9
+    ge.x0_N = 3
+    ge.xf_N = 3
+    ge.poly_N = 5
     ge.diff_N = 7
 
-    ge.regulation = 0.
-    ge.Cr = np.array([0, 0.0, 1.0, 1.0, 1.0, 0, 0])
+    ge.solve()  # order 5 fully constrained
 
-    ge.solve()
+    ge.poly_N = 12
+    ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
+    ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
 
-    # ge.bc_t0_N = 4
-    # ge.bc_tf_N = 4
+    ge.solve()  # order 12 with optimization on polynomial parameters
+
+    # ge.x0_N = 4
+    # ge.xf_N = 4
     # ge.poly_N = 7
     # ge.diff_N = 7
 
     # ge.solve()
 
-    # ge.bc_t0_N = 5
-    # ge.bc_tf_N = 5
+    # ge.x0_N = 5
+    # ge.xf_N = 5
     # ge.poly_N = 9
     # ge.diff_N = 7
 
     # ge.solve()
 
-    # ge.bc_t0_N = 6
-    # ge.bc_tf_N = 6
+    # ge.x0_N = 6
+    # ge.xf_N = 6
     # ge.poly_N = 11
     # ge.diff_N = 7
 
     # ge.solve()
 
-    # ge.bc_t0_N = 7
-    # ge.bc_tf_N = 7
+    # ge.x0_N = 7
+    # ge.xf_N = 7
     # ge.poly_N = 13
     # ge.diff_N = 7
 
     # ge.solve()
 
-    # ge.bc_t0_N = 1
-    # ge.bc_tf_N = 1
+    # ge.x0_N = 1
+    # ge.xf_N = 1
     # ge.poly_N = 3
     # ge.diff_N = 7
 
