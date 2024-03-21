@@ -17,6 +17,7 @@ from scipy.optimize import minimize
 # Import standard graphical parameters if part of pyro
 try:
     from pyro.analysis import graphical
+
     default_figsize = graphical.default_figsize
     default_dpi = graphical.default_dpi
     default_fontsize = graphical.default_fontsize
@@ -92,7 +93,7 @@ class SingleAxisPolynomialTrajectoryGenerator:
         self.xf = xf
         self.x0_N = x0.shape[0]
         self.xf_N = xf.shape[0]
-        self.Rs = np.zeros((self.poly_N+1))
+        self.Rs = np.zeros((self.poly_N + 1))
         self.Ws = np.zeros((self.diff_N))
         self.dt = dt
 
@@ -186,7 +187,7 @@ class SingleAxisPolynomialTrajectoryGenerator:
             Q = Q + Ws[r] * Qs[:, :, r]
 
         # Regulation term penalizing the polynomial parameters directly
-        Q = Q + np.diag(Rs)
+        Q = Q + np.diag(Rs[: (poly_N + 1)])
 
         return Q
 
@@ -255,9 +256,10 @@ class SingleAxisPolynomialTrajectoryGenerator:
 
     ################################################
     def generate_trajectory(self, tf, p, diff_N, dt=0.01):
+        """Generate a numerical trajectory based on the polynomial parameters"""
 
         Np1 = p.shape[0]  # order of polynomial
-        steps = int(tf / dt) # number of time steps
+        steps = int(tf / dt)  # number of time steps
         ts = np.linspace(0, tf, steps)
         X = np.zeros((diff_N, steps))
 
@@ -280,6 +282,24 @@ class SingleAxisPolynomialTrajectoryGenerator:
                 X[j, i] = x
 
         return X, ts
+
+    ################################################
+    def get_trajectory(self, j, t, p):
+        """Get the jth derivative of the trajectory at time t based on the polynomial parameters p"""
+
+        Np1 = p.shape[0]  # order of polynomial
+        x = 0
+
+        # For all terms of the polynomical
+        for n in range(j, Np1):
+            p_n = p[n]
+            exp = n - j
+            mul = 1
+            for k in range(j):
+                mul = mul * (n - k)
+            x = x + mul * p_n * t**exp
+
+        return x
 
     ################################################
     def plot_trajectory(self, X, t, n_fig=None):
@@ -317,7 +337,7 @@ class SingleAxisPolynomialTrajectoryGenerator:
         plt.show()
 
     ################################################
-    def solve(self, show = True):
+    def solve(self, show=True):
 
         tf = self.tf
         x0 = self.x0
@@ -354,10 +374,16 @@ class SingleAxisPolynomialTrajectoryGenerator:
 if __name__ == "__main__":
     """MAIN TEST"""
 
-    ge = SingleAxisPolynomialTrajectoryGenerator()
+    x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
-    ge.x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-    ge.xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
+    ge = SingleAxisPolynomialTrajectoryGenerator(
+        x0=x0, xf=xf, tf=10, poly_N=5, diff_N=7, dt=0.01
+    )
+
+    #############################
+    ### Fully constrained order 3
+    #############################
 
     # ge.x0_N = 2
     # ge.xf_N = 2
@@ -366,6 +392,10 @@ if __name__ == "__main__":
 
     # ge.solve()
 
+    #############################
+    ### Fully constrained order 5
+    #############################
+
     ge.x0_N = 3
     ge.xf_N = 3
     ge.poly_N = 5
@@ -373,43 +403,51 @@ if __name__ == "__main__":
 
     ge.solve()  # order 5 fully constrained
 
+    ###########################################
+    ### Optimization on polynomial parameters
+    ###########################################
+
     ge.poly_N = 12
     ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
     ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
 
-    ge.solve()  # order 12 with optimization on polynomial parameters
+    p, X, t = ge.solve()  # order 12 with optimization on polynomial parameters
+
+    #############################
+    ### Fully constrained order 7
+    #############################
+
+    # ge = SingleAxisPolynomialTrajectoryGenerator(
+    #     x0=x0, xf=xf, tf=10, poly_N=7, diff_N=7, dt=0.01
+    # )
 
     # ge.x0_N = 4
     # ge.xf_N = 4
-    # ge.poly_N = 7
-    # ge.diff_N = 7
 
     # ge.solve()
+
+    #############################
+    ### Fully constrained order 9
+    #############################
+
+    # ge = SingleAxisPolynomialTrajectoryGenerator(
+    #     x0=x0, xf=xf, tf=10, poly_N=9, diff_N=7, dt=0.01
+    # )
 
     # ge.x0_N = 5
     # ge.xf_N = 5
-    # ge.poly_N = 9
-    # ge.diff_N = 7
 
     # ge.solve()
 
-    # ge.x0_N = 6
-    # ge.xf_N = 6
-    # ge.poly_N = 11
-    # ge.diff_N = 7
+    #############################
+    ### Overconstrained order 3
+    #############################
 
-    # ge.solve()
+    # ge = SingleAxisPolynomialTrajectoryGenerator(
+    #     x0=x0, xf=xf, tf=10, poly_N=3, diff_N=7, dt=0.01
+    # )
 
-    # ge.x0_N = 7
-    # ge.xf_N = 7
-    # ge.poly_N = 13
-    # ge.diff_N = 7
-
-    # ge.solve()
-
-    # ge.x0_N = 1
-    # ge.xf_N = 1
-    # ge.poly_N = 3
-    # ge.diff_N = 7
+    # ge.x0_N = 3
+    # ge.xf_N = 3
 
     # ge.solve()
