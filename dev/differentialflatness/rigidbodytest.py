@@ -21,41 +21,41 @@ z0 = 0.0
 # fixed final position for now
 xf = 0.0
 yf = 0.0
-zf = 0.0 #np.pi / 2
+zf = 0.0  # np.pi / 2
 tf = 10
 
-ddx0 = 0.0
-ddy0 = -1.0#ddx0 * np.tan(z0)
+ddx0 = 1.0
+ddy0 = -0.0  # ddx0 * np.tan(z0)
 
-ddxf = 1.0
-ddyf =+0.0 # ddxf * np.tan(zf)
+ddxf = 0.0
+ddyf = -0.2  # ddxf * np.tan(zf)
 
-bc_y = np.array([y0, 0, ddy0, yf, 0, ddyf])
 
-gex = trajectorygeneration.SingleAxisTrajectoryGenerator(N=9)
-gex.bc_t0_N = 5
-gex.bc_tf_N = 5
-gex.x0 = np.array([x0, 0, ddx0,0,0,0])
-gex.xf = np.array([xf, 0, ddxf,0,0,0])
-gex.solve()
-x = gex.X[0, :]
-dx = gex.X[1, :]
-ax = gex.X[2, :]
-dax = gex.X[3, :]
-ddax = gex.X[4, :]
-t = gex.t
+gex = trajectorygeneration.SingleAxisPolynomialTrajectoryGenerator(poly_N=9)
+gex.x0_N = 3
+gex.xf_N = 3
+gex.x0 = np.array([x0, 0, ddx0, 0, 0, 0])
+gex.xf = np.array([xf, 0, ddxf, 0, 0, 0])
+gex.Ws = np.array([0, 0.0, 10.0, 1.0, 100.0, 1.0, 1.0])
+px, X, t = gex.solve()
+x = X[0, :]
+dx = X[1, :]
+ax = X[2, :]
+dax = X[3, :]
+ddax = X[4, :]
 
-gey = trajectorygeneration.SingleAxisTrajectoryGenerator(N=9)
-gey.bc_t0_N = 5
-gey.bc_tf_N = 5
-gey.x0 = np.array([y0, 0, ddy0,0,0,0])
-gey.xf = np.array([yf, 0, ddyf,0,0,0])
-gey.solve()
-y = gey.X[0, :]
-dy = gey.X[1, :]
-ay = gey.X[2, :]
-day = gey.X[3, :]
-dday = gex.X[4, :]
+gey = trajectorygeneration.SingleAxisPolynomialTrajectoryGenerator(poly_N=9)
+gey.x0_N = 3
+gey.xf_N = 3
+gey.x0 = np.array([y0, 0, ddy0, 0, 0, 0])
+gey.xf = np.array([yf, 0, ddyf, 0, 0, 0])
+gey.Ws = np.array([0, 0.0, 10.0, 1.0, 100.0, 1.0, 1.0])
+py, Y, t = gey.solve()
+y = Y[0, :]
+dy = Y[1, :]
+ay = Y[2, :]
+day = Y[3, :]
+dday = Y[4, :]
 
 # Position theta
 theta = np.arctan2(ay, ax)
@@ -102,12 +102,18 @@ xs[:, 2] = theta
 
 M = np.array([[m, 0], [0, m]])
 
-ax_cg = ax + J / (m * r) * np.sin(theta) * ddtheta + J / (m * r) * np.cos(theta) * dtheta**2
-ay_cg = ay - J / (m * r) * np.cos(theta) * ddtheta + J / (m * r) * np.sin(theta) * dtheta**2
+ax_cg = (
+    ax + J / (m * r) * np.sin(theta) * ddtheta + J / (m * r) * np.cos(theta) * dtheta**2
+)
+ay_cg = (
+    ay - J / (m * r) * np.cos(theta) * ddtheta + J / (m * r) * np.sin(theta) * dtheta**2
+)
 
 # COmpute forces
 for i in range(steps):
-    R = np.array([[np.cos(theta[i]), -np.sin(theta[i])], [np.sin(theta[i]), np.cos(theta[i])]])
+    R = np.array(
+        [[np.cos(theta[i]), -np.sin(theta[i])], [np.sin(theta[i]), np.cos(theta[i])]]
+    )
     a_cg = np.array([ax_cg[i], ay_cg[i]])
     us[i, :] = np.linalg.inv(R) @ M @ a_cg
 
@@ -170,7 +176,7 @@ axes.plot(x_cg, y_cg, "b")
 axes.set_ylabel("y", fontsize=graphical.default_fontsize)
 axes.set_xlabel("x", fontsize=graphical.default_fontsize)
 axes.axis("equal")
-axes.set(xlim=(-10, 10), ylim=(-10, 10))
+axes.set(xlim=(-20, 10), ylim=(-20, 10))
 axes.tick_params(labelsize=graphical.default_fontsize)
 axes.grid(True)
 

@@ -8,11 +8,8 @@ Created on 22 Feb 2024
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-import warnings
-
-
 from scipy.optimize import minimize
+import warnings
 
 # Import standard graphical parameters if part of pyro
 try:
