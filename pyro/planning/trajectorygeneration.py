@@ -406,7 +406,8 @@ if __name__ == "__main__":
 
     ge.poly_N = 12
     ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
-    ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
+    #ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
+    ge.Ws = np.array([0, 0.0, 1.0, 0,0,0,0])
 
     p, X, t = ge.solve()  # order 12 with optimization on polynomial parameters
 

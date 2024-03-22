@@ -21,14 +21,14 @@ z0 = 0.0
 # fixed final position for now
 xf = 0.0
 yf = 0.0
-zf = 0.0  # np.pi / 2
-tf = 10
+zf = np.pi 
+tf = 5
 
-ddx0 = 1.0
-ddy0 = -0.0  # ddx0 * np.tan(z0)
+ddx0 = 1.00
+ddy0 = 0.0# ddx0 * np.tan(z0)
 
 ddxf = 0.0
-ddyf = -0.2  # ddxf * np.tan(zf)
+ddyf = -1. #-ddxf * np.tan(zf)
 
 
 gex = trajectorygeneration.SingleAxisPolynomialTrajectoryGenerator(poly_N=9)
@@ -36,7 +36,8 @@ gex.x0_N = 3
 gex.xf_N = 3
 gex.x0 = np.array([x0, 0, ddx0, 0, 0, 0])
 gex.xf = np.array([xf, 0, ddxf, 0, 0, 0])
-gex.Ws = np.array([0, 0.0, 10.0, 1.0, 100.0, 1.0, 1.0])
+gex.poly_N = 7
+gex.Ws = np.array([0, 1.0, 1.0, 1.0, 10.0, 1.0, 1.0])
 px, X, t = gex.solve()
 x = X[0, :]
 dx = X[1, :]
@@ -49,7 +50,8 @@ gey.x0_N = 3
 gey.xf_N = 3
 gey.x0 = np.array([y0, 0, ddy0, 0, 0, 0])
 gey.xf = np.array([yf, 0, ddyf, 0, 0, 0])
-gey.Ws = np.array([0, 0.0, 10.0, 1.0, 100.0, 1.0, 1.0])
+gey.poly_N = 7
+gey.Ws = np.array([0, 1.0, 1.0, 1.0, 10.0, 1.0, 1.0])
 py, Y, t = gey.solve()
 y = Y[0, :]
 dy = Y[1, :]
@@ -62,7 +64,7 @@ theta = np.arctan2(ay, ax)
 # theta = np.arctan( (ay/ax))
 s = np.sin(theta)
 c = np.cos(theta)
-dtheta = (day * c - dax * s) / (ax * s + ay * c)
+dtheta = (day * c - dax * s) / (ay * s + ax * c)  # TODO check analytical equation, seems wrong
 ddtheta = (
     s * (-ddax + ax * dtheta**2 - 2 * day * dtheta)
     + c * (dday - ay * dtheta**2 - 2 * dax * dtheta)
