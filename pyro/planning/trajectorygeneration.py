@@ -431,8 +431,8 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
         self.tc = tc
         self.x0_N = x0.shape[0]
         self.xf_N = xf.shape[0]
-        self.K = xc.shape[0]  # number of waypoints
-        self.way_N = xc.shape[1]  # number of derivative to impose at each waypoint
+        self.K = xc.shape[1]  # number of waypoints
+        self.way_N = xc.shape[0]  # number of derivative to impose at each waypoint
         self.con_N = con_N  # number continuity constraints
         self.Rs = np.zeros((self.poly_N + 1))
         self.Ws = np.zeros((self.diff_N))
@@ -626,8 +626,8 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
         dt = self.dt
 
         b = self.compute_b(x0, xf, xc, N0, Nf, Nw, Nc)
-        A = self.compute_A(tc, N0, Nf, Nw, Nc, Np) # tc, N0, Nf, Nw, Nc, Np):
-        # Q = self.compute_Q(Np, Nd, tf, Ws, Rs)
+        A = self.compute_A(tc, N0, Nf, Nw, Nc, Np) 
+        # Q = self.compute_Q(Np, Nd, tf, Ws, Rs) # TODO
 
         p = self.solve_for_polynomial_parameters(A, b, None)
 
@@ -731,17 +731,51 @@ if __name__ == "__main__":
     # ge.solve()
 
     #############################
+    ### Waypoint simple fully constraint test
+    #############################
+
+    traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
+        poly_N=3,
+        diff_N=5,
+        con_N=2,
+        x0=np.array([0.0, 0.0]),
+        xf=np.array([10.0, 0.0]),
+        tc=np.array([0.0, 2.0, 8.0, 10.0]),
+        xc=np.array([[3.0, 7.0], [1.0, 1.0]]),
+        dt=0.01,
+    )
+
+    b, A, p, X, t = traj.solve()
+
+    #############################
     ### Waypoint test
     #############################
 
     traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
         poly_N=3,
-        diff_N=3,
-        con_N=2,
+        diff_N=5,
+        con_N=3,
         x0=np.array([0.0, 0.0]),
         xf=np.array([10.0, 0.0]),
         tc=np.array([0.0, 2.0, 8.0, 10.0]),
-        xc=np.array([[3.0, 7.0], [2.0, 2.0]]),
+        xc=np.array([[3.0, 7.0]]),
+        dt=0.01,
+    )
+
+    b, A, p, X, t = traj.solve()
+
+    #############################
+    ### Waypoint test
+    #############################
+
+    traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
+        poly_N=4,
+        diff_N=5,
+        con_N=4,
+        x0=np.array([0.0, 0.0, 0.0]),
+        xf=np.array([10.0, 0.0]),
+        tc=np.array([0.0, 2.0, 8.0, 10.0]),
+        xc=np.array([[3.0, 7.0]]),
         dt=0.01,
     )
 
