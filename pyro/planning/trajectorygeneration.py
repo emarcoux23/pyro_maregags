@@ -475,6 +475,8 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
 
         print("Constraints vector b = \n", b)
 
+        print("Constraints vector b shape = ",b.shape)
+
         return b
     
     ################################################
@@ -534,10 +536,39 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
 
         print("Constraints matrix: \n", A)
 
+        print("Constraints matrix A shape = ",A.shape)
+
         return A
+    
+    ################################################
+    def compute_Q(self, poly_N, diff_N, tc, Ws, Rs):
+
+        #
+        Kp1 = tc.shape[0]-1  # number of segments
+        N = poly_N + 1 # number of polynomial parameters per segments
+        N_params = Kp1 * N
+
+        # Times on segments
+        dt = np.diff(tc) # time between waypoints
+
+        # Quadratic global cost matrix
+        N_params = (poly_N + 1) * Kp1  # number of polynomial parameters
+        Q = np.zeros((N_params, N_params))
+
+        # Waypoint conditions
+        for k in range(Kp1):
+            Qk = self.compute_segment_Q(poly_N, diff_N, dt[k], Ws, Rs)
+            Q[N * k : N * (k + 1), N * k : N * (k + 1)] = Qk
+
+        print("Quadratic cost matrix: \n", Q)
+
+        print("Quadratic cost matrix shape = ",Q.shape)
+
+        return Q
+
 
     ################################################
-    def compute_Q(self, poly_N, diff_N, tf, Ws, Rs):
+    def compute_segment_Q(self, poly_N, diff_N, tf, Ws, Rs):
         """Compute the cost function matrix Q, only used if the boundary conditions do not fully specify the parameters of the polynomial"""
 
         # Quadratic cost matrix
@@ -627,9 +658,11 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
 
         b = self.compute_b(x0, xf, xc, N0, Nf, Nw, Nc)
         A = self.compute_A(tc, N0, Nf, Nw, Nc, Np) 
-        # Q = self.compute_Q(Np, Nd, tf, Ws, Rs) # TODO
+        Q = self.compute_Q(Np, Nd, tc, Ws, Rs) 
 
-        p = self.solve_for_polynomial_parameters(A, b, None)
+        print(Q.shape)
+
+        p = self.solve_for_polynomial_parameters(A, b, Q)
 
         X, t = self.generate_trajectory(tc, p, Np, Nd, dt)
 
@@ -734,35 +767,35 @@ if __name__ == "__main__":
     ### Waypoint simple fully constraint test
     #############################
 
-    traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
-        poly_N=3,
-        diff_N=5,
-        con_N=2,
-        x0=np.array([0.0, 0.0]),
-        xf=np.array([10.0, 0.0]),
-        tc=np.array([0.0, 2.0, 8.0, 10.0]),
-        xc=np.array([[3.0, 7.0], [1.0, 1.0]]),
-        dt=0.01,
-    )
+    # traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
+    #     poly_N=3,
+    #     diff_N=5,
+    #     con_N=2,
+    #     x0=np.array([0.0, 0.0]),
+    #     xf=np.array([10.0, 0.0]),
+    #     tc=np.array([0.0, 2.0, 8.0, 10.0]),
+    #     xc=np.array([[3.0, 7.0], [1.0, 1.0]]),
+    #     dt=0.01,
+    # )
 
-    b, A, p, X, t = traj.solve()
+    # b, A, p, X, t = traj.solve()
 
     #############################
     ### Waypoint test
     #############################
 
-    traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
-        poly_N=3,
-        diff_N=5,
-        con_N=3,
-        x0=np.array([0.0, 0.0]),
-        xf=np.array([10.0, 0.0]),
-        tc=np.array([0.0, 2.0, 8.0, 10.0]),
-        xc=np.array([[3.0, 7.0]]),
-        dt=0.01,
-    )
+    # traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
+    #     poly_N=3,
+    #     diff_N=5,
+    #     con_N=3,
+    #     x0=np.array([0.0, 0.0]),
+    #     xf=np.array([10.0, 0.0]),
+    #     tc=np.array([0.0, 2.0, 8.0, 10.0]),
+    #     xc=np.array([[3.0, 7.0]]),
+    #     dt=0.01,
+    # )
 
-    b, A, p, X, t = traj.solve()
+    # b, A, p, X, t = traj.solve()
 
     #############################
     ### Waypoint test
@@ -778,5 +811,27 @@ if __name__ == "__main__":
         xc=np.array([[3.0, 7.0]]),
         dt=0.01,
     )
+
+    b, A, p, X, t = traj.solve()
+
+    #############################
+    ### Waypoint simple fully constraint test
+    #############################
+
+    traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
+        poly_N=9,
+        diff_N=7,
+        con_N=4,
+        x0=np.array([0.0, 0.0, 0.0]),
+        xf=np.array([10.0, 0.0, 0.0]),
+        tc=np.array([0.0, 2.0, 8.0, 10.0]),
+        xc=np.array([[5.0, 12.0]]),
+        dt=0.01,
+    )
+
+    traj.Ws[1]= 1.0
+    traj.Ws[2]= 1.0
+    traj.Ws[3]= 1.0
+    traj.Ws[4]= 1.0
 
     b, A, p, X, t = traj.solve()
