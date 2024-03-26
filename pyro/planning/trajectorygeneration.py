@@ -361,6 +361,284 @@ class SingleAxisPolynomialTrajectoryGenerator:
         return p, X, t
 
 
+###############################################################################
+class MultiPointSingleAxisPolynomialTrajectoryGenerator(
+    SingleAxisPolynomialTrajectoryGenerator
+):
+    """
+    This class is a tool to generate a point-to-point trajectory for a
+    single axis based on boundary conditions (position and higher order derivative)
+
+    k Polynomial segments of order N
+
+    pi(t) = p0i + p1i*t + p2i*t^2 + ... + pNi*t^N
+
+    x(T) = pi(t) with i s.t. ti < T < ti+1 and t = T - ti
+
+    if boundary conditions do not fully specify the parameters of the polynomial,
+    then an optimization is conducted to minimize the cost function which is defined
+    as a weighted sum of the integral of the square of the ith derivative of the profile.
+
+    Parameters:
+    -----------
+    poly_N : int
+        order of the polynomials
+    diff_N : int
+        order of the highest derivative to compute
+    tc : array
+        array of time for initial, intermediate and final points
+    x0 : array
+        array of initial conditions
+    xf : array
+        array of final conditions
+    xc : array ( # of constrained derivatives , pts_N)
+        matrice of intermediate conditions at waypoints
+    Rs : array
+        weights for the cost function penalizing the ith polynomial parameters directly
+    Ws : array
+        weights for the cost function penalizing the ith derivative of the profile
+    dt : float
+        time step for the numerical solution of the trajectory
+
+    Output:
+    -------
+    p : array
+        polynomial parameters
+    X : array
+        profile of the trajectory X[i, j] is the ith derivative of the profile at time t[j]
+    t : array
+        time vector
+
+    """
+
+    ################################################
+    def __init__(
+        self,
+        poly_N=5,
+        diff_N=7,
+        con_N=3,
+        x0=np.array([0.0, 0.0, 0.0]),
+        xf=np.array([10.0, 0.0, 0.0]),
+        tc=np.array([0.0, 2.0, 8.0, 10.0]),
+        xc=np.array([[3.0, 7.0], [0.0, 0.0]]),
+        dt=0.01,
+    ):
+        self.poly_N = poly_N
+        self.diff_N = diff_N
+        self.x0 = x0
+        self.xf = xf
+        self.xc = xc
+        self.tc = tc
+        self.x0_N = x0.shape[0]
+        self.xf_N = xf.shape[0]
+        self.K = xc.shape[0]  # number of waypoints
+        self.way_N = xc.shape[1]  # number of derivative to impose at each waypoint
+        self.con_N = con_N  # number continuity constraints
+        self.Rs = np.zeros((self.poly_N + 1))
+        self.Ws = np.zeros((self.diff_N))
+        self.dt = dt
+
+        # Outputs
+        self.t = None
+        self.X = None
+        self.p = None
+
+        self.labels = [
+            "pos",
+            "vel",
+            "acc",
+            "jerk",
+            "snap",
+            "crac",
+            "pop",
+            "7th",
+            "8th",
+            "9th",
+            "10th",
+        ]
+
+    ################################################
+    def compute_b(self, x0, xf, xc, N0, Nf, Nw, Nc):
+        """ """
+
+        K = xc.shape[1] # number of waypoint
+
+        b = x0[:N0]  # initial conditions
+
+        for k in range(K):
+            b = np.hstack((b, xc[:Nw, k]))  # waypoint conditions
+
+        b = np.hstack((b, xf[:Nf]))
+
+        for k in range(K):
+            b = np.hstack((b, np.zeros(Nc)))  #  continuity conditions
+
+        print("Constraints vector b = \n", b)
+
+        return b
+    
+    ################################################
+    def A_t(self, t, poly_N, diff_N):
+        """ 
+        Compute the matrix  X(t) = A(t) @ p
+        where
+        p = [p0, p1, p2, ..., pN] are the polynomial parameters
+        X(t) = [x(t), dx(t), d2x(t), ..., dNx(t)] are the derivatives of the trajectory at time t
+
+        """
+
+        A = np.zeros((diff_N, poly_N + 1))
+
+        # For all jth derivative of the final conditions
+        for j in range(diff_N):
+            # For all terms of the polynomical
+            for n in range(j, poly_N + 1):
+                exp = n - j
+                mul = 1
+                for k in range(j):
+                    mul = mul * (n - k)
+                A[j, n] = mul * t**exp
+
+        return A
+
+
+    ################################################
+    def compute_A(self, tc, N0, Nf, Nw, Nc, Np):
+        """"""
+        Kp1 = tc.shape[0]-1  # number of segments
+        K = Kp1 - 1 # number of waypoints
+        N = Np + 1 # number of polynomial parameters per segments
+        N_params = Kp1 * N
+
+        N_contraints = N0 + Nf + Nw * K + Nc * K
+
+        A = np.zeros((N_contraints, N_params))
+
+        # Times on segments
+        dt = np.diff(tc) # time between waypoints
+
+        # Initial conditions
+        A[0:N0, 0:N] = self.A_t(0, Np, N0)
+
+        # Waypoint conditions
+        for k in range(K):
+            A[N0 + Nw * k : N0 + Nw * (k + 1), N * (k + 1) : N * (k + 2)] = self.A_t(0, Np, Nw)
+
+        # Final conditions
+        A[N0 + Nw * K : N0 + Nw * K + Nf, N * K : N * (K + 1)] = self.A_t(dt[-1], Np, Nf)
+
+        # Continuity conditions
+        for k in range(K):
+            A[N0 + Nw * K + Nf + Nc * k : N0 + Nw * K + Nf + Nc * (k + 1), N * k : N * (k + 1)] = self.A_t(dt[k], Np, Nc)
+            A[N0 + Nw * K + Nf + Nc * k : N0 + Nw * K + Nf + Nc * (k + 1), N * (k + 1) : N * (k + 2)] = -self.A_t(0, Np, Nc)
+
+        print("Constraints matrix: \n", A)
+
+        return A
+
+    ################################################
+    def compute_Q(self, poly_N, diff_N, tf, Ws, Rs):
+        """Compute the cost function matrix Q, only used if the boundary conditions do not fully specify the parameters of the polynomial"""
+
+        # Quadratic cost matrix
+        Q = np.zeros((poly_N + 1, poly_N + 1))
+
+        # Quadratic cost matrix for each derivative
+        Qs = np.zeros((poly_N + 1, poly_N + 1, diff_N))
+
+        # Qs are weight corresponding to computing the integral of the square of the ith derivative of the profile
+        # J = p.T @ Qs[i] @ p = integral( [ d_dt(ith)x(t) ]^2 dt)
+        # see https://groups.csail.mit.edu/rrg/papers/BryIJRR15.pdf
+        for r in range(diff_N):
+            for i in range(poly_N + 1):
+                for l in range(poly_N + 1):
+                    if (i >= r) and (l >= r):
+                        mul = 1
+                        for m in range(r):
+                            mul = mul * (i - m) * (l - m)
+                        exp = i + l - 2 * r + 1
+                        Qs[i, l, r] = 2 * mul * tf**exp / (i + l - 2 * r + 1)
+                    else:
+                        Qs[i, l, r] = 0
+
+        # Total cost for all derivatives
+        for r in range(diff_N):
+            Q = Q + Ws[r] * Qs[:, :, r]
+
+        # Regulation term penalizing the polynomial parameters directly
+        Q = Q + np.diag(Rs[: (poly_N + 1)])
+
+        return Q
+
+    ################################################
+    def generate_trajectory(self, tc, p, poly_N, diff_N, dt=0.01):
+        """Generate a numerical trajectory based on the polynomial parameters"""
+
+        Np1 = poly_N + 1  # order of polynomial
+        tf =tc[-1]
+        steps = int(tf / dt)  # number of time steps
+        ts = np.linspace(0, tf, steps)
+        X = np.zeros((diff_N, steps))
+
+        for i in range(steps):
+            t = ts[i]
+            k = 0
+            t0_segment = 0.0
+            while (t > tc[k+1]):
+                t0_segment = tc[k+1]
+                k = k + 1
+
+            t_local = t - t0_segment 
+            p_local = p[Np1 * k : Np1 * (k + 1)]
+            At = self.A_t(t_local, Np1 - 1, diff_N)
+            X[:, i] = At @ p_local
+
+        return X, ts
+
+    ################################################
+    def get_local_trajectory(self, t_local, p_local, diff_N):
+        """Get the jth derivative of the trajectory at time t based on the polynomial parameters p"""
+
+        p = p_local
+        Np = p.shape[0] - 1  # order of polynomial
+        t = t_local
+        At = self.A_t(t, Np, diff_N)
+
+        X = At @ p
+
+        return X
+
+    ################################################
+    def solve(self, show=True):
+
+        x0 = self.x0
+        xf = self.xf
+        xc = self.xc
+        tc = self.tc
+        N0 = self.x0_N
+        Nf = self.xf_N
+        Nw = self.way_N
+        Nc = self.con_N
+        Np = self.poly_N
+        Nd = self.diff_N
+        Ws = self.Ws
+        Rs = self.Rs
+        dt = self.dt
+
+        b = self.compute_b(x0, xf, xc, N0, Nf, Nw, Nc)
+        A = self.compute_A(tc, N0, Nf, Nw, Nc, Np) # tc, N0, Nf, Nw, Nc, Np):
+        # Q = self.compute_Q(Np, Nd, tf, Ws, Rs)
+
+        p = self.solve_for_polynomial_parameters(A, b, None)
+
+        X, t = self.generate_trajectory(tc, p, Np, Nd, dt)
+
+        if show:
+            self.plot_trajectory(X, t)
+
+        return b, A, p, X, t
+
+
 """
 #################################################################
 ##################          Main                         ########
@@ -371,23 +649,23 @@ class SingleAxisPolynomialTrajectoryGenerator:
 if __name__ == "__main__":
     """MAIN TEST"""
 
-    x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-    xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
+    # x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    # xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
-    ge = SingleAxisPolynomialTrajectoryGenerator(
-        x0=x0, xf=xf, tf=10, poly_N=12, diff_N=7, dt=0.01
-    )
+    # ge = SingleAxisPolynomialTrajectoryGenerator(
+    #     x0=x0, xf=xf, tf=10, poly_N=12, diff_N=7, dt=0.01
+    # )
 
     #############################
     ### Fully constrained order 3
     #############################
 
-    ge.x0_N = 2
-    ge.xf_N = 2
-    ge.poly_N = 3
-    ge.diff_N = 7
+    # ge.x0_N = 2
+    # ge.xf_N = 2
+    # ge.poly_N = 3
+    # ge.diff_N = 7
 
-    ge.solve()
+    # ge.solve()
 
     #############################
     ### Fully constrained order 5
@@ -404,14 +682,14 @@ if __name__ == "__main__":
     ### Optimization on polynomial parameters
     ###########################################
 
-    ge.poly_N = 12
-    ge.x0_N = 3
-    ge.xf_N = 3
-    ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
-    #ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
-    ge.Ws = np.array([0, 1.0, 0.0, 0, 0.0,0,0])
+    # ge.poly_N = 12
+    # ge.x0_N = 3
+    # ge.xf_N = 3
+    # ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
+    # # ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
+    # ge.Ws = np.array([0, 1.0, 0.0, 0, 0.0, 0, 0])
 
-    p, X, t = ge.solve()  # order 12 with optimization on polynomial parameters
+    # p, X, t = ge.solve()  # order 12 with optimization on polynomial parameters
 
     #############################
     ### Fully constrained order 7
@@ -430,14 +708,14 @@ if __name__ == "__main__":
     ### Fully constrained order 9
     #############################
 
-    ge = SingleAxisPolynomialTrajectoryGenerator(
-        x0=x0, xf=xf, tf=10, poly_N=9, diff_N=7, dt=0.01
-    )
+    # ge = SingleAxisPolynomialTrajectoryGenerator(
+    #     x0=x0, xf=xf, tf=10, poly_N=9, diff_N=7, dt=0.01
+    # )
 
-    ge.x0_N = 5
-    ge.xf_N = 5
+    # ge.x0_N = 5
+    # ge.xf_N = 5
 
-    ge.solve()
+    # ge.solve()
 
     #############################
     ### Overconstrained order 3
@@ -451,3 +729,20 @@ if __name__ == "__main__":
     # ge.xf_N = 3
 
     # ge.solve()
+
+    #############################
+    ### Waypoint test
+    #############################
+
+    traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
+        poly_N=3,
+        diff_N=3,
+        con_N=2,
+        x0=np.array([0.0, 0.0]),
+        xf=np.array([10.0, 0.0]),
+        tc=np.array([0.0, 2.0, 8.0, 10.0]),
+        xc=np.array([[3.0, 7.0], [2.0, 2.0]]),
+        dt=0.01,
+    )
+
+    b, A, p, X, t = traj.solve()
