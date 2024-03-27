@@ -473,7 +473,7 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
         for k in range(K):
             b = np.hstack((b, np.zeros(Nc)))  #  continuity conditions
 
-        print("Constraints vector b = \n", b)
+        #print("Constraints vector b = \n", b)
 
         print("Constraints vector b shape = ",b.shape)
 
@@ -534,7 +534,7 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
             A[N0 + Nw * K + Nf + Nc * k : N0 + Nw * K + Nf + Nc * (k + 1), N * k : N * (k + 1)] = self.A_t(dt[k], Np, Nc)
             A[N0 + Nw * K + Nf + Nc * k : N0 + Nw * K + Nf + Nc * (k + 1), N * (k + 1) : N * (k + 2)] = -self.A_t(0, Np, Nc)
 
-        print("Constraints matrix: \n", A)
+        #print("Constraints matrix: \n", A)
 
         print("Constraints matrix A shape = ",A.shape)
 
@@ -560,7 +560,7 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
             Qk = self.compute_segment_Q(poly_N, diff_N, dt[k], Ws, Rs)
             Q[N * k : N * (k + 1), N * k : N * (k + 1)] = Qk
 
-        print("Quadratic cost matrix: \n", Q)
+        #print("Quadratic cost matrix: \n", Q)
 
         print("Quadratic cost matrix shape = ",Q.shape)
 
@@ -659,8 +659,6 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
         b = self.compute_b(x0, xf, xc, N0, Nf, Nw, Nc)
         A = self.compute_A(tc, N0, Nf, Nw, Nc, Np) 
         Q = self.compute_Q(Np, Nd, tc, Ws, Rs) 
-
-        print(Q.shape)
 
         p = self.solve_for_polynomial_parameters(A, b, Q)
 
