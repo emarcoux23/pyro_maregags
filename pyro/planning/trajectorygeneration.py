@@ -119,7 +119,7 @@ class SingleAxisPolynomialTrajectoryGenerator:
 
         b = np.hstack((x0[:N0], xf[:Nf]))
 
-        print("Boundary condition vector b = [x0;xf]: \n", b)
+        print("Boundary condition vector b shape: ", b.shape)
 
         return b
 
@@ -150,7 +150,7 @@ class SingleAxisPolynomialTrajectoryGenerator:
                     mul = mul * (n - k)
                 A[N0 + j, n] = mul * tf**exp
 
-        print("Boundary condition matrix: \n", A)
+        print("Boundary condition matrix A shape: ", A.shape)
 
         return A
 
@@ -227,27 +227,42 @@ class SingleAxisPolynomialTrajectoryGenerator:
 
             print("Optimization over free decision variables")
 
-            p0 = np.zeros(A.shape[1])
+            try:
 
-            constraints = {"type": "eq", "fun": lambda p: A @ p - b}
-            cost = lambda p: p.T @ Q @ p
-            grad = lambda p: 2 * p.T @ Q
-            hess = lambda p: 2 * Q
+                Q_inv = np.linalg.inv(Q)
+                AQA = A @ Q_inv @ A.T
+                lam = np.linalg.solve(AQA, b)
+                p = Q_inv @ A.T @ lam
 
-            # TODO: Change to a solver specifc to quadratic optimization
-            res = minimize(
-                cost,
-                p0,
-                method="SLSQP",
-                jac=grad,
-                hess=hess,
-                constraints=constraints,
-                options={"disp": True, "maxiter": 5000},
-            )
+            except:
 
-            p = res.x
+                print(" Q is not invertible, using optimization solver")
 
-        print("Computed polynomial parameters: \n", p)
+                p0 = np.zeros(A.shape[1])
+
+                constraints = {"type": "eq", "fun": lambda p: A @ p - b}
+                cost = lambda p: p.T @ Q @ p
+                grad = lambda p: 2 * p.T @ Q
+                hess = lambda p: 2 * Q
+
+                # TODO: Change to a solver specifc to quadratic optimization
+                res = minimize(
+                    cost,
+                    p0,
+                    method="SLSQP",
+                    jac=grad,
+                    hess=hess,
+                    constraints=constraints,
+                    options={"disp": True, "maxiter": 5000},
+                )
+
+                p = res.x
+            
+            else:
+
+                print(" Q is invertible, using direct solver")
+
+        print("Computed polynomial parameters shape: ", p.shape)
 
         return p
 
@@ -680,12 +695,12 @@ class MultiPointSingleAxisPolynomialTrajectoryGenerator(
 if __name__ == "__main__":
     """MAIN TEST"""
 
-    # x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
-    # xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
+    x0 = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    xf = np.array([10, 0, 0, 0, 0, 0, 0, 0])
 
-    # ge = SingleAxisPolynomialTrajectoryGenerator(
-    #     x0=x0, xf=xf, tf=10, poly_N=12, diff_N=7, dt=0.01
-    # )
+    ge = SingleAxisPolynomialTrajectoryGenerator(
+        x0=x0, xf=xf, tf=10, poly_N=12, diff_N=7, dt=0.01
+    )
 
     #############################
     ### Fully constrained order 3
@@ -719,6 +734,7 @@ if __name__ == "__main__":
     # ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
     # # ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
     # ge.Ws = np.array([0, 1.0, 0.0, 0, 0.0, 0, 0])
+    # # ge.Ws = np.array([0.01, 10.0, 0.01, 0.01, 0.01, 0.01, 0.01])
 
     # p, X, t = ge.solve()  # order 12 with optimization on polynomial parameters
 
@@ -799,18 +815,18 @@ if __name__ == "__main__":
     ### Waypoint test
     #############################
 
-    traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
-        poly_N=4,
-        diff_N=5,
-        con_N=4,
-        x0=np.array([0.0, 0.0, 0.0]),
-        xf=np.array([10.0, 0.0]),
-        tc=np.array([0.0, 2.0, 8.0, 10.0]),
-        xc=np.array([[3.0, 7.0]]),
-        dt=0.01,
-    )
+    # traj = MultiPointSingleAxisPolynomialTrajectoryGenerator(
+    #     poly_N=4,
+    #     diff_N=5,
+    #     con_N=4,
+    #     x0=np.array([0.0, 0.0, 0.0]),
+    #     xf=np.array([10.0, 0.0]),
+    #     tc=np.array([0.0, 2.0, 8.0, 10.0]),
+    #     xc=np.array([[3.0, 7.0]]),
+    #     dt=0.01,
+    # )
 
-    b, A, p, X, t = traj.solve()
+    # b, A, p, X, t = traj.solve()
 
     #############################
     ### Waypoint simple fully constraint test
@@ -827,6 +843,7 @@ if __name__ == "__main__":
         dt=0.01,
     )
 
+    traj.Ws[0]= 0.01
     traj.Ws[1]= 1.0
     traj.Ws[2]= 1.0
     traj.Ws[3]= 1.0
