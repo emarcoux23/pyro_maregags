@@ -19,7 +19,7 @@ xyt = np.array([[ 0.0,  0.0, 0.0],
 
 
 
-traj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
+xtraj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
         poly_N=9,
         diff_N=7,
         con_N=4,
@@ -30,12 +30,13 @@ traj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
         dt=0.01,
     )
 
-traj.Ws[1]= 1.0
-traj.Ws[2]= 1.0
-traj.Ws[3]= 1.0
-traj.Ws[4]= 1.0
+xtraj.Ws[0]= 0.01
+xtraj.Ws[1]= 1.0
+xtraj.Ws[2]= 1.0
+xtraj.Ws[3]= 1.0
+xtraj.Ws[4]= 1.0
 
-b, A, p, X, t = traj.solve()
+b, A, p, X, t = xtraj.solve()
 
 x = X[0, :]
 dx = X[1, :]
@@ -43,7 +44,7 @@ ax = X[2, :]
 dax = X[3, :]
 ddax = X[4, :]
 
-traj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
+ytraj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
         poly_N=9,
         diff_N=7,
         con_N=4,
@@ -53,12 +54,14 @@ traj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
         xc=np.array([[xyt[1,1], xyt[1,2]]]),
         dt=0.01,
     )
-traj.Ws[1]= 1.0
-traj.Ws[2]= 1.0
-traj.Ws[3]= 1.0
-traj.Ws[4]= 1.0
 
-b, A, p, Y, t = traj.solve()
+ytraj.Ws[0]= 0.01
+ytraj.Ws[1]= 1.0
+ytraj.Ws[2]= 1.0
+ytraj.Ws[3]= 1.0
+ytraj.Ws[4]= 1.0
+
+b, A, p, Y, t = ytraj.solve()
 
 y = Y[0, :]
 dy = Y[1, :]

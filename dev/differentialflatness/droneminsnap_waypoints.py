@@ -32,6 +32,7 @@ traj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
         dt=0.01,
     )
 
+traj.Ws[0]= 0.01
 traj.Ws[1]= 1.0
 traj.Ws[2]= 1.0
 traj.Ws[3]= 1.0
@@ -55,6 +56,8 @@ traj = trajectorygeneration.MultiPointSingleAxisPolynomialTrajectoryGenerator(
         xc=np.array([[xyt[1,1], xyt[1,2]]]),
         dt=0.01,
     )
+
+traj.Ws[0]= 0.01
 traj.Ws[1]= 1.0
 traj.Ws[2]= 1.0
 traj.Ws[3]= 1.0
