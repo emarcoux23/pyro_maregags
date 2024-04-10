@@ -9,12 +9,12 @@ Created on Fri Oct 25 12:16:59 2019
 ###############################################################################
 import numpy as np
 ###############################################################################
-from pyro.dynamic  import vehicle
+from pyro.dynamic  import vehicle_steering
 ###############################################################################
 
 # Vehicule dynamical system
 #sys = vehicle.KinematicCarModel()
-sys = vehicle.KinematicCarModelwithObstacles()
+sys = vehicle_steering.KinematicCarModelwithObstacles()
 
 # Set default wheel velocity and steering angle
 sys.ubar = np.array([2,0.2])

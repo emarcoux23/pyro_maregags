@@ -728,15 +728,15 @@ if __name__ == "__main__":
     ### Optimization on polynomial parameters
     ###########################################
 
-    # ge.poly_N = 12
-    # ge.x0_N = 3
-    # ge.xf_N = 3
-    # ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
-    # # ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
-    # ge.Ws = np.array([0, 1.0, 0.0, 0, 0.0, 0, 0])
-    # # ge.Ws = np.array([0.01, 10.0, 0.01, 0.01, 0.01, 0.01, 0.01])
+    ge.poly_N = 12
+    ge.x0_N = 3
+    ge.xf_N = 3
+    ge.Rs = 0.0 * np.ones(ge.poly_N + 1)
+    # ge.Ws = np.array([0, 0.0, 10.0, 1.0, 1.0, 1.0, 1.0])
+    ge.Ws = np.array([0, 1.0, 0.0, 0, 0.0, 0, 0])
+    # ge.Ws = np.array([0.01, 10.0, 0.01, 0.01, 0.01, 0.01, 0.01])
 
-    # p, X, t = ge.solve()  # order 12 with optimization on polynomial parameters
+    p, X, t = ge.solve()  # order 12 with optimization on polynomial parameters
 
     #############################
     ### Fully constrained order 7
@@ -755,14 +755,14 @@ if __name__ == "__main__":
     ### Fully constrained order 9
     #############################
 
-    # ge = SingleAxisPolynomialTrajectoryGenerator(
-    #     x0=x0, xf=xf, tf=10, poly_N=9, diff_N=7, dt=0.01
-    # )
+    ge = SingleAxisPolynomialTrajectoryGenerator(
+        x0=x0, xf=xf, tf=10, poly_N=9, diff_N=7, dt=0.01
+    )
 
-    # ge.x0_N = 5
-    # ge.xf_N = 5
+    ge.x0_N = 5
+    ge.xf_N = 5
 
-    # ge.solve()
+    ge.solve()
 
     #############################
     ### Overconstrained order 3

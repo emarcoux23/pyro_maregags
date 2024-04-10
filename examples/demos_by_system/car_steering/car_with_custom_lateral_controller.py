@@ -9,12 +9,12 @@ Created on Fri Oct 25 12:16:59 2019
 ###############################################################################
 import numpy as np
 ###############################################################################
-from pyro.dynamic  import vehicle
+from pyro.dynamic  import vehicle_steering
 from pyro.control  import controller
 ###############################################################################
 
 # Vehicule dynamical system
-sys = vehicle.ConstantSpeedKinematicCarModel()
+sys = vehicle_steering.ConstantSpeedKinematicCarModel()
 
 
 class CarController( controller.StaticController ) :

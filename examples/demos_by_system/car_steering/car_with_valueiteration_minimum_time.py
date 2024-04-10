@@ -12,10 +12,10 @@ import numpy as np
 from pyro.analysis import costfunction
 from pyro.planning import dynamicprogramming 
 from pyro.planning import discretizer
-from pyro.dynamic  import vehicle
+from pyro.dynamic  import vehicle_steering
 ###############################################################################
 
-sys  = vehicle.KinematicCarModelwithObstacles()
+sys  = vehicle_steering.KinematicCarModelwithObstacles()
 
 # Set domain
 sys.x_ub = np.array([+35, +3, +3])

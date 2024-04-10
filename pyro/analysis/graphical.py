@@ -911,7 +911,7 @@ if __name__ == "__main__":
     """ MAIN TEST """
     
     from pyro.dynamic import pendulum
-    from pyro.dynamic import vehicle
+    from pyro.dynamic import vehicle_steering
     
     sys    = pendulum.DoublePendulum()
     sys.x0 = np.array([0.1,0.1,0,0])
@@ -938,7 +938,7 @@ if __name__ == "__main__":
     a = Animator(sys)
     a.animate_simulation( sys.traj, 1, is_3d)
     
-    sys      = vehicle.KinematicBicyleModel()
+    sys      = vehicle_steering.KinematicBicyleModel()
     sys.ubar = np.array([1,0.01])
     sys.x0   = np.array([0,0,0])
     

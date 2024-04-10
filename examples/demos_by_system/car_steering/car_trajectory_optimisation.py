@@ -8,7 +8,7 @@ Created on Sun Oct  3 08:27:06 2021
 
 import numpy as np
 
-from pyro.dynamic.vehicle                 import KinematicCarModel
+from pyro.dynamic.vehicle_steering                 import KinematicCarModel
 from pyro.planning.trajectoryoptimisation import DirectCollocationTrajectoryOptimisation
 
 

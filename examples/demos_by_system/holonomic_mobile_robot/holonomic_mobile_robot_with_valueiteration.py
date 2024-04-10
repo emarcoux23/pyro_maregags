@@ -7,12 +7,12 @@ Created on Mon Nov 12 20:28:17 2018
 
 import numpy as np
 
-from pyro.dynamic  import vehicle
+from pyro.dynamic  import vehicle_steering
 from pyro.planning import discretizer
 from pyro.analysis import costfunction
 from pyro.planning import dynamicprogramming
 
-sys  = vehicle.HolonomicMobileRobotwithObstacles()
+sys  = vehicle_steering.HolonomicMobileRobotwithObstacles()
 
 # Discrete world 
 grid_sys = discretizer.GridDynamicSystem( sys , (51,51) , (3,3) ) 

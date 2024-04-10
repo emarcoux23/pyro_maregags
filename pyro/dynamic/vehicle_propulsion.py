@@ -12,7 +12,6 @@ import numpy as np
 from pyro.dynamic import system
 ##############################################################################
 
-import matplotlib
 import matplotlib.pyplot as plt
 
 
