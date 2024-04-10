@@ -188,7 +188,7 @@ axes.plot(x_cg, y_cg, "b")
 axes.set_ylabel("y", fontsize=graphical.default_fontsize)
 axes.set_xlabel("x", fontsize=graphical.default_fontsize)
 axes.axis("equal")
-axes.set(xlim=(-5, 25), ylim=(-5, 25))
+axes.set(xlim=(-15, 25), ylim=(-15, 25))
 axes.tick_params(labelsize=graphical.default_fontsize)
 axes.grid(True)
 
@@ -200,4 +200,4 @@ plt.show()
 
 sys.traj = traj
 
-sys.animate_simulation()
+ani = sys.animate_simulation()

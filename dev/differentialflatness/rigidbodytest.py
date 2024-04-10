@@ -37,7 +37,7 @@ gex.xf_N = 3
 gex.x0 = np.array([x0, 0, ddx0, 0, 0, 0])
 gex.xf = np.array([xf, 0, ddxf, 0, 0, 0])
 gex.poly_N = 7
-#gex.Ws = np.array([0, 1.0, 1.0, 1.0, 1.0, 1.0, .0])
+gex.Ws = np.array([0.01, 1.0, 1.0, 1.0, 1.0, 1.0, .0])
 px, X, t = gex.solve()
 x = X[0, :]
 dx = X[1, :]
@@ -51,7 +51,7 @@ gey.xf_N = 3
 gey.x0 = np.array([y0, 0, ddy0, 0, 0, 0])
 gey.xf = np.array([yf, 0, ddyf, 0, 0, 0])
 gey.poly_N = 7
-#gey.Ws = np.array([0, 1.0, 1.0, 1.0, 1.0, 1.0, .0])
+gey.Ws = np.array([0.01, 1.0, 1.0, 1.0, 1.0, 1.0, .0])
 py, Y, t = gey.solve()
 y = Y[0, :]
 dy = Y[1, :]
@@ -190,4 +190,4 @@ plt.show()
 
 sys.traj = traj
 
-sys.animate_simulation()
+ani = sys.animate_simulation()
