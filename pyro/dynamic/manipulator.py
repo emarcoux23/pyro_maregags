@@ -1484,6 +1484,11 @@ class ThreeLinkManipulator3D( Manipulator ):
         lines_color.append('b')
  
         return lines_pts , lines_style , lines_color
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        
+        return [],[],[]
 
 
 
@@ -1513,6 +1518,8 @@ class FiveLinkPlanarManipulator( Manipulator ):
         
         # params
         self.setparams()
+
+        self.lines_plus = False
                 
             
     #############################
@@ -1669,7 +1676,11 @@ class FiveLinkPlanarManipulator( Manipulator ):
         lines_color.append('b')
  
         return lines_pts , lines_style , lines_color
-
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        
+        return [],[],[]
 
 
 ##############################################################################
@@ -1781,8 +1792,6 @@ class TwoLinkManipulatorwithObstacles( TwoLinkManipulator ):
                 
         return lines_pts , lines_style , lines_color
 
-    ###########################################################################
-
 
 ###############################################################################
 # Five Planar Link Manipulator with obstacles
@@ -1877,8 +1886,6 @@ class FiveLinkPlanarManipulatorwithObstacles( FiveLinkPlanarManipulator ):
             lines_color.append('k')
                 
         return lines_pts , lines_style , lines_color
-
-    ###########################################################################
     
     
     
@@ -1898,9 +1905,10 @@ if __name__ == "__main__":
     sys.x0[0]   = 0.1
     sys.ubar[0] = 4
     sys.ubar[1] = 4
-    #sys.animate_simulation()
-    #sys.plot_trajectory()
-    #sys.plot_end_effector_trajectory()
+
+    sys.plot_trajectory()
+    sys.animate_simulation()
+    sys.plot_end_effector_trajectory()
     
     
     #Ellispoid validation

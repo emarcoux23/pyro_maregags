@@ -8,10 +8,10 @@ Created on Wed Feb 23 16:31:41 2022
 ###############################################################################
 import numpy as np
 ###############################################################################
-from pyro.dynamic  import longitudinal_vehicule
+from pyro.dynamic  import vehicle_propulsion
 ####################################
 
-sys  = longitudinal_vehicule.LongitudinalFrontWheelDriveCarWithTorqueInput()
+sys  = vehicle_propulsion.LongitudinalFrontWheelDriveCarWithTorqueInput()
 
 
 sys.x0      = np.array([0,0.1,0,0])

@@ -110,6 +110,23 @@ class StaticController():
         
         return r
     
+    #########################################################################
+    def forward_kinematic_lines_plus( self, x , u , t ):
+        """  
+        Graphical output for the controller
+        -----------------------------------
+        default is nothing
+
+        x,u,t are the state, input and time of the global closed-loop system
+
+        """
+
+        pts = None
+        style = None
+        color = None
+
+        return pts, style, color
+    
     
     #########################################################################
     # No need to overwrite the following functions for child classes
@@ -382,6 +399,83 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
         
         return u
     
+
+    ###########################################################################
+    # Place holder graphical output, overload with specific graph output
+    ###########################################################################
+        
+    #############################
+    def xut2q( self, x , u , t ):
+        """ Compute configuration variables ( q vector ) """
+        
+        # Use the plant function
+        q = self.plant.xut2q( x, u, t)
+        
+        return q
+    
+    
+    ###########################################################################
+    def forward_kinematic_domain(self, q ):
+        """ Set the domain range for ploting, can be static or dynamic """
+
+        # Use the plant function
+        domain = self.plant.forward_kinematic_domain( q )
+        
+        return domain
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines(self, q ):
+        """ 
+        Compute points p = [x;y;z] positions given config q 
+        ----------------------------------------------------
+        - points of interest for ploting
+        
+        Outpus:
+        lines_pts = [] : a list of array (n_pts x 3) for each lines
+        
+        """
+
+        lines_pts = self.plant.forward_kinematic_lines( q )
+                
+        return lines_pts
+    
+    
+    ###########################################################################
+    def forward_kinematic_lines_plus(self, x , u , t ):
+        """  
+        Return combined graphical output for the controller and the system
+        """
+
+        # TODO: this is a quick fix, need to be improved
+
+        sys = self.plant.forward_kinematic_lines_plus( x , u , t )
+        ctl = self.controller.forward_kinematic_lines_plus( x , u , t )
+
+        if type(sys) is tuple:
+            lines_pts   = sys[0]
+            lines_style = sys[1]
+            lines_color = sys[2]
+        else:
+            # Legacy graph function to remove eventually
+            lines_pts   = sys
+            lines_style = []
+            lines_color = []
+            for j, line in enumerate(lines_pts):
+                lines_style.append( self.plant.linestyle  )  # default value 
+                lines_color.append( self.plant.linescolor )  # default value 
+        
+        if ctl[0] is not None:
+            lines_pts    = ctl[0] + lines_pts
+            lines_style  = ctl[1] + lines_style
+            lines_color  = ctl[2] + lines_color
+                
+        return lines_pts, lines_style, lines_color
+    
+    #############################################################################
+    #### Updated shortcuts
+    #############################################################################
+    
     
     ###########################################################################
     def plot_phase_plane_closed_loop(self , x_axis = 0 , y_axis = 1 ):
@@ -447,7 +541,8 @@ class ClosedLoopSystem( system.ContinuousDynamicSystem ):
     
     ###########################################################################
     def get_animator(self):
-        return self.plant.get_animator()
+
+        return graphical.Animator(self)
     
 
     ###########################################################################
@@ -680,6 +775,24 @@ class DynamicController( StaticController ):
         u = self.c( self.zbar, y , self.rbar , t )
         
         return u
+    
+
+    #########################################################################
+    def forward_kinematic_lines_plus( self, x, u , t ):
+        """  
+        Graphical output for the controller
+        -----------------------------------
+        default is nothing
+
+        x,u,t are the state, input and time of the global closed-loop system
+
+        """
+
+        pts = None
+        style = None
+        color = None
+
+        return pts, style, color
         
     
     #############################

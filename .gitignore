@@ -29,6 +29,7 @@ MANIFEST
 *.npy
 *.csv
 *.mat
+*.zip
 
 # Output files #
 ############################

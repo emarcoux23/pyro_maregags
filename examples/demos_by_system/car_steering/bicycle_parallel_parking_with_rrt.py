@@ -7,11 +7,11 @@ Created on Mon Nov 12 20:20:11 2018
 ###############################################################################
 import numpy as np
 ###############################################################################
-from pyro.dynamic import vehicle
+from pyro.dynamic import vehicle_steering
 from pyro.planning import randomtree
 ###############################################################################
 
-sys  = vehicle.KinematicBicyleModel()
+sys  = vehicle_steering.KinematicBicyleModel()
 
 sys.dynamic_domain = False
 ###############################################################################

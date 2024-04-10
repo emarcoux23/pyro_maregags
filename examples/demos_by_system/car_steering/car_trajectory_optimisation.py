@@ -8,7 +8,7 @@ Created on Sun Oct  3 08:27:06 2021
 
 import numpy as np
 
-from pyro.dynamic.vehicle                 import KinematicCarModel
+from pyro.dynamic.vehicle_steering                 import KinematicCarModel
 from pyro.planning.trajectoryoptimisation import DirectCollocationTrajectoryOptimisation
 
 
@@ -34,7 +34,8 @@ planner.x_start = np.array([-0,1,0])
 planner.x_goal  = np.array([ 0,0,0])
 
 planner.maxiter = 1000
+# planner.ini
 planner.compute_optimal_trajectory()
-planner.show_solution()
+# planner.show_solution()
 planner.animate_solution()
 

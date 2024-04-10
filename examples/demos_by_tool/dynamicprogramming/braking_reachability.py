@@ -8,12 +8,12 @@ Created on Sun Oct 16 22:27:47 2022
 
 import numpy as np
 
-from pyro.dynamic  import longitudinal_vehicule
+from pyro.dynamic  import vehicle_propulsion
 from pyro.analysis import costfunction
 from pyro.planning import dynamicprogramming 
 from pyro.planning import discretizer
 
-sys  = longitudinal_vehicule.LongitudinalFrontWheelDriveCarWithWheelSlipInput()
+sys  = vehicle_propulsion.LongitudinalFrontWheelDriveCarWithWheelSlipInput()
 
 sys.x_ub[0] = 60
 sys.x_lb[0] = 0

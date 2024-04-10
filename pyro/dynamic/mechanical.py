@@ -422,7 +422,7 @@ class MechanicalSystemWithPositionInputs( MechanicalSystem  ):
         H = self.H( q )
         C = self.C( q , dq )
         g = self.g( q  )
-        d = self.d( q , dq)
+        d = self.d( q , dq, u )
         
         B = self.B( q , u )
         e = self.u2e( u )

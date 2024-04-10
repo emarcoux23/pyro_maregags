@@ -15,7 +15,9 @@ from pyro.dynamic import pendulum
 sys = pendulum.DoublePendulum()
 
 # Simultation
-sys.x0  = np.array([-0.1,0,0,0])
+sys.x0   = np.array([-0.1,0,0,0])
+sys.ubar = np.array([-0.1,0.0])
+
 sys.plot_trajectory()
 sys.plot_phase_plane_trajectory(0, 2)
 sys.animate_simulation()

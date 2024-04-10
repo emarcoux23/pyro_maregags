@@ -98,7 +98,7 @@ tf = 10
 cl_sys.x0[0] = q0
 cl_sys.compute_trajectory(tf,10001,'euler')
 cl_sys.plot_trajectory('xu')
-cl_sys.animate_simulation()
-
 sys.plot_phase_plane()
 cl_sys.plot_phase_plane_trajectory_closed_loop()
+cl_sys.animate_simulation()
+

@@ -14,12 +14,16 @@ from pyro.planning.trajectoryoptimisation import DirectCollocationTrajectoryOpti
 
 sys = Drone2D()
 
+sys.u_ub = np.array([10.0, 10.0])
+
 planner = DirectCollocationTrajectoryOptimisation( sys )
 
 planner.x_start = np.array([-5,0,0,0,0,0])
 planner.x_goal  = np.array([0,0,0,0,0,0])
 
+planner.maxiter = 200
+planner.init_dynamic_plot()
 planner.compute_optimal_trajectory()
-planner.show_solution()
+# planner.show_solution()
 planner.animate_solution()
 

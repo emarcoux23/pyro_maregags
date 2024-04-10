@@ -97,9 +97,6 @@ class CostFunction():
 ###############################################################################
 # Basic cost functions
 ###############################################################################
-
-
-#############################################################################
      
 class QuadraticCostFunction( CostFunction ):
     """ 
@@ -205,6 +202,84 @@ class QuadraticCostFunction( CostFunction ):
                 dJ = 0
         
         return dJ
+    
+    
+#############################################################################
+     
+class QuadraticCostFunctionVectorized( CostFunction ):
+    """ 
+    Vectorized: (x, u , t) can be trajectory of time matrices
+    
+    Quadratic cost functions of continuous dynamical systems
+    ----------------------------------------------
+    n : number of states
+    m : number of control inputs
+    ---------------------------------------
+    J = int( g(x,u,t) * dt ) + h( x(T) , T )
+    
+    g = xQx + uRu 
+    h = xSx
+    
+    """
+    
+    ############################
+    def __init__(self, n, m):
+        
+        CostFunction.__init__(self)
+        
+        # dimensions
+        self.n = n
+        self.m = m
+
+        # Quadratic cost weights
+        self.Q = np.diag( np.ones(n)  )
+        self.R = np.diag( np.ones(m)  )
+        self.S = np.diag( np.zeros(n) )
+        
+        self.is_vectorized = True
+        
+    
+    ############################
+    @classmethod
+    def from_sys(cls, sys):
+        """ From ContinuousDynamicSystem instance """
+        
+        instance = cls( sys.n , sys.m )
+        
+        return instance
+    
+
+    #############################
+    def h(self, x , t = 0):
+        """ Final cost function with zero value """
+        
+        if x.ndim == 1 :
+            
+            J_f = x.T @ self.S @ x 
+            
+            
+        else:
+            
+            # Quadratic terminal cost
+            J_f = np.diag( x.T @ self.S @ x )
+        
+        return J_f
+    
+    
+    #############################
+    def g(self, x, u, t):
+        """ Quadratic additive cost """
+        
+        if x.ndim == 1 :
+            
+            dJ = x.T @ self.Q @ x + u.T @ self.R @ u
+            
+        else:
+        
+            dJ = np.diag( x.T @ self.Q @ x ) + np.diag( u.T @ self.R @ u )
+        
+        return dJ
+
     
 
 ##############################################################################

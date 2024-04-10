@@ -1163,9 +1163,6 @@ class TwoIndependentSinglePendulum( mechanical.MechanicalSystem ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    sys = DoublePendulum()
-    
-    #sys = SinglePendulum()
     
     if False:
     
