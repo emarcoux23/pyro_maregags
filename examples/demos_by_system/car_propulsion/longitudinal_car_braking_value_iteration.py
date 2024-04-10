@@ -9,14 +9,14 @@ Created on Wed Feb 23 13:40:47 2022
 ###############################################################################
 import numpy as np
 ###############################################################################
-from pyro.dynamic  import longitudinal_vehicule
+from pyro.dynamic  import vehicle_propulsion
 from pyro.planning import discretizer
 from pyro.analysis import costfunction
 from pyro.planning import dynamicprogramming
 from pyro.control  import controller
 ###############################################################################
 
-sys  = longitudinal_vehicule.LongitudinalFrontWheelDriveCarWithWheelSlipInput()
+sys  = vehicle_propulsion.LongitudinalFrontWheelDriveCarWithWheelSlipInput()
 
 ###############################################################################
 

@@ -1206,29 +1206,29 @@ class ConstantSpeedKinematicCarModel( KinematicCarModel ):
 if __name__ == "__main__":     
     """ MAIN TEST """
     
-    sys = KinematicBicyleModel()
+    # sys = KinematicBicyleModel()
     
-    sys.ubar = np.array([2,-0.5])
-    sys.plot_trajectory()
-    #sys.animate_simulation()
+    # sys.ubar = np.array([2,-0.5])
+    # sys.plot_trajectory()
+    # sys.animate_simulation()
     
     sys = KinematicCarModelwithObstacles()
     
     sys.ubar = np.array([2,-0.5])
     sys.plot_trajectory()
-    #sys.animate_simulation()
-    
-    sys = UdeSRacecar()
-    
-    sys.ubar = np.array([2,-0.5])
-    sys.plot_trajectory()
     sys.animate_simulation()
     
-    sys = HolonomicMobileRobotwithObstacles()
+    # sys = UdeSRacecar()
     
-    sys.ubar = np.array([1,1])
-    sys.plot_trajectory()
-    #sys.animate_simulation()
+    # sys.ubar = np.array([2,-0.5])
+    # sys.plot_trajectory()
+    # sys.animate_simulation()
+    
+    # sys = HolonomicMobileRobotwithObstacles()
+    
+    # sys.ubar = np.array([1,1])
+    # sys.plot_trajectory()
+    # sys.animate_simulation()
     
     
         

@@ -9,9 +9,6 @@ Created on Sun Oct 16 22:27:47 2022
 import numpy as np
 
 from pyro.dynamic  import suspension
-from pyro.analysis import costfunction
-from pyro.planning import dynamicprogramming 
-from pyro.planning import discretizer
 
 sys  = suspension.QuarterCarOnRoughTerrain()
 
