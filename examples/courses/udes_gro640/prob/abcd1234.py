@@ -15,6 +15,7 @@ Fichier d'amorce pour les livrables de la problématique GRO640'
 import sys
 sys.path.insert(0, "C:/PythonLib/pyro_maregags")
 #allo
+#salut
 
 import numpy as np
 
