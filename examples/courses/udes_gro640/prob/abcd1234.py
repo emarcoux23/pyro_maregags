@@ -14,8 +14,6 @@ Fichier d'amorce pour les livrables de la problématique GRO640'
 
 import sys
 sys.path.insert(0, "C:/PythonLib/pyro_maregags")
-#allo
-#salut
 
 import numpy as np
 
@@ -46,16 +44,49 @@ def dh2T( r , d , theta, alpha ):
             Matrice de transformation
 
     """
-    
-    T = np.zeros((4,4))
-    
+
     ###################
     # Votre code ici
     ###################
+
+    # ROTATION MATRIX FROM A' TO A
+    R_a_ap = np.array([[np.cos(theta), -np.sin(theta), 0],
+                       [np.sin(theta),  np.cos(theta), 0],
+                       [0,              0,             1]])
     
+    # ROTATION MATRIX FROM B TO A'
+    R_ap_b = np.array([[1,  0,             0],
+                       [0,  np.cos(alpha), -np.sin(alpha)],
+                       [0,  np.sin(alpha), np.cos(alpha)]])
+    
+    # ROTATION MATRIX FROM B TO A
+    R_a_b = np.dot(R_a_ap, R_ap_b)
+
+    # VECTOR TO A' FROM A IN BASE A
+    r_ap_a = np.array([[0],
+                       [0],
+                       [d]])
+    
+    # VECTOR TO B FROM A' IN BASE A'
+    r_b_ap = np.array([[r],
+                       [0],
+                       [0]])
+    
+    # VECTOR TO B FROM A' IN BASE A
+    r_b_ap = np.dot(R_a_ap, r_b_ap)
+    
+    # VECTOR TO B FROM A IN BASE A
+    r_b_a = r_ap_a + r_b_ap
+
+    # FILLING THE TRANSFORMATION MATRIX
+    T = np.zeros((4,4))
+    T[:3, :3] = R_a_b       # Ajout matrice rotation
+    T[0, 3] = r_b_a[0, 0]   
+    T[1, 3] = r_b_a[1, 0]   # Ajout vecteur position
+    T[2, 3] = r_b_a[2, 0]
+    T[3, 3] = 1             # Ajout du 1
+
     return T
-
-
 
 def dhs2T( r , d , theta, alpha ):
     """
@@ -76,14 +107,25 @@ def dhs2T( r , d , theta, alpha ):
 
     """
     
-    WTT = np.zeros((4,4))
-    
     ###################
     # Votre code ici
     ###################
-    
-    return WTT
 
+    # POUR S'ASSURER QUE LES INPUTS SOIENT CORRECTS
+    if len(r) != len(d) or len(r) != len(theta) or len(r) != len(alpha):
+        raise ValueError("Lengths of input arrays (r, d, theta, alpha) must be equal.")
+    if len(r) <= 1 or len(r) >= 7:
+        raise ValueError("Lengths of input arrays (r, d, theta, alpha) must be of size 2 to 7.")
+
+    # MATRICE DE TRANSFORMATION ENTRE LES 2 PREMIER JOINTS
+    WTT = dh2T(r[0], d[0], theta[0], alpha[0])
+
+    # CONSTRUCTION DE LA MATRICE DE TRANSFORMATION POUR TOUS LES JOINTS RESTANTS
+    for i in range(1, len(r)):
+        new_WTT = dh2T(r[i], d[i], theta[i], alpha[i])
+        WTT = np.dot(WTT, new_WTT)
+
+    return WTT
 
 def f(q):
     """
@@ -101,7 +143,7 @@ def f(q):
 
     """
     r = np.zeros((3,1))
-    
+
     ###################
     # Votre code ici
     ###################
