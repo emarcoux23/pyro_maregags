@@ -46,42 +46,10 @@ def dh2T( r , d , theta, alpha ):
     # Votre code ici
     ###################
 
-    # ROTATION MATRIX FROM A' TO A
-    R_a_ap = np.array([[np.cos(theta), -np.sin(theta), 0],
-                       [np.sin(theta),  np.cos(theta), 0],
-                       [0,              0,             1]])
-    
-    # ROTATION MATRIX FROM B TO A'
-    R_ap_b = np.array([[1,  0,             0],
-                       [0,  np.cos(alpha), -np.sin(alpha)],
-                       [0,  np.sin(alpha), np.cos(alpha)]])
-    
-    # ROTATION MATRIX FROM B TO A
-    R_a_b = np.dot(R_a_ap, R_ap_b)
-
-    # VECTOR TO A' FROM A IN BASE A
-    r_ap_a = np.array([[0],
-                       [0],
-                       [d]])
-    
-    # VECTOR TO B FROM A' IN BASE A'
-    r_b_ap = np.array([[r],
-                       [0],
-                       [0]])
-    
-    # VECTOR TO B FROM A' IN BASE A
-    r_b_ap = np.dot(R_a_ap, r_b_ap)
-    
-    # VECTOR TO B FROM A IN BASE A
-    r_b_a = r_ap_a + r_b_ap
-
-    # FILLING THE TRANSFORMATION MATRIX
-    T = np.zeros((4,4))
-    T[:3, :3] = R_a_b       # Ajout matrice rotation
-    T[0, 3] = r_b_a[0, 0]   
-    T[1, 3] = r_b_a[1, 0]   # Ajout vecteur position
-    T[2, 3] = r_b_a[2, 0]
-    T[3, 3] = 1             # Ajout du 1
+    T = np.array([[np.cos(theta),   -np.sin(theta) * np.cos(alpha),  np.sin(theta) * np.sin(alpha), r * np.cos(theta)],
+                  [np.sin(theta),    np.cos(theta) * np.cos(alpha), -np.cos(theta) * np.sin(alpha), r * np.sin(theta)],
+                  [0,                np.sin(alpha),                  np.cos(alpha),                 d],
+                  [0,                0,                              0,                             1]])
 
     return T
 
@@ -112,7 +80,7 @@ def dhs2T( r , d , theta, alpha ):
     if len(r) <= 1 or len(r) >= 7:
         raise ValueError("Lengths of input arrays (r, d, theta, alpha) must be of size 2 to 7.")
 
-    # MATRICE DE TRANSFORMATION ENTRE LES 2 PREMIER JOINTS
+    # MATRICE DE TRANSFORMATION ENTRE LES 2 PREMIERS JOINTS
     WTT = dh2T(r[0], d[0], theta[0], alpha[0])
 
     # CONSTRUCTION DE LA MATRICE DE TRANSFORMATION POUR TOUS LES JOINTS RESTANTS
