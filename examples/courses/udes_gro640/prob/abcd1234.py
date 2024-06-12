@@ -108,38 +108,41 @@ def f(q):
     ###################
 
     # DH PARAMETERS OF KUKA ROBOT
-    r =     [0.5, 0.8, 0.3, 0.4, 0.6]
-    d =     [0.3, 0.6, 0.1, 0.2, 0.4]
+    r =     [0, -33, 155, 135, 80.5, 9.5]
+    d =     [72, 75, 0, 0, 0, 136.6]
     theta = q
-    alpha = [np.pi/2, np.pi/3, np.pi/3, np.pi/3, np.pi/3]
+    alpha = [0, -np.pi/2, 0, 0, -np.pi/2, np.pi/2]
     
-    # CREATE THE TRANSFORMATION MATRIXES FROM ALL BASES TO A
-    a_T_b = dh2T (r[0],  d[0],  theta[0],  alpha[0])
-    a_T_c = dhs2T(r[:2], d[:2], theta[:2], alpha[:2])
-    a_T_d = dhs2T(r[:3], d[:3], theta[:3], alpha[:3])
-    a_T_e = dhs2T(r[:4], d[:4], theta[:4], alpha[:4])
-    a_T_f = dhs2T(r[:5], d[:5], theta[:5], alpha[:5])
+    # CREATE THE TRANSFORMATION MATRIXES FROM ALL BASES TO W
+    w_T_a = dh2T (r[0],  d[0],  theta[0],  alpha[0])
+    a_T_b = dhs2T(r[:2], d[:2], theta[:2], alpha[:2])
+    a_T_c = dhs2T(r[:3], d[:3], theta[:3], alpha[:3])
+    a_T_d = dhs2T(r[:4], d[:4], theta[:4], alpha[:4])
+    a_T_e = dhs2T(r[:5], d[:5], theta[:5], alpha[:5])
+    a_T_tool = dhs2T(r[:6], d[:6], theta[:6], alpha[:6])
 
     # CREATE THE 1X4 POSITON VECTORS IN THEIR RESPECTIVE BASES
-    r_A_to_B_in_B = np.array([[r[0]], [0], [d[0]], [1]])
-    r_B_to_C_in_C = np.array([[r[1]], [0], [d[1]], [1]])
-    r_C_to_D_in_D = np.array([[r[2]], [0], [d[2]], [1]])
-    r_D_to_E_in_E = np.array([[r[3]], [0], [d[3]], [1]])
-    r_E_to_F_in_F = np.array([[r[4]], [0], [d[4]], [1]])
+    r_W_to_A_in_A = np.array([[r[0]], [0], [d[0]], [1]])
+    r_A_to_B_in_B = np.array([[r[1]], [0], [d[1]], [1]])
+    r_B_to_C_in_C = np.array([[r[2]], [0], [d[2]], [1]])
+    r_C_to_D_in_D = np.array([[r[3]], [0], [d[3]], [1]])
+    r_D_to_E_in_E = np.array([[r[4]], [0], [d[4]], [1]])
+    r_E_to_tool_in_tool = np.array([[r[5]], [0], [d[5]], [1]])
 
     # TRANSFORM ALL THE POSITION VECTORS IN THEIR RESPECTIVE
-    # BASES TO THE SAME A BASE
-    r_A_to_B_in_A = np.dot(a_T_b, r_A_to_B_in_B)
-    r_B_to_C_in_A = np.dot(a_T_c, r_B_to_C_in_C)
-    r_C_to_D_in_A = np.dot(a_T_d, r_C_to_D_in_D)
-    r_D_to_E_in_A = np.dot(a_T_e, r_D_to_E_in_E)
-    r_E_to_F_in_A = np.dot(a_T_f, r_E_to_F_in_F)
+    # BASES TO THE SAME W BASE
+    r_W_to_A_in_W = np.dot(w_T_a, r_W_to_A_in_A)
+    r_A_to_B_in_W = np.dot(a_T_b, r_A_to_B_in_B)
+    r_B_to_C_in_W = np.dot(a_T_c, r_B_to_C_in_C)
+    r_C_to_D_in_W = np.dot(a_T_d, r_C_to_D_in_D)
+    r_D_to_E_in_W = np.dot(a_T_e, r_D_to_E_in_E)
+    r_E_to_tool_in_W = np.dot(a_T_tool, r_E_to_tool_in_tool)
 
-    # ADD ALL POSITION VECTORS IN THE SAME A BASE
-    r_A_to_F_in_A = r_A_to_B_in_A + r_B_to_C_in_A + r_C_to_D_in_A + r_D_to_E_in_A + r_E_to_F_in_A
+    # ADD ALL POSITION VECTORS IN THE SAME W BASE
+    r_W_to_tool_in_W = r_W_to_A_in_W + r_A_to_B_in_W + r_B_to_C_in_W + r_C_to_D_in_W + r_D_to_E_in_W + r_E_to_tool_in_W
 
     # 1x4 MATRIX TO 1X3 MATRIX TO ONLY KEEP XYZ
-    r = r_A_to_F_in_A[:-1]
+    r = r_W_to_tool_in_W[:-1]
     
     return r
 
@@ -196,7 +199,13 @@ class CustomPositionController( EndEffectorKinematicController ) :
         # Votre loi de commande ici !!!
         ##################################
 
-        
+        lamda = 2
+        K = 5
+        JT = np.transpose(J)
+        I = np.identity(3)
+
+        dq = np.linalg.inv((JT @ J) + (lamda*lamda*I)) @ JT @ e * K
+
         return dq
     
     
