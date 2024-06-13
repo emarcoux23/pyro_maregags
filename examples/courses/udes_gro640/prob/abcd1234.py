@@ -75,6 +75,7 @@ def dhs2T( r , d , theta, alpha ):
     ###################
 
     # POUR S'ASSURER QUE LES INPUTS SOIENT CORRECTS
+    #TODO corrigé ça
     if len(r) != len(d) or len(r) != len(theta) or len(r) != len(alpha):
         raise ValueError("Lengths of input arrays (r, d, theta, alpha) must be equal.")
     if len(r) <= 1 or len(r) >= 7:

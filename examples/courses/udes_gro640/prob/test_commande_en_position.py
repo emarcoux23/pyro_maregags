@@ -6,6 +6,7 @@ Created on Fri May  1 19:51:49 2020
 @author: alex
 """
 import numpy as np
+import sys; sys.path.insert(0, "C:/PythonLib/pyro_maregags")
 
 from gro640_robots import LaserRobot
 
