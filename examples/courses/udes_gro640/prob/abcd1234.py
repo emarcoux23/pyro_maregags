@@ -200,12 +200,17 @@ class CustomPositionController( EndEffectorKinematicController ) :
         # Votre loi de commande ici !!!
         ##################################
 
+        # Paramètres de la loi de commande
         lamda = 2
         K = 5
+
+        # Éléments utiles pour la loi de commande
         JT = np.transpose(J)
         I = np.identity(3)
+        lamba2_I = (lamda*lamda*I)
 
-        dq = np.linalg.inv((JT @ J) + (lamda*lamda*I)) @ JT @ e * K
+        # Loi de commande qui pénalise les grandes vitesses
+        dq = np.linalg.inv((JT @ J) + (lamba2_I)) @ JT @ e * K
 
         return dq
     
