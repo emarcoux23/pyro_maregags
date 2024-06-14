@@ -270,8 +270,50 @@ class CustomDrillingController( robotcontrollers.RobotController ) :
         ##################################
         # Votre loi de commande ici !!!
         ##################################
+
+        # Personnaliser le code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         
         u = np.zeros(self.m)  # place-holder de bonne dimension
+
+        if self.State == 0:
+            r_desired = np.array([0.25, 0.25, 0.45])
+        elif self.State == 1:
+            r_desired = np.array([0.25, 0.25, 0.40])
+        elif self.State == 2:
+            r_desired = np.array([0.25, 0.25, 0.20])
+        elif self.State == 3:
+            r_desired = np.array([0.25, 0.25, 0.70])
+
+        dr_desired = np.array([0, 0, 0])
+
+        re = r_desired - r
+        dre = dr_desired - dr
+
+        if self.State == 1:
+            k = 50
+            b = 40
+        elif self.State == 2:
+            k = 10
+            b = 100
+        elif self.State == 3:
+            k = 500
+            b = 200
+        else:
+            k = 100
+            b = 40
+
+        K = np.diag([k, k, k])
+        B = np.diag([b, b, b])
+        fe = np.dot(K, re) + np.dot(B, dre)
+
+        if self.State == 2:
+            fe[2] = -200
+
+        u = np.dot(J.T, fe) + g
+
+        if (np.linalg.norm(re) < 0.001 and np.linalg.norm(dre) < 0.006) or (self.State == 2 and np.linalg.norm(re) < 0.006):
+            if self.State < 3:
+                self.State += 1
         
         return u
         
@@ -313,7 +355,32 @@ def goal2r( r_0 , r_f , t_f ):
     #################################
     # Votre code ici !!!
     ##################################
+
+    a_max = 1
+    v_max = 1
+    T = t_f
+    t = np.linspace(0, T, l)
     
+    for i in range(l):
+        if t[i] < 0 and t[i] <= v_max/a_max:
+            s = 1/2*(a_max*t[i]**2)
+            s_dot = a_max*t[i]
+            s_dot_dot = a_max
+        if t[i] > v_max/a_max and t[i] <= T - v_max/a_max:
+            s = v_max*t[i] - (v_max**2)/(2*a_max)
+            s_dot = v_max
+            s_dot_dot = 0
+        if (T - v_max/a_max) < t[i] and t[i] <= T:
+            s = ((2*a_max*v_max*T)-(2*v_max**2)-((a_max**2)*((t[i]-T)**2)))/(2*a_max) 
+            s_dot = a_max*(T-t[i])
+            s_dot_dot = -a_max
+        else :
+            s = None
+            s_dot = None
+            s_dot_dot = None
+
+    
+    ## ajouter le code p.169 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     return r, dr, ddr
 
@@ -350,7 +417,14 @@ def r2q( r, dr, ddr , manipulator ):
     #################################
     # Votre code ici !!!
     ##################################
-    
+    J = self.J(q)
+    J_inv = np.linalg.inv(J)
+    J_dot = np.diff(J)
+
+    # add for loop
+    #q = 
+    dq = np.dot(J_inv, dr)
+    ddq = np.dot(J_inv, (ddr - (np.dot(J_dot, dq))))
     
     return q, dq, ddq
 
@@ -385,5 +459,7 @@ def q2torque( q, dq, ddq , manipulator ):
     # Votre code ici !!!
     ##################################
     
+    for i in range(l):
+        tau[:, i] = manipulator.inverse_dynamics(q[:, i], dq[:, i], ddq[:, i])
     
     return tau
