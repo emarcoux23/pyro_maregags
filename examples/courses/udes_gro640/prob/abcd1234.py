@@ -25,61 +25,19 @@ from pyro.control.robotcontrollers import EndEffectorKinematicController
 ###################
 
 def dh2T( r , d , theta, alpha ):
-    """
-    Parameters
-    ----------
-    r     : float 1x1
-    d     : float 1x1
-    theta : float 1x1
-    alpha : float 1x1
-    
-    4 paramètres de DH
 
-    Returns
-    -------
-    T     : float 4x4 (numpy array)
-            Matrice de transformation
-
-    """
-
-    ###################
-    # Votre code ici
-    ###################
-
-    T = np.array([[np.cos(theta),   -np.sin(theta) * np.cos(alpha),  np.sin(theta) * np.sin(alpha), r * np.cos(theta)],
-                  [np.sin(theta),    np.cos(theta) * np.cos(alpha), -np.cos(theta) * np.sin(alpha), r * np.sin(theta)],
-                  [0,                np.sin(alpha),                  np.cos(alpha),                 d],
-                  [0,                0,                              0,                             1]])
+    T = np.array([[np.cos(theta), -np.sin(theta) * np.cos(alpha),  np.sin(theta) * np.sin(alpha), r * np.cos(theta)],
+                  [np.sin(theta),  np.cos(theta) * np.cos(alpha), -np.cos(theta) * np.sin(alpha), r * np.sin(theta)],
+                  [0,              np.sin(alpha),                  np.cos(alpha),                 d],
+                  [0,              0,                              0,                             1]])
 
     return T
 
 def dhs2T( r , d , theta, alpha ):
-    """
-    Parameters
-    ----------
-    r     : float nx1
-    d     : float nx1
-    theta : float nx1
-    alpha : float nx1
-    
-    Colonnes de paramètre de DH
 
-    Returns
-    -------
-    WTT     : float 4x4 (numpy array)
-              Matrice de transformation totale de l'outil
-    """
-    
-    ###################
-    # Votre code ici
-    ###################
-
-    # POUR S'ASSURER QUE LES INPUTS SOIENT CORRECTS
-    #TODO corrigé ça
+    # POUR S'ASSURER QUE LES INPUTS SOIENT DE LA MÊME TAILLE
     if len(r) != len(d) or len(r) != len(theta) or len(r) != len(alpha):
         raise ValueError("Lengths of input arrays (r, d, theta, alpha) must be equal.")
-    if len(r) <= 1 or len(r) >= 7:
-        raise ValueError("Lengths of input arrays (r, d, theta, alpha) must be of size 2 to 7.")
 
     # MATRICE DE TRANSFORMATION ENTRE LES 2 PREMIERS JOINTS
     WTT = dh2T(r[0], d[0], theta[0], alpha[0])
@@ -92,26 +50,11 @@ def dhs2T( r , d , theta, alpha ):
     return WTT
 
 def f(q):
-    """
-        Parameters
-    ----------
-    q : float 6x1
-        Joint space coordinates
-
-    Returns
-    -------
-    r : float 3x1 
-        Effector (x,y,z) position
-    """
-    
-    ###################
-    # Votre code ici
-    ###################
 
     # DH PARAMETERS OF KUKA ROBOT
-    r =     [0, -33, 155, 135, 80.5, 9.5]
-    d =     [72, 75, 0, 0, 0, 136.6]
-    theta = q
+    r =     [0, -0.033, 0.155, 0.135, 0.0805, 0.0095 + q[5]]
+    d =     [0.072, 0.075, 0, 0, 0, 0.1366]
+    theta = [q[0], q[1], q[2], q[3], q[4] + np.pi, -np.pi/2]
     alpha = [0, -np.pi/2, 0, 0, -np.pi/2, np.pi/2]
     
     # CREATE THE TRANSFORMATION MATRIXES FROM ALL BASES TO W
@@ -120,7 +63,7 @@ def f(q):
     a_T_c = dhs2T(r[:3], d[:3], theta[:3], alpha[:3])
     a_T_d = dhs2T(r[:4], d[:4], theta[:4], alpha[:4])
     a_T_e = dhs2T(r[:5], d[:5], theta[:5], alpha[:5])
-    a_T_tool = dhs2T(r[:6], d[:6], theta[:6], alpha[:6])
+    a_T_t = dhs2T(r[:6], d[:6], theta[:6], alpha[:6])
 
     # CREATE THE 1X4 POSITON VECTORS IN THEIR RESPECTIVE BASES
     r_W_to_A_in_A = np.array([[r[0]], [0], [d[0]], [1]])
@@ -128,24 +71,23 @@ def f(q):
     r_B_to_C_in_C = np.array([[r[2]], [0], [d[2]], [1]])
     r_C_to_D_in_D = np.array([[r[3]], [0], [d[3]], [1]])
     r_D_to_E_in_E = np.array([[r[4]], [0], [d[4]], [1]])
-    r_E_to_tool_in_tool = np.array([[r[5]], [0], [d[5]], [1]])
+    r_E_to_T_in_T = np.array([[r[5]], [0], [d[5]], [1]])
 
-    # TRANSFORM ALL THE POSITION VECTORS IN THEIR RESPECTIVE
-    # BASES TO THE SAME W BASE
+    # TRANSFORM ALL THE POSITION VECTORS IN THEIR RESPECTIVE BASES TO THE SAME W BASE
     r_W_to_A_in_W = np.dot(w_T_a, r_W_to_A_in_A)
     r_A_to_B_in_W = np.dot(a_T_b, r_A_to_B_in_B)
     r_B_to_C_in_W = np.dot(a_T_c, r_B_to_C_in_C)
     r_C_to_D_in_W = np.dot(a_T_d, r_C_to_D_in_D)
     r_D_to_E_in_W = np.dot(a_T_e, r_D_to_E_in_E)
-    r_E_to_tool_in_W = np.dot(a_T_tool, r_E_to_tool_in_tool)
+    r_E_to_T_in_W = np.dot(a_T_t, r_E_to_T_in_T)
 
     # ADD ALL POSITION VECTORS IN THE SAME W BASE
-    r_W_to_tool_in_W = r_W_to_A_in_W + r_A_to_B_in_W + r_B_to_C_in_W + r_C_to_D_in_W + r_D_to_E_in_W + r_E_to_tool_in_W
-
-    # 1x4 MATRIX TO 1X3 MATRIX TO ONLY KEEP XYZ
-    r = r_W_to_tool_in_W[:-1]
+    r_W_to_T_in_W = r_W_to_A_in_W + r_A_to_B_in_W + r_B_to_C_in_W + r_C_to_D_in_W + r_D_to_E_in_W + r_E_to_T_in_W
+       
+    # 1x4 MATRIX TO 1X3 MATRIX TO ONLY KEEP XYZ AND PUT INTO TUPLE
+    r_W_to_T_in_W = (r_W_to_T_in_W[0][0], r_W_to_T_in_W[1][0], r_W_to_T_in_W[2][0])
     
-    return r
+    return r_W_to_T_in_W
 
 
 ###################
