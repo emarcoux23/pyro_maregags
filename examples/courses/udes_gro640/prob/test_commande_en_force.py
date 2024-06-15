@@ -5,6 +5,7 @@ Created on Fri May  1 19:51:49 2020
 
 @author: alex
 """
+import sys; sys.path.insert(0, "C:/PythonLib/pyro_maregags")
 import numpy as np
 import matplotlib
 

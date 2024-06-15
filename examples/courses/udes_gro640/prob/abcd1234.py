@@ -25,12 +25,10 @@ from pyro.control.robotcontrollers import EndEffectorKinematicController
 ###################
 
 def dh2T( r , d , theta, alpha ):
-
     T = np.array([[np.cos(theta), -np.sin(theta) * np.cos(alpha),  np.sin(theta) * np.sin(alpha), r * np.cos(theta)],
                   [np.sin(theta),  np.cos(theta) * np.cos(alpha), -np.cos(theta) * np.sin(alpha), r * np.sin(theta)],
                   [0,              np.sin(alpha),                  np.cos(alpha),                 d],
                   [0,              0,                              0,                             1]])
-
     return T
 
 def dhs2T( r , d , theta, alpha ):
@@ -98,29 +96,11 @@ class CustomPositionController( EndEffectorKinematicController ) :
     
     ############################
     def __init__(self, manipulator ):
-        """ """
-        
-        EndEffectorKinematicController.__init__( self, manipulator, 1)
-        
-        ###################################################
-        # Vos paramètres de loi de commande ici !!
-        ###################################################
-        
+
+        EndEffectorKinematicController.__init__( self, manipulator, 1)      
     
     #############################
     def c( self , y , r , t = 0 ):
-        """ 
-        Feedback law: u = c(y,r,t)
-        
-        INPUTS
-        y = q   : sensor signal vector  = joint angular positions      dof x 1
-        r = r_d : reference signal vector  = desired effector position   e x 1
-        t       : time                                                   1 x 1
-        
-        OUPUTS
-        u = dq  : control inputs vector =  joint velocities             dof x 1
-        
-        """
         
         # Feedback from sensors
         q = y
@@ -135,7 +115,6 @@ class CustomPositionController( EndEffectorKinematicController ) :
         # Error
         e  = r_desired - r_actual
         
-        ################
         dq = np.zeros( self.m )  # place-holder de bonne dimension
         
         ##################################
@@ -159,8 +138,7 @@ class CustomPositionController( EndEffectorKinematicController ) :
     
 ###################
 # Part 3
-###################
-        
+###################  
 
         
 class CustomDrillingController( robotcontrollers.RobotController ) :
@@ -175,6 +153,8 @@ class CustomDrillingController( robotcontrollers.RobotController ) :
         super().__init__( dof = 3 )
         
         self.robot_model = robot_model
+
+        self.step = 0
         
         # Label
         self.name = 'Custom Drilling Controller'
@@ -182,19 +162,7 @@ class CustomDrillingController( robotcontrollers.RobotController ) :
         
     #############################
     def c( self , y , r , t = 0 ):
-        """ 
-        Feedback static computation u = c(y,r,t)
-        
-        INPUTS
-        y  : sensor signal vector     p x 1
-        r  : reference signal vector  k x 1
-        t  : time                     1 x 1
-        
-        OUPUTS
-        u  : control inputs vector    m x 1
-        
-        """
-        
+
         # Ref
         f_e = r
         
@@ -208,54 +176,71 @@ class CustomDrillingController( robotcontrollers.RobotController ) :
         g = self.robot_model.g( q )      # Gravity vector
         H = self.robot_model.H( q )      # Inertia matrix
         C = self.robot_model.C( q , dq ) # Coriolis matrix
+
+        dr = self.robot_model.J(q) @ dq  # End-effector actual speed
             
         ##################################
         # Votre loi de commande ici !!!
         ##################################
 
-        # Personnaliser le code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        
-        u = np.zeros(self.m)  # place-holder de bonne dimension
-
-        if self.State == 0:
-            r_desired = np.array([0.25, 0.25, 0.45])
-        elif self.State == 1:
-            r_desired = np.array([0.25, 0.25, 0.40])
-        elif self.State == 2:
-            r_desired = np.array([0.25, 0.25, 0.20])
-        elif self.State == 3:
-            r_desired = np.array([0.25, 0.25, 0.70])
-
-        dr_desired = np.array([0, 0, 0])
-
-        re = r_desired - r
-        dre = dr_desired - dr
-
-        if self.State == 1:
-            k = 50
+       
+        if self.step == 0:      # Approche rapide au dessus du trou
+            r_d = np.array([0.25, 0.25, 0.43])
+            k = 100
             b = 40
-        elif self.State == 2:
+        elif self.step == 1:    # Approche précise (linéaire) au dessus du trou
+            r_d = np.array([0.25, 0.25, 0.401])
+            k = 60
+            b = 40
+        elif self.step == 2:     # Percage
+            r_d = np.array([0.25, 0.25, 0.20])
             k = 10
             b = 100
-        elif self.State == 3:
-            k = 500
-            b = 200
-        else:
+        elif self.step == 3:     # Retrait linéaire au dessus du trou
+            r_d = np.array([0.25, 0.25, 0.43])
+            k = 1000
+            b = 50
+        elif self.step == 4:     # Retour position neutre
+            r_d = np.array([0.5, 0.0, 0.50])
+            k = 100
+            b = 40
+        else:                    # Retour position neutre
+            r_d = np.array([0.5, 0.0, 0.50])
             k = 100
             b = 40
 
+        # Matrice de constantes Kp et Kd
         K = np.diag([k, k, k])
         B = np.diag([b, b, b])
-        fe = np.dot(K, re) + np.dot(B, dre)
 
-        if self.State == 2:
-            fe[2] = -200
+        # Vitesse désirée de 0 m/s à la fin du mouvement
+        dr_d = np.array([0, 0, 0])
 
-        u = np.dot(J.T, fe) + g
+        # Erreur en position et en vitesse
+        r_e = r_d - r
+        dr_e = dr_d - dr
+        
+        # Force à appliquer à l'effecteur
+        f_e = np.dot(K, r_e) + np.dot(B, dr_e)
 
-        if (np.linalg.norm(re) < 0.001 and np.linalg.norm(dre) < 0.006) or (self.State == 2 and np.linalg.norm(re) < 0.006):
-            if self.State < 3:
-                self.State += 1
+        # 200N en Z- si on est à l'étape du percage
+        if self.step == 2:
+            f_e[2] = -200
+
+        # Calcul de la commande en torque aux joints
+        u = np.dot(J.T, f_e) + g
+
+        # Calcul des normes du vecteur erreur position et vitesse
+        norm_r_e  = np.linalg.norm(r_e)
+        norm_dr_e = np.linalg.norm(dr_e)
+
+        # Si la position est atteinte durant l'étape de percage, on passe à la prochaine étape
+        if norm_r_e < 0.01 and self.step == 2:
+            self.step += 1
+
+        # Si la position est atteinte et que la vitesse est nulle, on passe à la prochaine étape
+        elif norm_r_e < 0.01 and norm_dr_e < 0.01 and self.step < 4:
+            self.step += 1
         
         return u
         
