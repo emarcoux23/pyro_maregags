@@ -86,24 +86,18 @@ class CustomPositionController( EndEffectorKinematicController ) :
         q = y
         
         # Jacobian computation
-        J = self.J( q )
+        J = self.J(q)
         
         # Ref
-        r_desired   = r
-        r_actual    = self.fwd_kin( q )
+        r_desired = r
+        r_actual  = self.fwd_kin(q)
         
         # Error
-        e  = r_desired - r_actual
-        
-        dq = np.zeros( self.m )  # place-holder de bonne dimension
-        
-        ##################################
-        # Votre loi de commande ici !!!
-        ##################################
+        e = r_desired - r_actual
 
         # Paramètres de la loi de commande
-        lamda = 2
-        K = 5
+        lamda = 3
+        K = 15
 
         # Éléments utiles pour la loi de commande
         JT = np.transpose(J)
@@ -162,7 +156,6 @@ class CustomDrillingController( robotcontrollers.RobotController ) :
         ##################################
         # Votre loi de commande ici !!!
         ##################################
-
        
         if self.step == 0:      # Approche rapide au dessus du trou
             r_d = np.array([0.25, 0.25, 0.43])

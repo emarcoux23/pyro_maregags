@@ -30,6 +30,6 @@ clsys.x0 =  np.array([0,0.5,0])   # crash
 # clsys.x0 =  np.array([0,0.7,0]) # fonctionne
 
 # Simulation
-clsys.compute_trajectory()
+clsys.compute_trajectory(tf = 4)
 clsys.plot_trajectory('xu')
 clsys.animate_simulation()
