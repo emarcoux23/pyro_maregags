@@ -6,9 +6,11 @@ Created on Fri May  1 19:51:49 2020
 @author: alex
 """
 import numpy as np
+import sys; sys.path.insert(0, "C:/PythonLib/pyro_maregags")
+import matplotlib.pyplot as plt
 
 from gro640_robots import DrillingRobot
-from abcd1234      import goal2r, r2q # Load your functions
+from abcd1234      import goal2r, r2q, q2torque # Load your functions
 
 # Define end-effector motion
 r_0 = np.array([  0.5,   0.0,   1.0]) # start
@@ -31,6 +33,24 @@ q3  = q[2,:]
 dq1 = dq[0,:]
 dq2 = dq[1,:]
 dq3 = dq[2,:]
+
+tau = q2torque(q, dq, ddq, model)
+
+# AFFICHAGE TORQUE -----------------------------------------
+
+time = np.linspace(0, 3, 1000)
+plt.figure(figsize=(10, 6))
+plt.plot(time, tau[0, :], label='tau 1')
+plt.plot(time, tau[1, :], label='tau 2', color='orange')
+plt.plot(time, tau[2, :], label='tau 3', color='green')
+
+plt.title('Torques aux joints du robot selon le temps')
+plt.xlabel('Temps (s)')
+plt.ylabel('Torque (Nm)')
+plt.legend()
+plt.grid(True)
+plt.show()
+# AFFICHAGE TORQUE -----------------------------------------
 
 ###################################################
 # Direct joint trajectory test

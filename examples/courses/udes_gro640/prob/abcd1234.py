@@ -13,6 +13,7 @@ Fichier d'amorce pour les livrables de la problématique GRO640'
 # ABSOLUTE PATH TO PYRO LIBRARY
 import sys; sys.path.insert(0, "C:/PythonLib/pyro_maregags")
 
+from scipy.optimize import fsolve
 import numpy as np
 
 from pyro.control  import robotcontrollers
@@ -226,28 +227,10 @@ class CustomDrillingController( robotcontrollers.RobotController ) :
     
 ###################
 # Part 4
-###################
-        
+###################   
     
-def goal2r( r_0 , r_f , t_f ):
-    """
-    
-    Parameters
-    ----------
-    r_0 : numpy array float 3 x 1
-        effector initial position
-    r_f : numpy array float 3 x 1
-        effector final position
-    t_f : float
-        time 
+def goal2r(r_0, r_f, t_f):
 
-    Returns
-    -------
-    r   : numpy array float 3 x l
-    dr  : numpy array float 3 x l
-    ddr : numpy array float 3 x l
-
-    """
     # Time discretization
     l = 1000 # nb of time steps
     
@@ -257,58 +240,46 @@ def goal2r( r_0 , r_f , t_f ):
     r = np.zeros((m,l))
     dr = np.zeros((m,l))
     ddr = np.zeros((m,l))
-    
-    #################################
-    # Votre code ici !!!
-    ##################################
 
-    a_max = 1
-    v_max = 1
-    T = t_f
-    t = np.linspace(0, T, l)
-    
+    # Discrétisation du temps total sur l pas discrets
+    t = np.linspace(0, t_f, l)
+
+    # On trouve v_max et a_max qui respecte ces contraintes:
+    # Éq. 10.7: tf = (a_max + v_max^2) / (a_max * v_max)
+    # Fig. 10.4: a_max > v_max^2 
+    v_max = 0.5
+    a_max = 0.5
+
+    # On bâti le profil temporel de type trapézoidal selon Fig. 10.3
     for i in range(l):
-        if t[i] < 0 and t[i] <= v_max/a_max:
-            s = 1/2*(a_max*t[i]**2)
-            s_dot = a_max*t[i]
-            s_dot_dot = a_max
-        if t[i] > v_max/a_max and t[i] <= T - v_max/a_max:
-            s = v_max*t[i] - (v_max**2)/(2*a_max)
-            s_dot = v_max
-            s_dot_dot = 0
-        if (T - v_max/a_max) < t[i] and t[i] <= T:
-            s = ((2*a_max*v_max*T)-(2*v_max**2)-((a_max**2)*((t[i]-T)**2)))/(2*a_max) 
-            s_dot = a_max*(T-t[i])
-            s_dot_dot = -a_max
-        else :
-            s = None
-            s_dot = None
-            s_dot_dot = None
 
-    
-    ## ajouter le code p.169 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # Phase d'accélération selon Éq. 10.8
+        if 0 <= t[i] <= v_max / a_max:
+            s = 0.5 * a_max * t[i] * t[i]
+            s_dot = a_max * t[i]
+            s_ddot = a_max
+
+        # Phase de vitesse constante selon Éq. 10.9
+        elif v_max / a_max < t[i] <= t_f - v_max / a_max:
+            s = v_max * t[i] - (v_max**2) / (2 * a_max)
+            s_dot = v_max
+            s_ddot = 0
+
+        # Phase de decceleration selon Éq. 10.10
+        elif t_f - v_max / a_max < t[i] <= t_f:
+            s = ((2 * a_max * v_max * t_f) - (2 * v_max * v_max) -((a_max * a_max) * (t[i] - t_f)**2))/(2 * a_max)
+            s_dot = a_max * (t_f - t[i])
+            s_ddot = -a_max
+
+        # Création d'un chemin en ligne droite dans le domaine de l'effecteur: Éq. 10.26
+        r[:,i]   = r_0 + (r_f - r_0) * s       # Éq. 10.27
+        dr[:,i]  =       (r_f - r_0) * s_dot   # Éq. 10.28
+        ddr[:,i] =       (r_f - r_0) * s_ddot  # Éq. 10.29
     
     return r, dr, ddr
 
+def r2q(r, dr, ddr, manipulator):
 
-def r2q( r, dr, ddr , manipulator ):
-    """
-
-    Parameters
-    ----------
-    r   : numpy array float 3 x l
-    dr  : numpy array float 3 x l
-    ddr : numpy array float 3 x l
-    
-    manipulator : pyro object 
-
-    Returns
-    -------
-    q   : numpy array float 3 x l
-    dq  : numpy array float 3 x l
-    ddq : numpy array float 3 x l
-
-    """
     # Time discretization
     l = r.shape[1]
     
@@ -319,39 +290,66 @@ def r2q( r, dr, ddr , manipulator ):
     q = np.zeros((n,l))
     dq = np.zeros((n,l))
     ddq = np.zeros((n,l))
-    
-    #################################
-    # Votre code ici !!!
-    ##################################
-    J = self.J(q)
-    J_inv = np.linalg.inv(J)
-    J_dot = np.diff(J)
 
-    # add for loop
-    #q = 
-    dq = np.dot(J_inv, dr)
-    ddq = np.dot(J_inv, (ddr - (np.dot(J_dot, dq))))
-    
+    # Longueurs des joints du bras
+    l1 = manipulator.l1
+    l2 = manipulator.l2
+    l3 = manipulator.l3
+
+    # Pas de temps avec tf = 3
+    dt = 3 / l
+
+    # Pour tous les points discrétiser de la trajectoire
+    for i in range(l):
+
+        # On prend le x, y et z du point discrétisé
+        x = r[0, i]
+        y = r[1, i]
+        z = r[2, i]
+
+        # Système d'équation de la cinématique directe trouvé à la main
+        # Les équations pour x, y et z sont mises à zéro pour pouvoir solve
+        def equations(vars):
+            theta_1, theta_2, theta_3 = vars
+            equ_1 = x - (l2 * np.cos(theta_2) + l3 * np.cos(theta_2 + theta_3)) * np.cos(theta_1)
+            equ_2 = y - (l2 * np.cos(theta_2) + l3 * np.cos(theta_2 + theta_3)) * np.sin(theta_1)
+            equ_3 = z - (l1 + l2 * np.sin(theta_2) + l3 * np.sin(theta_2 + theta_3))
+            return [equ_1, equ_2, equ_3]
+
+        # Dernière valeur de q trouvée, sinon zéro
+        if i < 1:
+            last_q = [0, 0, 0]
+        else:
+            last_q = q[:,i-1]
+
+        # Méthode numérique trouvée pour solve les équations en x, y, z et
+        # ainsi retrouver q1, q2, q3. Le last_q permet à la méthode de mieux
+        # trouver la prochaine réponse
+        q_solved = fsolve(equations, last_q)
+
+        # Les angles trouvées par la méthode ne sont pas toujours normalisées
+        # sur le cercle trigonométrique. Le modulo assure un range de 0 à 2pi
+        q_solved = [angle % (2 * np.pi) for angle in q_solved]
+
+        # Calcul de la jacobienne inverse
+        J_inv = np.linalg.inv(manipulator.J(q_solved))
+
+        # Calcul de q1_dot, q2_dot, q3_dot selon la cinématique différentielle inverse
+        dq_solved = J_inv @ dr[:,i]
+
+        # On rempli la matrice des q et dq discret aux bons index
+        q[:,i] = q_solved
+        dq[:,i] = dq_solved
+
+        # Pour l'accélération, on utilise le pas de temps, le dq présent et le dq précédent
+        # pour dériver la vitesse et ainsi trouver l'accélération
+        if i > 0:
+            ddq[:,i] = (dq_solved - dq[:,i-1]) / dt
+
     return q, dq, ddq
 
+def q2torque(q, dq, ddq, manipulator):
 
-
-def q2torque( q, dq, ddq , manipulator ):
-    """
-
-    Parameters
-    ----------
-    q   : numpy array float 3 x l
-    dq  : numpy array float 3 x l
-    ddq : numpy array float 3 x l
-    
-    manipulator : pyro object 
-
-    Returns
-    -------
-    tau   : numpy array float 3 x l
-
-    """
     # Time discretization
     l = q.shape[1]
     
@@ -361,11 +359,28 @@ def q2torque( q, dq, ddq , manipulator ):
     # Output dimensions
     tau = np.zeros((n,l))
     
-    #################################
-    # Votre code ici !!!
-    ##################################
-    
+    # Pour tous les q, dq et dqq discrétisés
     for i in range(l):
-        tau[:, i] = manipulator.inverse_dynamics(q[:, i], dq[:, i], ddq[:, i])
+
+        # Matrice d'inertie
+        H = manipulator.H(q[:,i])
+
+        # Matrice des forces de Coriolis
+        C = manipulator.C(q[:,i], dq[:,i])
+
+        # Vecteur de froces dissipatrices
+        d = manipulator.d(q[:,i], dq[:,i]) 
+
+        # Vecteur de forces conservatrices
+        g = manipulator.g(q[:,i])
+
+        # Matrice actionneurs -> forces généralisées
+        B = manipulator.B(q[:,i])
+
+        # Selon Éq. 6.4: H*ddq + C*dq + d + g = B*u + J_T*f_RE
+        # À préciser que f_RE est la force appliquée à l'effecteur et égale à zéro, donc ignoré
+        # À préciser qu'on isole u, qui est ici égal à tau, le torque des 3 joints et donc on 
+        # doit multiplier la gauche de l'équation par l'inverse de B
+        tau[:, i] = ( (H @ ddq[:,i]) + (C @ dq[:,i]) + d + g + d ) @ np.linalg.inv(B)
     
     return tau
