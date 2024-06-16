@@ -51,13 +51,13 @@ def dhs2T( r , d , theta, alpha ):
 def f(q):
 
     # Pour la clarté :)
-    q1 = q[0]; q2 = q[1]; q3 = q[2]; q4 = q[3]; q5 = q[4]
+    q1 = q[0]; q2 = q[1]; q3 = q[2]; q4 = q[3]; q5 = q[4]; q6 = q[5]
 
     # Paramètres DH
-    d =     [0.072, 0.075,        0,            0,     0           ]
-    theta = [q1,    q2 + np.pi/2, q3 + np.pi/2, q4,    q5 - np.pi/2]
-    r =     [0,     0.033,        0.155,        0.135, 0.081       ]
-    alpha = [0,     np.pi/2,      0,            0,     np.pi/2     ]
+    d =     [0.14700079,        0,              0,          0.00859888,         0.217,      0.009 + q6  ]
+    theta = [-(q1 + np.pi/2),   -q2 + np.pi/2,  -q3,        -(q4 + np.pi/2),    -q5,        0           ]
+    r =     [-0.03877670,       -0.155,         -0.135,     0,                  0,          0           ]
+    alpha = [-np.pi/2,          0,              0,          np.pi/2,            -np.pi/2,   0           ]
     
     # Matrice de transformation de E vers le world
     w_T_e = dhs2T(r[:5], d[:5], theta[:5], alpha[:5])
