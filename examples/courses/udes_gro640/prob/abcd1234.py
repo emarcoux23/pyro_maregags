@@ -256,25 +256,25 @@ def goal2r(r_0, r_f, t_f):
         # Phase d'accélération selon Éq. 10.8
         if 0 <= t[i] <= v_max / a_max:
             s = 0.5 * a_max * t[i] * t[i]
-            s_dot = a_max * t[i]
-            s_ddot = a_max
+            ds = a_max * t[i]
+            dds = a_max
 
         # Phase de vitesse constante selon Éq. 10.9
         elif v_max / a_max < t[i] <= t_f - v_max / a_max:
             s = v_max * t[i] - (v_max**2) / (2 * a_max)
-            s_dot = v_max
-            s_ddot = 0
+            ds = v_max
+            dds = 0
 
         # Phase de decceleration selon Éq. 10.10
         elif t_f - v_max / a_max < t[i] <= t_f:
             s = ((2 * a_max * v_max * t_f) - (2 * v_max * v_max) -((a_max * a_max) * (t[i] - t_f)**2))/(2 * a_max)
-            s_dot = a_max * (t_f - t[i])
-            s_ddot = -a_max
+            ds = a_max * (t_f - t[i])
+            dds = -a_max
 
         # Création d'un chemin en ligne droite dans le domaine de l'effecteur: Éq. 10.26
-        r[:,i]   = r_0 + (r_f - r_0) * s       # Éq. 10.27
-        dr[:,i]  =       (r_f - r_0) * s_dot   # Éq. 10.28
-        ddr[:,i] =       (r_f - r_0) * s_ddot  # Éq. 10.29
+        r[:,i]   = r_0 + (r_f - r_0) * s    # Éq. 10.27
+        dr[:,i]  =       (r_f - r_0) * ds   # Éq. 10.28
+        ddr[:,i] =       (r_f - r_0) * dds  # Éq. 10.29
     
     return r, dr, ddr
 
