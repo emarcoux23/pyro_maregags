@@ -13,6 +13,10 @@ test_cases = [
 
 # Loop through each test case
 for i, (q, r_expected) in enumerate(test_cases):
+
+    print(f"Test case {i+1}:")
+    print("q:" + str(q))
+
     # Convert angles from degrees to radians
     q = [np.deg2rad(q[0]), 
          np.deg2rad(q[1]), 
@@ -29,8 +33,7 @@ for i, (q, r_expected) in enumerate(test_cases):
     r_float = tuple(float(value) for value in r)
 
     # Print the results
-    print(f"Test case {i+1}:")
-    print("q:" + str(q))
+    
     print("r expected:   " + str(r_expected))
     print("r calculated: " + str(r_float))
 
